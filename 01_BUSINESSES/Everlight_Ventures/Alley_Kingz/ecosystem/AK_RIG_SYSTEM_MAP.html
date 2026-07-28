@@ -1,0 +1,335 @@
+<title>Alley Kingz: The Rig System</title>
+<style>
+  :root{
+    --asphalt:#0C0B0A; --oil:#16130F; --panel:#1E1A15; --line:#2E2822;
+    --gold:#D4AF37; --gold-dim:#8A7328; --hot:#E2481F; --emp:#49C5D6;
+    --bone:#E8E4DC; --muted:#8A8378; --good:#7BB661;
+    --display:"Arial Black","Helvetica Neue",Impact,sans-serif;
+    --body:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--asphalt);color:var(--bone);font-family:var(--body);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+  header{border-bottom:2px solid var(--gold);padding:56px 0 28px;margin-bottom:8px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+           color:var(--gold-dim);margin:0 0 14px}
+  h1{font-family:var(--display);font-size:clamp(38px,7vw,72px);line-height:.94;margin:0 0 16px;
+     text-transform:uppercase;letter-spacing:-.02em;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--gold)}
+  .dek{font-size:18px;color:var(--muted);max-width:62ch;margin:0}
+  h2{font-family:var(--display);font-size:26px;text-transform:uppercase;letter-spacing:.01em;
+     margin:64px 0 6px;text-wrap:balance}
+  h2 .n{font-family:var(--mono);font-size:12px;color:var(--gold-dim);letter-spacing:.15em;
+        display:block;margin-bottom:8px;font-weight:400}
+  h3{font-family:var(--display);font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     margin:32px 0 10px;color:var(--gold)}
+  p{max-width:68ch}
+  .sub{color:var(--muted);margin:0 0 20px;max-width:68ch}
+  strong{color:#fff}
+  code{font-family:var(--mono);font-size:.88em;background:var(--oil);padding:2px 6px;
+       border:1px solid var(--line);border-radius:3px;color:var(--gold)}
+  .scroll{overflow-x:auto;margin:18px 0;border:1px solid var(--line);background:var(--oil)}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--gold-dim);background:#120F0C;font-weight:400;white-space:nowrap}
+  td.num{font-variant-numeric:tabular-nums;font-family:var(--mono);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  .callout{border-left:3px solid var(--hot);background:#1A100C;padding:16px 20px;margin:22px 0}
+  .callout.gold{border-left-color:var(--gold);background:#171308}
+  .callout p{margin:0;max-width:64ch}
+  .callout .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+                color:var(--hot);display:block;margin-bottom:6px}
+  .callout.gold .tag{color:var(--gold)}
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);padding:16px}
+  .card h4{font-family:var(--display);font-size:13px;text-transform:uppercase;letter-spacing:.05em;
+           margin:0 0 4px;color:var(--bone)}
+  .card .meta{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold-dim);
+              text-transform:uppercase;margin:0 0 8px}
+  .card p{font-size:13px;color:var(--muted);margin:0}
+  .matrix table{min-width:760px}
+  .matrix td{font-size:12.5px;line-height:1.45}
+  .sig{background:#1C1708;border-left:2px solid var(--gold)}
+  .sig .nm{color:var(--gold);font-weight:700;display:block;font-size:13px}
+  .off .nm{color:var(--bone);font-weight:700;display:block;font-size:13px}
+  .role{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--muted);display:block;margin-top:4px}
+  .pill{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+        text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);border-radius:2px;
+        color:var(--muted)}
+  .pill.exists{color:var(--good);border-color:#2C4426}
+  ul,ol{max-width:68ch;padding-left:20px}
+  li{margin-bottom:7px}
+  li::marker{color:var(--gold-dim)}
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);
+         font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Alley Kingz &middot; Production Spec &middot; 2026-07-17</p>
+  <h1>The Rig<br><em>System</em></h1>
+  <p class="dek">The car is not a vehicle. It is half the character. This maps the roster, the
+  attributes, the weapons, the skins, and the dog-to-rig synergy that turns 106 dogs into
+  thousands of builds.</p>
+</header>
+
+<h2><span class="n">01 / Ground Truth</span>What actually exists today</h2>
+<p class="sub">Measured from <code>canon.js</code>, not assumed. The rig layer was scaffolded and
+then abandoned.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>State</th><th class="num">Count</th><th>What it really is</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Genuinely designed</strong></td><td class="num">4</td>
+        <td>The Crown Rig, Shadowblade, The Jammer, Railhound. The Mythics. Unique names, real flavor.</td></tr>
+    <tr><td>Templated</td><td class="num">58</td>
+        <td>One sentence copy-pasted per class. All 16 bruisers read <em>"Armored bruiser rig, ram plow, plate armor, slow and unstoppable."</em></td></tr>
+    <tr><td>Empty</td><td class="num">44</td>
+        <td><code>"Mastiff Rig"</code>, <code>"Boxer Rig"</code>. Breed plus the word "Rig". Blank flavor.</td></tr>
+    <tr><td>Chassis types</td><td class="num">4</td><td>Van, Muscle Car, GTR, Monster Truck</td></tr>
+    <tr><td>Weapon mods</td><td class="num">3</td><td><code>ram_plow</code> (52), <code>emp_array</code> (28), <code>incendiary</code> (26)</td></tr>
+    <tr><td>3D models</td><td class="num">0</td><td>No vehicle art exists in any form. Greenfield.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout">
+  <span class="tag">Legal, fix before art</span>
+  <p><strong>"GTR" is a Nissan trademark</strong> and it is sitting in the card data right now.
+  Every chassis needs an original name that evokes the real car without borrowing it. Renaming
+  after the meshes are built means re-rendering them. Rename first.</p>
+</div>
+
+<div class="callout gold">
+  <span class="tag">The same disease, art side</span>
+  <p><strong>105 of 106 cards share 7 generic class clips.</strong> Only $BCARDD has bespoke FX.
+  The roster reads generic because it is generic. The rig layer and the FX layer failed the same
+  way: an archetype scaffold nobody came back to fill in.</p>
+</div>
+
+<h2><span class="n">02 / Factions</span>Seven crews, one city</h2>
+<p class="sub">The flattest thing in the roster, and nobody named it: <strong>faction and combat role
+are the same field.</strong> Boneguard Crew <em>is</em> bruiser. Zoomie Syndicate <em>is</em>
+sprinter. All 26 Boneguard dogs play identically. The factions are not cultures. They are stat
+blocks wearing names.</p>
+
+<div class="callout gold">
+  <span class="tag">The structural fix</span>
+  <p><strong>Decouple them.</strong> Faction is turf, look and lore. Role is combat function. Every
+  crew fields all four roles, so an all-Boneguard deck runs a bruiser, a sprinter, a tech and a
+  turret and still reads as Boneguard. One data change, zero credits, and it multiplies deck
+  identity across the whole roster.</p>
+</div>
+
+<p>The game already ships <strong>six zones with no gangs in them</strong>: the Lot, Downtown, Neon
+Heights, the Yards, Factory Row, the Strip. That is The Warriors' architecture sitting unused. One
+city, one crew per turf, everybody wants the same streets.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Crew</th><th>Turf</th><th>How they earn</th><th>Breeds and look</th></tr></thead>
+  <tbody>
+    <tr><td><strong>BONEGUARD</strong></td><td>The Lot</td>
+      <td>Old enforcers. The ones you send when the talking is done.</td>
+      <td>Mastiff, Rottweiler, Cane Corso. Plate, ram plows, scar tissue.</td></tr>
+    <tr><td><strong>SCRAPLINE</strong></td><td>The Yards</td>
+      <td>Salvage and chop-shop. Welds its armor out of what it kills.</td>
+      <td>Pit, Dogo, Amstaff. Rust, sparks, cutting torches.</td></tr>
+    <tr><td><strong>NIGHTSHIFT</strong></td><td>Neon Heights</td>
+      <td>Chrome and after-hours. Runs every uptown route worth running.</td>
+      <td>Doberman, Whippet, Saluki. Speed, mirrored glass, no witnesses.</td></tr>
+    <tr><td><strong>KENNEL CLUB</strong></td><td>Downtown</td>
+      <td>The suits. Launders the city's money and calls it philanthropy.</td>
+      <td>Poodle, Afghan, Borzoi. Old money, older debts, pedigree as a weapon.</td></tr>
+    <tr><td><strong>ASHLINE</strong></td><td>Factory Row</td>
+      <td>Burns what it cannot own. Incendiary as a business model.</td>
+      <td>Malinois, Shepherd, Belgian. Smoke, soot, accelerant.</td></tr>
+    <tr><td><strong>HIGHROLLERS</strong></td><td>The Strip</td>
+      <td>Vice, tables, and the long con. Owns the debt, not the building.</td>
+      <td>Chihuahua, Boston, Frenchie. Small, loud, connected to everybody.</td></tr>
+    <tr><td><strong>THE STRAYS</strong></td><td>No turf</td>
+      <td>Broke every leash. Owe nobody, trusted by nobody, fight everybody.</td>
+      <td>Mutts and mixes. The wildcards. No colors to wear.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Retired</h3>
+<ul>
+  <li><strong>Zoomie Syndicate.</strong> "Zoomies" is a puppy word. It undercut every scene it appeared in.</li>
+  <li><strong>Leashbreak Tactix.</strong> The spelling was doing the work the writing should have. The idea survives, harder, as <strong>The Strays</strong>.</li>
+  <li><strong>K9 Circuitry.</strong> Tech is a <em>job</em>, not a bloodline. It survives as the tech-ops role inside every crew.</li>
+  <li><strong>Boneguard Crew</strong> keeps the name, drops "Crew", and becomes an actual faction instead of a synonym for bruiser.</li>
+</ul>
+
+<div class="callout">
+  <span class="tag">The eighth faction, not playable</span>
+  <p><strong>THE COLLAR.</strong> The ones who put the collars on. They do not hold turf because they
+  hold paper on all of it. Every crew in the city hates them, and every crew in the city has taken
+  their money. That contradiction is the engine of the story mode, and it is the only thing all
+  seven agree on.</p>
+</div>
+
+<h2><span class="n">03 / Thesis</span>Rigs are gear, not decoration</h2>
+<p>A rig is a <strong>mount, a weapon platform, and an identity</strong>, the same slot a dragon
+occupies in an MMO. It is owned separately from the dog, swapped freely, and it changes what the dog
+<em>does</em>, not just how it looks. That one decision turns a 106-card roster into a
+combinatorial one.</p>
+
+<div class="grid g4">
+  <div class="card"><h4>Owned, not attached</h4><p class="meta">The Garage</p>
+    <p>Rigs live in their own collection. You own a rig, not "Stonejaw's car." Any dog you own drives any rig you own.</p></div>
+  <div class="card"><h4>Signature bonus</h4><p class="meta">Lore pays out</p>
+    <p>Every dog has one canon rig. Driving it grants the signature bonus. Lore becomes a stat, so the writing carries mechanical weight.</p></div>
+  <div class="card"><h4>Off-class is legal</h4><p class="meta">Build diversity</p>
+    <p>A bruiser in a sport chassis is a real build with real tradeoffs. Not a penalty. A choice.</p></div>
+  <div class="card"><h4>Rig sets the role</h4><p class="meta">Frontline / protected</p>
+    <p>Chassis class decides where the dog stands in the lane. The rig is how you re-role a card you already own.</p></div>
+</div>
+
+<h2><span class="n">04 / The Matrix</span>Dog class against rig class</h2>
+<p class="sub">Four dog classes, four chassis classes, sixteen builds. The gold diagonal is the
+signature pairing the roster already implies. The other twelve are why players keep playing.</p>
+
+<div class="matrix scroll">
+<table>
+  <thead><tr><th>Dog / Rig</th><th>Muscle: armor, ram</th><th>Sport: speed, nitro</th>
+    <th>Van: EMP, signal</th><th>Monster: turret, platform</th></tr></thead>
+  <tbody>
+    <tr>
+      <th>Bruiser<br><span class="pill">frontline</span></th>
+      <td class="sig"><span class="nm">Battering Ram</span>Max armor. Ram damage scales with speed.<span class="role">Frontline &middot; signature</span></td>
+      <td class="off"><span class="nm">Runaway Freight</span>Closes distance fast, sheds plate to do it.<span class="role">Flanker &middot; glass tank</span></td>
+      <td class="off"><span class="nm">Bunker Bus</span>Slow rolling cover. Shields the dog behind it.<span class="role">Protected &middot; support</span></td>
+      <td class="off"><span class="nm">Siege Wall</span>Immovable. Parks and denies a lane outright.<span class="role">Frontline &middot; zone</span></td>
+    </tr>
+    <tr>
+      <th>Sprinter<br><span class="pill">flanker</span></th>
+      <td class="off"><span class="nm">Borrowed Weight</span>Survives a hit it should not. Loses the jump.<span class="role">Frontline &middot; brawler</span></td>
+      <td class="sig"><span class="nm">Blade Runner</span>Top speed, blade fenders, dies to anything.<span class="role">Flanker &middot; signature</span></td>
+      <td class="off"><span class="nm">Ghost Van</span>Hit and run EMP. Jams, and is gone.<span class="role">Flanker &middot; disruptor</span></td>
+      <td class="off"><span class="nm">Drive-By</span>A gun that never stops moving.<span class="role">Skirmisher</span></td>
+    </tr>
+    <tr>
+      <th>Tech-ops<br><span class="pill">protected</span></th>
+      <td class="off"><span class="nm">Armored Signal</span>A jammer that survives the frontline.<span class="role">Frontline &middot; utility</span></td>
+      <td class="off"><span class="nm">Flash Jam</span>EMP strike, gone before the reply.<span class="role">Flanker &middot; burst</span></td>
+      <td class="sig"><span class="nm">Blackout</span>Max EMP radius and duration. Turns the lights off.<span class="role">Protected &middot; signature</span></td>
+      <td class="off"><span class="nm">Relay Tower</span>Static. Buffs allies, launches drones.<span class="role">Backline &middot; anchor</span></td>
+    </tr>
+    <tr>
+      <th>Turret-util<br><span class="pill">backline</span></th>
+      <td class="off"><span class="nm">Rolling Bunker</span>An armored gun that walks forward.<span class="role">Frontline &middot; siege</span></td>
+      <td class="off"><span class="nm">Technical</span>Light gun, fast repositioning.<span class="role">Skirmisher</span></td>
+      <td class="off"><span class="nm">Drone Carrier</span>Trades range for a drone bay.<span class="role">Protected &middot; summoner</span></td>
+      <td class="sig"><span class="nm">Railhound</span>Max range, rail cannon, cannot move and fire.<span class="role">Backline &middot; signature</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>106 dogs times 20 rigs equals 2,120 loadouts</strong> out of art you are already paying
+for. That is the multiplier. No new dogs required.</p>
+
+<h2><span class="n">05 / Chassis</span>Twenty makes, four families</h2>
+<p class="sub">Four chassis is a parts list. This is a roster: five distinct makes per family, each
+a silhouette a player can name on sight. Original names, no trademarks.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Family</th><th>Makes</th><th>Reads as</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Muscle</strong><br><span class="pill">bruiser</span></td>
+      <td>Coffin Nail &middot; Boneyard &middot; Sunday Best &middot; Brickhouse &middot; Ratking</td>
+      <td>Fastback, hearse, lowrider, armored truck, rat rod</td></tr>
+    <tr><td><strong>Sport</strong><br><span class="pill">sprinter</span></td>
+      <td>Shadowblade <span class="pill exists">exists</span> &middot; Silkcut &middot; Rotorwind &middot; Hatchmutt &middot; Driftrat</td>
+      <td>Nitro coupe, targa, rotary, hot hatch, drift missile</td></tr>
+    <tr><td><strong>Van</strong><br><span class="pill">tech-ops</span></td>
+      <td>The Jammer <span class="pill exists">exists</span> &middot; Bread Truck &middot; Meat Wagon &middot; Sunshine Bus &middot; Cable Guy</td>
+      <td>Antenna van, box truck, ambulance, microbus, utility rig</td></tr>
+    <tr><td><strong>Monster</strong><br><span class="pill">turret-util</span></td>
+      <td>Railhound <span class="pill exists">exists</span> &middot; Stiltjack &middot; Technical &middot; Hooktooth &middot; Dozerhead</td>
+      <td>Rail platform, monster truck, gun pickup, tow truck, dozer</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="n">06 / Skins</span>The cheap half is the money half</h2>
+<p>This is the most important economic fact in the document, and it is counterintuitive.</p>
+
+<div class="callout gold">
+  <span class="tag">Skins cost zero credits</span>
+  <p>A skin is a <strong>material and texture swap on a mesh you already own</strong>. Twenty rigs
+  times six skins is 120 sellable SKUs for <strong>zero additional Tripo credits</strong>. Candy
+  paint, chrome, matte black, rust, neon underglow, gold. The mesh is bought once. The paint is
+  free forever. Only <em>accessories</em>, meaning spoilers, plows, roof guns, rims and spikes,
+  need geometry of their own.</p>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Layer</th><th class="num">Count</th><th>Method</th><th class="num">Credits</th></tr></thead>
+  <tbody>
+    <tr><td>Chassis meshes</td><td class="num">20</td><td>Tripo, premium tier. These are showpieces.</td><td class="num">1,100</td></tr>
+    <tr><td>Weapon mounts</td><td class="num">~24</td><td>Tripo standard, socket-attached</td><td class="num">480</td></tr>
+    <tr><td>Rig accessories</td><td class="num">~30</td><td>Tripo standard, socket-attached</td><td class="num">600</td></tr>
+    <tr><td><strong>Rig skins</strong></td><td class="num"><strong>120</strong></td><td><strong>Material swap in-engine</strong></td><td class="num"><strong>0</strong></td></tr>
+    <tr><td>Iteration and re-dos</td><td class="num">n/a</td><td>Regenerate anything that is not right</td><td class="num">~600</td></tr>
+    <tr><td colspan="3"><strong>Vehicle layer, total</strong></td><td class="num"><strong>~2,780</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>The entire Twisted Metal layer, twenty makes plus weapons plus accessories plus a 120-SKU skin
+catalog, costs about <strong>11% of a 25,000-credit month</strong>.</p>
+
+<h2><span class="n">07 / Attributes</span>What a rig card carries</h2>
+<p class="sub">Mirroring the dog schema exactly, so the importer, the ScriptableObjects and the
+Unity socket taxonomy all take it without re-authoring.</p>
+
+<div class="grid g4">
+  <div class="card"><h4>Identity</h4><p class="meta">rigNumber &middot; name &middot; make &middot; family</p>
+    <p>Its own number space (R001 up), not a field hanging off a dog.</p></div>
+  <div class="card"><h4>Attributes</h4><p class="meta">armor &middot; speed &middot; handling &middot; payload</p>
+    <p>Four stats that modify the dog's own hp, move_speed, range and damage.</p></div>
+  <div class="card"><h4>Loadout</h4><p class="meta">weapon &middot; ability &middot; cooldown</p>
+    <p>The rig brings its own active. Same shape as the dog's ability block.</p></div>
+  <div class="card"><h4>Rarity</h4><p class="meta">Common up to Mythic</p>
+    <p>The same five rungs as the dogs, so drop tables and the chest ladder need no new logic.</p></div>
+  <div class="card"><h4>Lore</h4><p class="meta">origin &middot; flavor &middot; comic</p>
+    <p>A 5-beat origin, same as the 106 dog books. Cars the movie, by way of The Warriors.</p></div>
+  <div class="card"><h4>Sockets</h4><p class="meta">hood &middot; roof &middot; rims &middot; rear &middot; underglow</p>
+    <p>Five attach points, authored the same way as the dog's six cosmetic slots.</p></div>
+</div>
+
+<h2><span class="n">08 / Order</span>What has to happen, in sequence</h2>
+<ol>
+  <li><strong>Rename the chassis.</strong> Kill "GTR" before a single mesh is rendered.</li>
+  <li><strong>Author the 20 makes:</strong> names, silhouettes, attributes, weapon, ability. Free. This is writing, not spending.</li>
+  <li><strong>Write the rig roster</strong> onto the 106 cards, replacing 44 empty and 58 templated entries with real signature rigs.</li>
+  <li><strong>Lock the synergy matrix</strong> in data, so the 16 builds are tunable numbers and not hardcoded cases.</li>
+  <li><strong>Generate 20 full-body chassis refs</strong> with the same free FLUX pipeline that solved the dogs.</li>
+  <li><strong>Mesh them through Tripo</strong> at premium tier. Roughly 2,780 credits, all in.</li>
+  <li><strong>Author the skin catalog</strong> as material definitions. Zero credits, pure revenue.</li>
+  <li><strong>Wire the Garage:</strong> own, equip, signature bonus. <em>Server-side.</em> See below.</li>
+</ol>
+
+<div class="callout">
+  <span class="tag">The blocker nobody wants to hear</span>
+  <p>Steps 1 through 7 are art and writing. <strong>Step 8 decides whether any of it earns a
+  dollar.</strong> The cosmetic shop currently grants items with no balance check and no deduction,
+  and the modular slot system, the exact one this rig catalog would plug into, has no server
+  ownership at all. Build the rig economy on top of that and you ship a free catalog. Fix the
+  ledger in the same month as the art, not after it.</p>
+</div>
+
+<footer>Alley Kingz &middot; Rig System Map &middot; derived from canon.js: 106 cards, 4 rig classes,
+101 rig names, 62 with flavor, 4 genuinely authored &middot; Everlight Ventures</footer>
+</div>

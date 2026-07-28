@@ -1,0 +1,153 @@
+<title>AK Sim-Life + Minigame Wiring Plan</title>
+<style>
+  :root{--gold:#D4AF37;--gold2:#e8c55a;--dark:#0A0A0A;--panel:#15120a;--line:#2a2417;--txt:#E8E8E8;--mut:#9a8f6a;--green:#7CFFb0;--red:#ff6b6b;--blue:#7fc8ff;}
+  @media (prefers-color-scheme: light){:root{--dark:#faf7ef;--panel:#fffdf6;--line:#e6dcbf;--txt:#231f14;--mut:#7a6f45;}}
+  :root[data-theme="dark"]{--dark:#0A0A0A;--panel:#15120a;--line:#2a2417;--txt:#E8E8E8;--mut:#9a8f6a;}
+  :root[data-theme="light"]{--dark:#faf7ef;--panel:#fffdf6;--line:#e6dcbf;--txt:#231f14;--mut:#7a6f45;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--dark);color:var(--txt);font:15px/1.6 Inter,system-ui,sans-serif;padding:0 0 80px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  header{border-bottom:2px solid var(--gold);padding:34px 0 22px;margin-bottom:8px}
+  .kick{color:var(--mut);letter-spacing:.16em;text-transform:uppercase;font-size:11px;font-weight:800}
+  h1{font:800 30px/1.15 "Playfair Display",Georgia,serif;color:var(--gold2);margin:8px 0 6px}
+  h2{font:800 21px/1.2 "Playfair Display",Georgia,serif;color:var(--gold2);margin:38px 0 4px;border-left:3px solid var(--gold);padding-left:12px}
+  h3{font-size:15px;font-weight:800;color:var(--txt);margin:22px 0 6px}
+  .sub{color:var(--mut);font-size:13px}
+  p{margin:10px 0}
+  code{background:rgba(212,175,55,.10);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font:12.5px/1.4 ui-monospace,Menlo,monospace;color:var(--gold2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  .grid{display:grid;gap:14px}
+  @media(min-width:680px){.grid.two{grid-template-columns:1fr 1fr}}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  .scroll{overflow-x:auto}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);text-transform:uppercase;font-size:10.5px;letter-spacing:.08em}
+  .p0{color:var(--red);font-weight:800}.p1{color:var(--gold2);font-weight:800}.p2{color:var(--blue);font-weight:800}
+  .ok{color:var(--green)}.dead{color:var(--red)}
+  ul{margin:8px 0;padding-left:20px}li{margin:5px 0}
+  .pill{display:inline-block;background:rgba(212,175,55,.12);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;color:var(--gold2);margin:2px 4px 2px 0}
+  .flow{font:12.5px/1.7 ui-monospace,monospace;color:var(--txt);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;padding:12px 14px;white-space:pre;overflow-x:auto}
+  .foot{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--mut);font-size:12px}
+</style>
+<div class="wrap">
+<header>
+  <div class="kick">Alley Kingz &middot; Gameplay + Wiring Audit &middot; Plan Phase</div>
+  <h1>The Living Runner + The Minigame Floor</h1>
+  <div class="sub">A concrete build plan for (1) the SIM-LIFE care building that finally lets the player <em>satisfy</em> the needs the engine already tracks, and (2) turning the MOBA / Streets / Arcade from playable-but-bare into loop-connected modes. Grounded in <code>systems/needs.js</code>, <code>systems/modes.js</code>, <code>systems/arcade.js</code> and bible &sect;10.</div>
+</header>
+
+<div class="card">
+<strong>One-line diagnosis.</strong> The metrics engine is real and guarded (<code>needs.js</code>), and the minigames are real playable MVPs (<code>modes.js</code>, <code>arcade.js</code>). What is missing is the <em>place</em>: there is no walk-in building to feed / rest / cheer the runner, the hunger and energy "ad" bubbles point at a <span class="dead">BARN that does not exist</span> and a <span class="dead">Kennel that does not rest you</span>, and the modes render on flat near-black canvas with rewards that never touch missions or story. Nothing here needs a rebuild &mdash; it needs <em>wiring</em>.
+</div>
+
+<h2>Part 1 &middot; The SIM-LIFE Care Building</h2>
+<p class="sub">Operator: "we have metrics but no means to satisfy the sim metrics." Correct. Below is exactly what exists, what is missing, and the one building that closes it &mdash; wired to the APIs <code>needs.js</code> already exports.</p>
+
+<h3>What EXISTS today</h3>
+<div class="scroll"><table>
+<tr><th>Need</th><th>Satisfy path that exists</th><th>Where</th><th>State</th></tr>
+<tr><td>HUNGER</td><td><code>akFeedRunner()</code> &rarr; <code>AK_NEEDS.feed(3)</code> spends produce/crops (+12/unit)</td><td>index.html:3442-3452; needs.js:289</td><td class="ok">works, but a conditional HUD chip only</td></tr>
+<tr><td>MORALE</td><td>passive side-effects: arcade enter, crew-win, Street Talk open</td><td>index.html:1122 / 1853 / 3502</td><td class="ok">works, no deliberate action</td></tr>
+<tr><td>ENERGY</td><td>passive stamina time-regen (<code>staminaState</code>); API <code>AK_ECON.refillStamina()</code> exists</td><td>economy.js:1325 / 1362</td><td class="dead">NO in-world action triggers a rest</td></tr>
+<tr><td>HONOR</td><td>earned via wins / duties (<code>repRank</code>)</td><td>economy.js repRank</td><td class="ok">fine as-is (progression, not a place)</td></tr>
+</table></div>
+
+<h3>What is MISSING (the gap + the dead wires)</h3>
+<ul>
+<li><span class="dead">No BARN building.</span> Bible &sect;10.1 names the BARN/garden as the hunger place; <code>needs.js adSuggestion()</code> returns <code>target:'BARN'</code> (needs.js:271) and <code>game.html:5670</code> tells the starving player "Feed them at the BARN" &mdash; but there is no <code>BARN</code> in the building table (index.html:646-684). The thought-bubble routes to <code>akFlyRoute</code> (index.html:1024-1026), finds no BARN, and dead-ends on <em>"Head to the BARN -- it needs you."</em></li>
+<li><span class="dead">Energy has no active refill.</span> The energy bubble says "rest at the Kennel" (<code>target:'KENNEL'</code>, needs.js:277), but the Kennel is breeding (Mama Bones, index.html:610). Entering it does <em>nothing</em> to stamina. The <code>refillStamina()</code> API is built and unused by any building &mdash; a dangling wire waiting for a trigger.</li>
+<li>Feeding is invisible until it is already a problem &mdash; the FEED chip only appears when hunger is low/danger (index.html:3456). A new player never learns needs exist.</li>
+<li><em>restroom / wash / sleep</em> are operator words but NOT canon. Bible &sect;10.1 deliberately chose "4 needs, not 8." Adding a bladder/hygiene meter re-opens a question the bible already closed. Recommendation below folds "sleep/rest/wash" into the existing four rather than minting new meters.</li>
+</ul>
+
+<h3>The build: <span style="color:var(--gold2)">THE DEN</span> (a.k.a. the runner's yard) &mdash; one walk-in that satisfies all four</h3>
+<p>Add ONE building, <code>DEN</code>, to <code>HOME_TURF</code> (THE LOT) so it sits with the Infirmary/Kennel as the "care" cluster. It is claimed by a small new hub-only <code>AK_SYSTEMS</code> module (mirror <code>production.js</code>'s <code>onEnterBuilding</code> pattern, ~120 lines) that renders a keeper card with four affordances &mdash; each a one-line call into the existing API. No new needs, no engine touch, byte-identical zero-state.</p>
+
+<div class="scroll"><table>
+<tr><th>Affordance in THE DEN</th><th>Flavor (canon voice)</th><th>Exact wire</th><th>Cost to player</th></tr>
+<tr><td><strong>FEED THE PACK</strong></td><td>"Bowl's full. Belly quiets, block sharpens."</td><td><code>AK_NEEDS.feed(n)</code> &mdash; spends produce/crops; reuse <code>akFeedRunner</code> banner + manga stamp</td><td>produce (already gathered from garden nodes)</td></tr>
+<tr><td><strong>REST / SLEEP</strong> ("the runner's" energy)</td><td>"Head down, dog. Bones come back with the sun."</td><td><code>AK_ECON.refillStamina('gold'|'time')</code> &mdash; the dead API finally gets its trigger; this IS the "rest at the Kennel" the bubble already promises</td><td>gold OR a short wait (time)</td></tr>
+<tr><td><strong>RUN THE YARD</strong> (morale)</td><td>"Let him zoom. Tail's been low."</td><td><code>AK_NEEDS.boostMorale('dogbark')</code> (+4) or a 10-sec free micro-toy = <code>boostMorale('arcade')</code> equivalent</td><td>free, once per PT-day</td></tr>
+<tr><td><strong>WASH / GROOM</strong> (folds into HONOR presentation, optional)</td><td>"Clean dog walks taller. Streets notice."</td><td>cosmetic + tiny morale; NO new meter &mdash; a groom sets a hub "clean" tint flag, not a bladder bar</td><td>free / small gold</td></tr>
+</table></div>
+
+<p><strong>Why THE DEN and not a BARN:</strong> the canon already gathers produce from in-district <em>garden harvest nodes</em> (index.html:1990) &mdash; the "garden" half of "BARN/garden" is live. THE DEN becomes the consumption place. Then <strong>re-point the two dead ad targets</strong>: change <code>adSuggestion</code> hunger <code>target:'BARN'&rarr;'DEN'</code> and energy <code>target:'KENNEL'&rarr;'DEN'</code> (needs.js:271/277), and update the <code>game.html:5670</code> gaunt banner copy "at the BARN" &rarr; "at the DEN." Two string edits kill both dead wires and every thought-bubble now routes somewhere real.</p>
+
+<div class="flow">FIELD (garden node) --harvest--> p.produce
+                                    |
+THE DEN  --FEED-->  AK_NEEDS.feed() --> hunger up --> manga brightens, raid dmg restored
+         --REST-->  AK_ECON.refillStamina() --> energy up --> sprint back, no wobble panels
+         --YARD-->  AK_NEEDS.boostMorale() --> morale up --> miss-chance debuff clears
+adSuggestion.target: 'DEN' (was BARN / KENNEL)  ==> thought bubble now lands on a real door</div>
+
+<p class="sub"><strong>Effort:</strong> M (one ~120-line module + 1 building def + 3 string edits). <strong>Cost:</strong> mostly free &mdash; reuse <code>assets/hub/kennel.png</code> facade + <code>fixer_den.png</code> interior as placeholders; 1 keeper portrait + 1 DEN interior render is the only art buy (~2 CF renders, free tier).</p>
+
+<h2>Part 2 &middot; The Minigame Floor</h2>
+<p class="sub">Operator: "MOBA, the Streets, Arcade = black backdrops, template stubs." Verdict: <strong>functionally real, visually bare, loop-disconnected.</strong> They are NOT stubs &mdash; they are playable MVPs on flat near-black canvas whose rewards go nowhere but a soft-currency island.</p>
+
+<div class="scroll"><table>
+<tr><th>Mode</th><th>Reachable?</th><th>Real mechanics?</th><th>The actual problem</th><th>File:line</th></tr>
+<tr><td><strong>THE STREET</strong> (picker)</td><td class="ok">yes &mdash; THE_STRIP building</td><td>it's a mode-picker keeper ("Switch the Hustler") with 4 buttons</td><td>fine; it is the front door, not a game</td><td>index.html:677; modes.js:1747-1770</td></tr>
+<tr><td><strong>WORLD MOBA</strong></td><td class="ok">yes &mdash; STREET &rarr; WORLD MOBA</td><td class="ok">real 1v1 lane push: minions, 2 cores, 3 skills, stick</td><td class="dead">flat radial-gradient over black (no arena art); 1v1 stub of the promised 5v5/draft/jungle; reward = 18 trophies, isolated</td><td>modes.js:357, bg fill :272-277; reward :785</td></tr>
+<tr><td><strong>GULAG 1v1</strong></td><td class="ok">yes &mdash; STREET &rarr; GULAG</td><td class="ok">real jump-out shooter: cover, bullets, strafing AI</td><td class="dead">flat <code>#070608</code> fill; reward not fed to missions/story</td><td>modes.js openGulag; bg :1089</td></tr>
+<tr><td><strong>DEFEND THE BLOCK</strong></td><td class="ok">yes &mdash; STREET &rarr; DEFEND</td><td class="ok">real tower-defense round</td><td class="dead">flat <code>#06070c</code> fill; isolated reward</td><td>modes.js:1510; bg :1675</td></tr>
+<tr><td><strong>THE ARCADE</strong></td><td class="ok">yes &mdash; THE_STRIP building</td><td class="ok">3 real games: bone_dig, alley_dash, whack (+ gem_tap/forge_temper)</td><td>keeper HAS ambient video (<code>arcade_amb.mp4</code>, 482KB, exists) + interior art; games themselves draw on flat canvas; reward is a daily GOLD cap only</td><td>index.html:678; arcade.js:685,754</td></tr>
+<tr><td><strong>ENCOUNTER ROUTER</strong></td><td class="ok">yes &mdash; STREET &rarr; STREET ENCOUNTER + raid/encounters proximity</td><td class="ok">COLLIDE&rarr;tower / SWERVE&rarr;MOBA / JUMPOUT&rarr;gulag / RUN</td><td>works; the connective tissue is already here</td><td>modes.js:1144</td></tr>
+</table></div>
+
+<h3>The 3-move minigame plan (in priority order)</h3>
+<div class="grid two">
+<div class="card">
+<h3 style="margin-top:0">Move 1 &mdash; Kill the black backdrop <span class="p1">P1</span></h3>
+<p>Every mode fills a flat dark rect (modes.js:272/1089/1675). Draw the active district's hub art behind the play layer at low alpha before the mechanics draw &mdash; the same <code>districtBg</code> images the hub already decodes, or a single reused <code>the_strip_bg.png</code>. One <code>drawImage</code> per mode's render head.</p>
+<p class="sub"><strong>Effort:</strong> S. <strong>Cost:</strong> free (reuse existing hub art). Instantly reads as "a place," not a test harness.</p>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Move 2 &mdash; Connect the rewards to the loop <span class="p1">P1</span></h3>
+<p>Right now MOBA/gulag/arcade pay soft currency in isolation. Route each result through the systems that already listen: fire <code>AK_NEEDS.boostMorale('arcade'/'crewwin')</code> on a win (arcade already does; MOBA/gulag/defense do not), report the win to <code>missions</code>/<code>quests</code> via the existing <code>report*</code> rail (missions.js:308), and let a mode win count toward Alley Pass XP. A win should move the runner, the pass, and a daily duty &mdash; not just a coin counter.</p>
+<p class="sub"><strong>Effort:</strong> S-M. <strong>Cost:</strong> free.</p>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Move 3 &mdash; Play-again + reward variety <span class="p2">P2</span></h3>
+<p>Mode <code>onClose</code> just banners the result (modes.js:977). Add a REMATCH button on every mode's end (shares the raid play-again work, Part 3). Give arcade games a high-score that unlocks a cosmetic or a story page (feed the 106-book lake, below).</p>
+<p class="sub"><strong>Effort:</strong> M. <strong>Cost:</strong> free.</p>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Later &mdash; MOBA depth <span class="p2">P2</span></h3>
+<p>The bible promises 5v5/draft/jungle/Lord; today's is a 1v1 duel (already marked "future research," modes.js:45-49). Not a bug &mdash; a scope note. Ship backdrop+rewards first; depth is a Wave, not a fix.</p>
+</div>
+</div>
+
+<h2>Part 3 &middot; Cross-System Wiring Map</h2>
+<h3 class="ok">Live wires (working)</h3>
+<p>
+<span class="pill">produce &rarr; feed() &rarr; hunger</span>
+<span class="pill">hunger &rarr; RAID dmg (RAID.ndm, index.html:1704)</span>
+<span class="pill">needs &rarr; chronicles mood ring + state-locked choices</span>
+<span class="pill">morale &larr; arcade/crew-win/chat</span>
+<span class="pill">missions &rarr; produce + Alley Pass XP</span>
+<span class="pill">raid &rarr; loot / retaliation / producer damage</span>
+</p>
+<h3 class="dead">Dead / partial wires (built, not consumed)</h3>
+<ul>
+<li><span class="dead">adSuggestion &rarr; BARN</span> : phantom target, dead-end banner (fixed by Part 1).</li>
+<li><span class="dead">adSuggestion &rarr; KENNEL "rest"</span> : Kennel never refills stamina; <code>refillStamina()</code> API unused (fixed by Part 1 REST affordance).</li>
+<li><span class="dead">needs.combatMods dmgMult in the TOWER</span> : game.html:5656 documents it CANNOT apply &mdash; engine.js is frozen and clamps unit dmg to 1.0-1.10, so the starving debuff is redirected to a -20% match-gold penalty. The damage debuff only truly lands in the RAID loop. Working-as-designed but worth knowing: the tower and the raid punish starvation differently.</li>
+<li><span class="dead">106 story books &rarr; thin buff</span> : chronicles reads them for mood + a next-battle fx (rage/tactical/easter, consumed game.html:5658). They are lore + a small buff, but they do NOT unlock modes/cards/areas. A large content lake driving one small wire &mdash; candidate to gate arcade high-scores or DEN cosmetics onto story progress.</li>
+<li><span class="dead">MOBA/gulag/arcade rewards</span> : isolated soft-currency islands (fixed by Part 2, Move 2).</li>
+<li><span class="dead">THE_UNDERCITY + THE_OVERLOOK</span> : both zones <code>locked:true</code> with barrier labels and no unlock path (index.html:646/674); <code>showBarrier</code> just says "sealed (soon)." Two districts of dead content.</li>
+</ul>
+
+<h2>Part 4 &middot; Operator's 3 quick-fixes &mdash; <span class="p0">P0 IN PROGRESS</span> (not touched here)</h2>
+<div class="scroll"><table>
+<tr><th>Fix</th><th>Current state (confirmed)</th><th>Where</th></tr>
+<tr><td>Post-raid &rarr; comic, not district</td><td>victoryPage manga loot page + chronicle sweep exist, but CONTINUE &rarr; <code>akExitRaid</code> dumps back to the district (prevZone)</td><td>index.html:1899-1910 / 1934-1938</td></tr>
+<tr><td>Play-again on raid / street</td><td>raid end has SHARE + CONTINUE only, no PLAY AGAIN; mode onClose only banners</td><td>index.html:1925-1930; modes.js:977</td></tr>
+<tr><td>Raid fire-rate ~1/sec</td><td><code>RAID.fireCd</code> exists + decays; player ranged is the ability-bolt</td><td>index.html:1701 / 1744 / 1583</td></tr>
+</table></div>
+<p class="sub">Verified present and consistent with "in progress." No action taken per audit scope.</p>
+
+<div class="foot">
+Read-only gameplay+wiring audit &middot; Alley Kingz &middot; grounded in needs.js / production.js / modes.js / arcade.js / chronicles.js + bible &sect;10-11. Priorities: P0 = breaks/annoys now, P1 = core value, P2 = polish. Everlight Ventures.
+</div>
+</div>

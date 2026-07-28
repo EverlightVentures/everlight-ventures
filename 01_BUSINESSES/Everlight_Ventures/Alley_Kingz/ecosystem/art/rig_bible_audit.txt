@@ -1,0 +1,104 @@
+Grep confirms the leaks are real (all quoted from the payload's look/weapon/prompt fields, not the allowed DNA field) and that the text uses " -- " throughout with zero em-dash/en-dash bytes. I also fully read the 20-rig payload for the semantic checks. Report follows.
+
+---
+
+ALLEY KINGZ RIG PASS -- ADVERSARIAL VERIFICATION (20 rigs)
+Method: full read of all 20 rig objects + grep confirmation of dash bytes and marque strings. Failures first.
+
+====================================================================
+TIER 1 -- TRADEMARK LEAKS (hard canon violation, must fix)
+====================================================================
+Rule: real marque/model may live in DNA only. It must NOT appear in look/weapon/armor/prompt. Every rig scrubbed this correctly EXCEPT the five below. Grep-confirmed.
+
+1. rig_sport_silkcut -- "Targa" leaks TWICE onto visible-surface fields.
+   - look: "a wraparound Targa band standing where a hardtop should be"
+   - weapon.mount: "Targa-hoop scalpel rail, mirror-machined"
+   "Targa" is Porsche's registered body-style/model designation and is literally the model in this rig's DNA (911 Targa). The prompt already scrubbed it ("brushed-steel wraparound roll hoop") -- the look and weapon fields did not. Fix: "roll-hoop band" / "hoop-mounted scalpel rail."
+
+2. rig_van_meat_wagon -- "Cadillac" named in the look field.
+   - look: "that stretched Cadillac body"
+   Manufacturer name on a visible-surface field. Prompt scrubbed it correctly ("1950s American emergency ambulance wagon"); look did not. Fix: "that stretched land-yacht body."
+
+3. rig_van_cable_guy -- "Econoline" (Ford model) in the PROMPT field.
+   - prompt: "unmistakable classic Econoline proportions"
+   Worst placement of the five because the prompt drives image generation. Fix: "unmistakable classic full-size work-van proportions."
+
+4. rig_mon_dozerhead -- "D9" (Caterpillar model designation) in the look field.
+   - look: "The unmistakable D9 profile survives whole"
+   Prompt scrubbed it ("heavy armored bulldozer war rig"); look did not. Fix: "the unmistakable heavy-dozer profile."
+
+5. rig_van_bread_truck -- "Divco" (manufacturer name) in the look field.
+   - look: "Unmistakable Divco milk-truck shape"
+   Prompt scrubbed it ("Rounded snub-nose milk-truck body"); look did not. Fix: "Unmistakable snub-nose milk-truck shape."
+
+Soft trademark notes (technically prose, not on-vehicle text, so borderline -- clean up for consistency):
+- rig_muscle_ratking: "Deuce roadster / Deuce hot rod" in look (hot-rod nickname for the '32 Ford; not an official marque, but recognizable shorthand).
+- rig_van_jammer: "reads A-Team on sight" in look (TV-franchise reference, not a car marque).
+- rig_mon_hooktooth: "square-body" (look) and "fleetside" (prompt) are Chevrolet enthusiast/trade terms.
+- rig_van_sunshine_bus: "Microbus" (genericized VW term). Lowest priority.
+
+====================================================================
+TIER 2 -- RESIDUAL CONVERGENCE (point 1)
+====================================================================
+A. rig_muscle_coffin_nail + rig_van_meat_wagon -- STRONGEST collision.
+   Same base car: Coffin Nail DNA = 1959 Cadillac hearse; Meat Wagon DNA = 1959 Cadillac Miller-Meteor ambulance. Both are 1959 Cadillac professional cars on the same commercial chassis, and both look fields render as "long low finned" tailfin land-yachts -- near-identical silhouette. On top of that they share the "carried the dead" origin and pride motif (Coffin Nail "carried every King this block buried"; Meat Wagon "carried the dead for the Collar"). Two rigs, one base car, one premise. Re-base Meat Wagon off a different emergency wagon or push it visually away from the '59 fins.
+
+B. rig_mon_railhound + rig_mon_dozerhead -- tightest CORE collision.
+   Both monster family, both turret_util SIGNATURE, and both pride lines resolve to the same line:
+   - Railhound: "I do not move and I do not yield."
+   - Dozerhead: "I do not move."
+   Two of the five monsters are the same "immovable line-holder / anchor gun platform." Origins differ (purpose-welded lane vs saved-from-crusher) but the core is identical. Differentiate one core.
+
+C. rig_van_jammer + rig_van_cable_guy -- mechanical collision.
+   Both tech_ops vans whose signature weapon takes an enemy rig offline for a turn:
+   - Jammer: "blacks out an enemy rig's targeting, comms, and minimap... fights blind and alone."
+   - Cable Guy: "the hit rig goes dark for a turn with weapons and lights offline."
+   Same effect (disable a target, kill its weapons/targeting). Split the effects cleanly: Jammer = comms/minimap denial, Cable Guy = single-target power-kill plus vision-steal.
+
+D. rig_muscle_sunday_best + rig_mon_stiltjack -- near-identical pride construction.
+   - Sunday Best: "the whole Strip already paid to watch me put you down."
+   - Stiltjack: "You paid a ticket to watch me crush junk for laughs."
+   Same "[audience] paid to watch me ___" build, plus both carry a show/crowd-performer origin. Crowd-as-weapon is Sunday Best's assigned core; Stiltjack's is eager-underdog. Reword Stiltjack's pride off the "paid to watch" beat.
+
+E. rig_muscle_boneyard + rig_muscle_ratking -- shared adversity-stacking mechanic.
+   Both muscle + bruiser, both scale UP the more they are hurt (Ratking bolts on armor from every hit; Boneyard gains Last Rites fire stacks per 20 percent health lost). rig_muscle_coffin_nail also stacks (on ally deaths), so three of five muscle rigs share a "gets stronger as it degrades" bruiser mechanic. Boneyard and Ratking are the closest pair (both trigger on own damage taken). Differentiate one.
+
+Minor motif spread (not a hard collision): the word "ledger" recurs as flavor/armor-tier across Coffin Nail, Ratking, and Brickhouse (plus debt language in Hooktooth). The "guard/protector" core also spreads across Brickhouse, Sunshine Bus, and Dozerhead -- acceptable because the classes and mechanics differ, but the roster is protector-heavy.
+
+====================================================================
+TIER 3 -- FUNERAL CREEP (point 3)
+====================================================================
+- rig_van_meat_wagon (STRONG): grave-incense censer, prayer chains, "carried the dead," "tolls once for every soul," penitent/redemption. A full funeral/death rig other than Coffin Nail. Combined with collision A, this is the single biggest problem in the set.
+- rig_muscle_boneyard (MODERATE): "raised from the dead," wrench-priest, "Last Rites," "consecrated flame," "grave-white primer," armor tier "Risen Reliquary." Resurrection/funeral-cult creep.
+- Crew concentration: all three RUST HALO rigs (Boneyard, Meat Wagon, Hooktooth) lean death/grave/cult, and Coffin Nail (BONEGUARD) is a fourth death rig. Death/funeral is the most crowded theme in the roster and it is bleeding past Coffin Nail's lane.
+
+====================================================================
+CLEAN / PASSING CHECKS
+====================================================================
+Point 2 (body-block trope): PASS. No pride line misfires into "I take the hit for my dog" against a different assigned core. Brickhouse ("I underwrite him") and Sunshine Bus ("runts ride in my belly") resolve to protect-the-asset, but that IS each one's assigned core. Soft note: Coffin Nail's "the King I am carrying today walks out, and does not ride back" edges toward protect-the-driver, but the undertaker/debt framing plus the death-stack inheritance mechanic keep it distinct. Acceptable.
+
+Point 5 (DNA recognizability): PASS. Every look/prompt carries the assigned car's signature cues (Charger coke-bottle + flying buttresses, Countach wedge + scissor doors, 911 four-round-lamps + Targa hoop, Unimog portal-axle stance, VW split windshield, etc.). Softest two, both acceptable: rig_mon_technical (deliberately the generic militia "technical" archetype rather than a specific Hilux silhouette) and rig_muscle_brickhouse (Rolls recognizability rides almost entirely on the temple-grille cue while the rear vault box competes with the silhouette).
+
+Point 6 (stat balance): PASS. All 20 totals fall 20-24, inside the 18-26 band:
+21,23,22,24,23 (muscle) / 23,23,21,20,23 (sport) / 22,22,20,23,23 (van) / 21,21,22,21,21 (monster).
+Family leans correct: muscle armor 7-10 with low handling; sport speed/handling 7-9 with armor 2-4; vans payload 7-8; monsters payload 7-8 with low speed/handling. Two watch items, neither breaks the family: Sunshine Bus armor 8 is the tankiest van (justified -- it is the bouncer/shield-wall), and Technical armor 5 is the lightest-armor monster (leans mobile-merc, softest monster lean).
+
+Point 7 (crew coverage): PASS. All 8 crews present. Distribution: NIGHTSHIFT 3, SCRAPJAW 3, K-CLUB 3, RUST HALO 3, BONEGUARD 2, SNAKE EYES 2, MUTT$ 2, ASHLINE 2.
+
+Point 8 (em-dash and prompt hygiene): PASS. Zero em-dash (U+2014) and zero en-dash (U+2013) bytes -- text uses " -- " throughout (grep-confirmed). All 20 prompts request the correct negatives (no character, no hands, no A-pose) and a plain/solid white background; none request a character, hands, an A-pose, or a non-white background.
+
+Point 9 (canon Mythics): PASS. Exactly three Mythics, each honoring its named canon character:
+- rig_sport_shadowblade honors Jagged (story).
+- rig_van_jammer honors Rosco (story).
+- rig_mon_railhound honors Crown Foxhound, with turret_util set as signatureDogClass (synergy note "canon: Crown Foxhound").
+
+====================================================================
+PRIORITY FIX ORDER
+====================================================================
+1. Strip the 5 Tier-1 marque strings (Silkcut Targa x2, Meat Wagon Cadillac, Cable Guy Econoline, Dozerhead D9, Bread Truck Divco).
+2. Rebuild Meat Wagon -- it is both the DNA/premise twin of Coffin Nail (collision A) and the worst funeral-creep offender (Tier 3). Fixing it clears two findings at once.
+3. Split the Jammer/Cable Guy disable effect (collision C) and differentiate one of Railhound/Dozerhead (collision B).
+4. Reword Stiltjack's "paid to watch" pride (collision D); differentiate Boneyard or Ratking's adversity-stack (collision E).
+5. Dial back Boneyard's funeral/resurrection language and thin the death concentration across the three RUST HALO rigs.
+
+Files that carry the live rig data if these fixes get applied: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/data/cards.json and /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/data/cards_stories.js (the supplied 20-rig JSON is not yet committed as a standalone file).

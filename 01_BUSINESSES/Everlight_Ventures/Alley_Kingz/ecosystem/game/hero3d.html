@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Alley Kingz -- Jagged (3D Hero Test)</title>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+  :root{ --gold:#D4AF37; --bone:#E8E4DC; --muted:#8A8378; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#0A0A0A;color:var(--bone);
+    font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+  .stage{position:fixed;inset:0;
+    background:radial-gradient(120% 90% at 50% 18%, #241f18 0%, #14110d 45%, #060606 100%);}
+  model-viewer{width:100%;height:100%;--poster-color:transparent;}
+  .top{position:fixed;top:0;left:0;right:0;padding:16px 18px;pointer-events:none;
+    background:linear-gradient(#000a,#0000);}
+  .ey{font:600 11px/1 ui-monospace,monospace;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}
+  h1{font:900 26px/1 "Arial Black",Impact,sans-serif;text-transform:uppercase;margin:8px 0 2px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13px}
+  .tag{color:var(--gold);font-style:italic;font-size:14px;margin-top:6px}
+  .anims{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;
+    flex-wrap:wrap;padding:16px;background:linear-gradient(#0000,#000c)}
+  button{font:600 12px/1 ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--bone);background:#1b1712;border:1px solid #2e2822;border-radius:4px;
+    padding:10px 14px;cursor:pointer}
+  button.on{color:#0A0A0A;background:var(--gold);border-color:var(--gold)}
+  .hint{position:fixed;bottom:64px;left:0;right:0;text-align:center;color:var(--muted);
+    font-size:12px;pointer-events:none}
+  .load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="stage"></div>
+<model-viewer id="mv"
+  src="assets/models/jagged.glb"
+  alt="Jagged, Mythic hero"
+  camera-controls
+  touch-action="pan-y"
+  autoplay
+  interaction-prompt="none"
+  shadow-intensity="1.1"
+  shadow-softness="0.9"
+  exposure="1.05"
+  camera-orbit="0deg 88deg 3.2m"
+  min-camera-orbit="auto auto 1.6m"
+  max-camera-orbit="auto auto 6m"
+  field-of-view="30deg">
+  <div class="load" slot="poster">Loading Jagged...</div>
+</model-viewer>
+
+<div class="top">
+  <div class="ey">Alley Kingz &middot; 3D Hero Test</div>
+  <h1>Jagged</h1>
+  <div class="sub">Mythic &middot; Doberman &middot; Zoomie Syndicate</div>
+  <div class="tag">"Blink. You're already gone."</div>
+</div>
+
+<div class="hint">drag to orbit &middot; pinch to zoom</div>
+<div class="anims" id="anims"></div>
+
+<script>
+  var mv = document.getElementById('mv');
+  var bar = document.getElementById('anims');
+  function addBtn(label, name, on){
+    var b = document.createElement('button');
+    b.textContent = label;
+    if(on) b.className = 'on';
+    if(name){
+      b.onclick = function(){
+        mv.animationName = name; mv.play();
+        var kids = bar.children;
+        for(var k=0;k<kids.length;k++) kids[k].className = '';
+        b.className = 'on';
+      };
+    }
+    bar.appendChild(b);
+    return b;
+  }
+  mv.addEventListener('load', function(){
+    var names = mv.availableAnimations || [];
+    if(!names.length){ addBtn('No animations found', null, true); return; }
+    names.forEach(function(nm, i){ addBtn('Anim ' + (i+1), nm, i===0); });
+    mv.animationName = names[0]; mv.play();
+  });
+</script>
+</body>
+</html>

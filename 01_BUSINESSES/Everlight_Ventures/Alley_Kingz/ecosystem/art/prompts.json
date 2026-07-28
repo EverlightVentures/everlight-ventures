@@ -1,0 +1,1067 @@
+{
+  "version": 1,
+  "count": 106,
+  "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows",
+  "prompts": [
+    {
+      "cardNumber": "0001",
+      "name": "$BCARDD",
+      "breed": "Dogo Argentino",
+      "faction": "Boneguard Crew",
+      "rarity": "Mythic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Dogo Argentino dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold crown, flag aviator sunglasses, a cigar in his mouth, a thick gold cuban link chain with a large letter B medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0002",
+      "name": "Stonejaw",
+      "breed": "Mastiff",
+      "faction": "Boneguard Crew",
+      "rarity": "Legendary",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Mastiff dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0003",
+      "name": "Balboa",
+      "breed": "Boxer",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Boxer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0004",
+      "name": "Iron Rottweiler",
+      "breed": "Rottweiler",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Rottweiler dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0005",
+      "name": "Granite Saint",
+      "breed": "St. Bernard",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic St. Bernard dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0006",
+      "name": "Grit Bulldog",
+      "breed": "Bulldog",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Bulldog dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0007",
+      "name": "Alloy Akita",
+      "breed": "Akita",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Akita dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0010",
+      "name": "Tank Pug",
+      "breed": "Pug",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pug dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0011",
+      "name": "Copper Chow",
+      "breed": "Chow",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Chow dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0008",
+      "name": "Warden Newfie",
+      "breed": "Newfoundland",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Newfoundland dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0009",
+      "name": "Rust Cane Corso",
+      "breed": "Cane Corso",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Cane Corso dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0012",
+      "name": "Brick Bullmastiff",
+      "breed": "Bullmastiff",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Bullmastiff dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0013",
+      "name": "Jagged",
+      "breed": "Doberman",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Mythic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Doberman dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold crown, flag aviator sunglasses, a cigar in his mouth, a thick gold cuban link chain with a large letter B medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0016",
+      "name": "Pixel Greyhound",
+      "breed": "Greyhound",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Greyhound dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0017",
+      "name": "Circuit Shiba",
+      "breed": "Shiba Inu",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Shiba Inu dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0021",
+      "name": "Neon Whippet",
+      "breed": "Whippet",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Whippet dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0022",
+      "name": "Turbo Jack",
+      "breed": "Jack Russell",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Jack Russell dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0014",
+      "name": "Razor Vizsla",
+      "breed": "Vizsla",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Vizsla dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0018",
+      "name": "Flash Saluki",
+      "breed": "Saluki",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Saluki dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0019",
+      "name": "Bolt Corgi",
+      "breed": "Corgi",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0020",
+      "name": "Glitch Basenji",
+      "breed": "Basenji",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basenji dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0015",
+      "name": "Aero Malinois",
+      "breed": "Malinois",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Malinois dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0023",
+      "name": "Drift Sheltie",
+      "breed": "Sheltie",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Sheltie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0024",
+      "name": "Byte Beagle",
+      "breed": "Beagle",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Beagle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0025",
+      "name": "Rosco",
+      "breed": "Australian Cattle Dog",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Mythic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Australian Cattle Dog dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold crown, flag aviator sunglasses, a cigar in his mouth, a thick gold cuban link chain with a large letter B medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0026",
+      "name": "Synth Collie",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0029",
+      "name": "Holo Husky",
+      "breed": "Husky",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Husky dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0030",
+      "name": "Chill Samoyed",
+      "breed": "Samoyed",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Samoyed dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0031",
+      "name": "Prism Poodle",
+      "breed": "Poodle",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Poodle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0034",
+      "name": "Echo Dalmatian",
+      "breed": "Dalmatian",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Dalmatian dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0035",
+      "name": "Static Sheba Inu",
+      "breed": "Shiba Inu",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Shiba Inu dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0036",
+      "name": "Vibe Shih Tzu",
+      "breed": "Shih Tzu",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Shih Tzu dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0027",
+      "name": "Noir Setter",
+      "breed": "Setter",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Setter dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0032",
+      "name": "Signal Pointer",
+      "breed": "Pointer",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pointer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0033",
+      "name": "Ghost Spaniel",
+      "breed": "Spaniel",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Spaniel dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0028",
+      "name": "Pulse Border Collie",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0037",
+      "name": "Crown Foxhound",
+      "breed": "Foxhound",
+      "faction": "K9 Circuitry",
+      "rarity": "Mythic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Foxhound dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold crown, flag aviator sunglasses, a cigar in his mouth, a thick gold cuban link chain with a large letter B medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0040",
+      "name": "Laser Beagle",
+      "breed": "Beagle",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Beagle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0045",
+      "name": "Neon Dachshund",
+      "breed": "Dachshund",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Dachshund dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0041",
+      "name": "Volt Corgi",
+      "breed": "Corgi",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0042",
+      "name": "Grid Schnauzer",
+      "breed": "Schnauzer",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Schnauzer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0046",
+      "name": "Flux Pomeranian",
+      "breed": "Pomeranian",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pomeranian dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0047",
+      "name": "Rail Terrier",
+      "breed": "Terrier",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Terrier dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0038",
+      "name": "Circuit Retriever",
+      "breed": "Retriever",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Retriever dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0043",
+      "name": "Chrome Airedale",
+      "breed": "Airedale",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Airedale dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0044",
+      "name": "Beacon Basset",
+      "breed": "Basset",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basset dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0048",
+      "name": "Pixel Pug",
+      "breed": "Pug",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pug dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0039",
+      "name": "Nova Shepherd",
+      "breed": "German Shepherd",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic German Shepherd dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0049",
+      "name": "Cinderblock",
+      "breed": "Boxer",
+      "faction": "Boneguard Crew",
+      "rarity": "Legendary",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Boxer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0050",
+      "name": "Knuckles",
+      "breed": "Boxer",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Boxer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0051",
+      "name": "Tombstone",
+      "breed": "Rottweiler",
+      "faction": "Boneguard Crew",
+      "rarity": "Legendary",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Rottweiler dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0052",
+      "name": "Razorgums",
+      "breed": "Rottweiler",
+      "faction": "Boneguard Crew",
+      "rarity": "Rare",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Rottweiler dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0053",
+      "name": "Anvil",
+      "breed": "St. Bernard",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic St. Bernard dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0054",
+      "name": "Hatchet",
+      "breed": "St. Bernard",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic St. Bernard dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0055",
+      "name": "Bonecrusher",
+      "breed": "Bulldog",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Bulldog dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0056",
+      "name": "Switch",
+      "breed": "Bulldog",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Bulldog dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0057",
+      "name": "Warhorse",
+      "breed": "Akita",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Akita dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0058",
+      "name": "Lugnut",
+      "breed": "Akita",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Akita dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0059",
+      "name": "Ironhide",
+      "breed": "Newfoundland",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Newfoundland dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0060",
+      "name": "Snaggle",
+      "breed": "Newfoundland",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Newfoundland dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0061",
+      "name": "Slab",
+      "breed": "Cane Corso",
+      "faction": "Boneguard Crew",
+      "rarity": "Epic",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Cane Corso dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0062",
+      "name": "Brassknuck",
+      "breed": "Cane Corso",
+      "faction": "Boneguard Crew",
+      "rarity": "Common",
+      "rigClass": "bruiser",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Cane Corso dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, heavy armored bruiser build, broad shoulders, bone and gold accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0063",
+      "name": "Roadblock",
+      "breed": "Greyhound",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Greyhound dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0064",
+      "name": "Nitro",
+      "breed": "Greyhound",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Greyhound dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0065",
+      "name": "Bullbar",
+      "breed": "Shiba Inu",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Shiba Inu dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0066",
+      "name": "Switchblade",
+      "breed": "Shiba Inu",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Shiba Inu dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0067",
+      "name": "Rollcage",
+      "breed": "Vizsla",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Legendary",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Vizsla dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0068",
+      "name": "Ricochet",
+      "breed": "Vizsla",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Vizsla dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0069",
+      "name": "Crashcage",
+      "breed": "Saluki",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Saluki dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0070",
+      "name": "Hotwire",
+      "breed": "Saluki",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Saluki dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0071",
+      "name": "Bumper",
+      "breed": "Corgi",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0072",
+      "name": "Backfire",
+      "breed": "Corgi",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0073",
+      "name": "Gridiron",
+      "breed": "Basenji",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Epic",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basenji dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0074",
+      "name": "Skidmark",
+      "breed": "Basenji",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Common",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basenji dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0075",
+      "name": "Deadweight",
+      "breed": "Malinois",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Legendary",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Malinois dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0076",
+      "name": "Flatline",
+      "breed": "Malinois",
+      "faction": "Zoomie Syndicate",
+      "rarity": "Rare",
+      "rigClass": "sprinter",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Malinois dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, lean athletic sprinter build, streetwear, speed-runner styling, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0077",
+      "name": "Firewall",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Legendary",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0078",
+      "name": "Glitchfork",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0079",
+      "name": "Deadbolt",
+      "breed": "Husky",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Husky dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0080",
+      "name": "Static",
+      "breed": "Husky",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Husky dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0081",
+      "name": "Bunkerlink",
+      "breed": "Samoyed",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Samoyed dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0082",
+      "name": "Shortcircuit",
+      "breed": "Samoyed",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Samoyed dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0083",
+      "name": "Faraday",
+      "breed": "Poodle",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Poodle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0084",
+      "name": "Hexer",
+      "breed": "Poodle",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Poodle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0085",
+      "name": "Sandbag",
+      "breed": "Setter",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Legendary",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Setter dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0086",
+      "name": "Whitenoise",
+      "breed": "Setter",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Setter dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0087",
+      "name": "Blacksite",
+      "breed": "Pointer",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pointer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0088",
+      "name": "Carrier",
+      "breed": "Pointer",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Pointer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0089",
+      "name": "Hardline",
+      "breed": "Spaniel",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Epic",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Spaniel dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0090",
+      "name": "Spike",
+      "breed": "Spaniel",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Common",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Spaniel dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0091",
+      "name": "Bulwark",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Legendary",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0092",
+      "name": "Brownout",
+      "breed": "Border Collie",
+      "faction": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "rigClass": "tech_ops",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Border Collie dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, tactical operator build, utility straps and tactical gear, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0093",
+      "name": "Bunker",
+      "breed": "Beagle",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Beagle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0094",
+      "name": "Buckshot",
+      "breed": "Beagle",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Beagle dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0095",
+      "name": "Howitzer",
+      "breed": "Corgi",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0096",
+      "name": "Tripwire",
+      "breed": "Corgi",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Corgi dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0097",
+      "name": "Flakwall",
+      "breed": "Schnauzer",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Schnauzer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0098",
+      "name": "Deadeye",
+      "breed": "Schnauzer",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Schnauzer dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0099",
+      "name": "Casemate",
+      "breed": "Retriever",
+      "faction": "K9 Circuitry",
+      "rarity": "Legendary",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Retriever dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0100",
+      "name": "Shrapnel",
+      "breed": "Retriever",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Retriever dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0101",
+      "name": "Pillbox",
+      "breed": "Airedale",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Airedale dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0102",
+      "name": "Hairtrigger",
+      "breed": "Airedale",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Airedale dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0103",
+      "name": "Stronghold",
+      "breed": "Basset",
+      "faction": "K9 Circuitry",
+      "rarity": "Epic",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basset dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing aviator sunglasses, a gold chain, a street jacket, blue jeans, and boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0104",
+      "name": "Snubnose",
+      "breed": "Basset",
+      "faction": "K9 Circuitry",
+      "rarity": "Common",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic Basset dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a plain tank top, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0105",
+      "name": "Emplacement",
+      "breed": "German Shepherd",
+      "faction": "K9 Circuitry",
+      "rarity": "Legendary",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic German Shepherd dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing flag aviator sunglasses, a thick gold cuban link chain with a medallion, an open denim vest, blue jeans with a gold belt buckle, and heavy boots, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    },
+    {
+      "cardNumber": "0106",
+      "name": "Salvo",
+      "breed": "German Shepherd",
+      "faction": "K9 Circuitry",
+      "rarity": "Rare",
+      "rigClass": "turret_util",
+      "prompt": "full body character reference sheet of a muscular anthropomorphic German Shepherd dog, dog head on a jacked humanoid bodybuilder body, standing upright on two legs like a Ninja Turtles character, entire body visible from head to feet, symmetrical relaxed A-pose, standing still and facing forward, both arms held out away from the body at roughly 45 degrees with clear space between each arm and the torso, hands open and away from the hips, legs straight and shoulder-width apart with clear space between the thighs, both feet flat and fully visible, wearing a gold chain, a hoodie, blue jeans, and sneakers, cyber-tech build, subtle glowing circuitry and chrome tech accents, stylized 3D game character render, even neutral lighting, clean plain solid white background, full figure, no cropping, no text, no watermark",
+      "negative": "four legged, quadruped, dog on all fours, walking on four legs, bust, portrait, cropped legs, cut off at waist, headshot, torso only, arms crossed, arms at sides, arms touching torso, hands on hips, hands in pockets, walking, running, mid-stride, action pose, dynamic pose, twisted torso, legs crossed, legs together, foreshortening, blurry, text, watermark, multiple characters, busy background, harsh shadows"
+    }
+  ]
+}

@@ -1,0 +1,252 @@
+<title>Alley Kingz: State of the Game</title>
+<style>
+  :root{
+    --asphalt:#0C0B0A; --oil:#16130F; --panel:#1E1A15; --line:#2E2822;
+    --gold:#D4AF37; --gold-dim:#8A7328; --hot:#E2481F; --emp:#49C5D6;
+    --bone:#E8E4DC; --muted:#8A8378; --good:#7BB661; --warn:#D19A2E;
+    --display:"Arial Black","Helvetica Neue",Impact,sans-serif;
+    --body:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--asphalt);color:var(--bone);font-family:var(--body);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+  header{border-bottom:2px solid var(--gold);padding:56px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+           color:var(--gold-dim);margin:0 0 14px}
+  h1{font-family:var(--display);font-size:clamp(36px,6.5vw,66px);line-height:.94;margin:0 0 16px;
+     text-transform:uppercase;letter-spacing:-.02em;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--gold)}
+  .dek{font-size:18px;color:var(--muted);max-width:64ch;margin:0}
+  h2{font-family:var(--display);font-size:26px;text-transform:uppercase;margin:64px 0 6px;text-wrap:balance}
+  h2 .n{font-family:var(--mono);font-size:12px;color:var(--gold-dim);letter-spacing:.15em;
+        display:block;margin-bottom:8px;font-weight:400}
+  h3{font-family:var(--display);font-size:14px;text-transform:uppercase;letter-spacing:.06em;
+     margin:30px 0 10px;color:var(--gold)}
+  p{max-width:68ch}
+  .sub{color:var(--muted);margin:0 0 20px;max-width:68ch}
+  strong{color:#fff}
+  code{font-family:var(--mono);font-size:.86em;background:var(--oil);padding:2px 6px;
+       border:1px solid var(--line);border-radius:3px;color:var(--gold)}
+  .scroll{overflow-x:auto;margin:18px 0;border:1px solid var(--line);background:var(--oil)}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--gold-dim);background:#120F0C;font-weight:400;white-space:nowrap}
+  td.num{font-variant-numeric:tabular-nums;font-family:var(--mono);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  .bar{display:flex;align-items:center;gap:10px}
+  .bar .track{flex:1;height:7px;background:#241F19;border-radius:1px;overflow:hidden;min-width:70px}
+  .bar .fill{height:100%;background:var(--good)}
+  .bar .fill.mid{background:var(--warn)} .bar .fill.low{background:var(--hot)}
+  .bar .pct{font-family:var(--mono);font-size:11px;color:var(--muted);width:38px;text-align:right}
+  .callout{border-left:3px solid var(--hot);background:#1A100C;padding:16px 20px;margin:22px 0}
+  .callout.gold{border-left-color:var(--gold);background:#171308}
+  .callout.good{border-left-color:var(--good);background:#0E1710}
+  .callout p{margin:0;max-width:64ch}
+  .callout .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+                color:var(--hot);display:block;margin-bottom:6px}
+  .callout.gold .tag{color:var(--gold)} .callout.good .tag{color:var(--good)}
+  .grid{display:grid;gap:14px;margin:20px 0}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);padding:16px}
+  .card h4{font-family:var(--display);font-size:13px;text-transform:uppercase;margin:0 0 4px}
+  .card .meta{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold-dim);
+              text-transform:uppercase;margin:0 0 8px}
+  .card p{font-size:13px;color:var(--muted);margin:0}
+  .pill{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+        text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);border-radius:2px;color:var(--muted)}
+  .pill.done{color:var(--good);border-color:#2C4426}
+  .pill.gap{color:var(--hot);border-color:#4A2015}
+  .pill.part{color:var(--warn);border-color:#4A3A15}
+  .quote{font-family:var(--display);font-size:19px;text-transform:none;color:var(--gold);
+         border-left:2px solid var(--gold-dim);padding-left:18px;margin:22px 0;max-width:60ch;line-height:1.35}
+  ul,ol{max-width:68ch;padding-left:20px} li{margin-bottom:7px} li::marker{color:var(--gold-dim)}
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);
+         font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Alley Kingz &middot; State of the Game &middot; 2026-07-17</p>
+  <h1>You Wrote<br>The Novel.<br><em>Now Build<br>The Stage.</em></h1>
+  <p class="dek">Every number here was counted off the filesystem today. Nothing is estimated,
+  nothing is remembered. This is what the game actually is, what is finished, what is broken,
+  and where the work goes next.</p>
+</header>
+
+<h2><span class="n">01 / What it is</span>The pitch, in one paragraph</h2>
+<p>A live-action street game about upright, jacked gangster dogs who run a city block by block.
+The Warriors and the Ninja Turtles by way of 80s Homie figures, driving Twisted Metal war rigs.
+It is a tower battler with an MMO wrapped around it: a walkable hub, raidable player bases, crews,
+a card economy, and a 106-book comic saga underneath. It is not a kids game.</p>
+
+<div class="quote">"Crowns get taken, never given. Kneel or bleed."<br>
+<span style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;">
+$BCARDD &middot; Mythic &middot; Dogo Argentino &middot; card 0001</span></div>
+
+<h2><span class="n">02 / The Scoreboard</span>Where every layer actually stands</h2>
+<p class="sub">Counted, not guessed. The pattern is unmistakable once you see it: the further from
+the player's eye, the more finished it is.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Layer</th><th>State</th><th class="num">Evidence</th><th>Done</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Writing</strong></td><td><span class="pill done">Finished</span></td>
+      <td class="num">106 books, 106 taglines, 106 bios, 12 bosses, 6 arcs</td>
+      <td><div class="bar"><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">100%</span></div></td></tr>
+    <tr><td><strong>Card data</strong></td><td><span class="pill done">Finished</span></td>
+      <td class="num">106/106 with breed, faction, rarity, role, stats, ability, rig</td>
+      <td><div class="bar"><div class="track"><div class="fill" style="width:100%"></div></div><span class="pct">100%</span></div></td></tr>
+    <tr><td><strong>Game systems</strong></td><td><span class="pill done">Built</span></td>
+      <td class="num">44 modules, PVP loop live, economy, raids, seasons</td>
+      <td><div class="bar"><div class="track"><div class="fill" style="width:90%"></div></div><span class="pct">90%</span></div></td></tr>
+    <tr><td><strong>2D art</strong></td><td><span class="pill done">Deep</span></td>
+      <td class="num">425 cards, 387 panels, 11 bosses, 114 voices, 973 MB</td>
+      <td><div class="bar"><div class="track"><div class="fill" style="width:85%"></div></div><span class="pct">85%</span></div></td></tr>
+    <tr><td><strong>Rig layer</strong></td><td><span class="pill part">Stub</span></td>
+      <td class="num">4 authored, 58 templated, 44 empty</td>
+      <td><div class="bar"><div class="track"><div class="fill mid" style="width:20%"></div></div><span class="pct">20%</span></div></td></tr>
+    <tr><td><strong>Meta juice</strong></td><td><span class="pill part">Thin</span></td>
+      <td class="num">5 chest tiers share 1 animation, 2 loading screens, fake progress bar</td>
+      <td><div class="bar"><div class="track"><div class="fill mid" style="width:25%"></div></div><span class="pct">25%</span></div></td></tr>
+    <tr><td><strong>The Docks</strong></td><td><span class="pill gap">Unbuilt</span></td>
+      <td class="num">34 dogs live there. Not a playable zone.</td>
+      <td><div class="bar"><div class="track"><div class="fill low" style="width:5%"></div></div><span class="pct">5%</span></div></td></tr>
+    <tr><td><strong>Money</strong></td><td><span class="pill gap">Broken</span></td>
+      <td class="num">Cosmetics grant free. Shop trusts a URL for identity.</td>
+      <td><div class="bar"><div class="track"><div class="fill low" style="width:15%"></div></div><span class="pct">15%</span></div></td></tr>
+    <tr><td><strong>3D</strong></td><td><span class="pill gap">Zero</span></td>
+      <td class="num">No mesh, no renderer, no loader. Greenfield.</td>
+      <td><div class="bar"><div class="track"><div class="fill low" style="width:2%"></div></div><span class="pct">2%</span></div></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="n">03 / The Saga</span>Six arcs, already written</h2>
+<p class="sub">Every card carries timeline tags and a relationship web of allies, rivals, keepers
+and bosses. This is a finished bible, not an outline.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Arc</th><th class="num">Cards</th><th>What it is</th></tr></thead>
+  <tbody>
+    <tr><td><strong>T1 &middot; JUNKYARD DYNASTY</strong></td><td class="num">12</td><td>The origin. Before the crown existed.</td></tr>
+    <tr><td><strong>T2 &middot; CHOPSHOP SPLIT</strong></td><td class="num">134</td><td>The break. The largest arc in the saga.</td></tr>
+    <tr><td><strong>T3 &middot; CROWN CITADEL</strong></td><td class="num">44</td><td>The throne, and who sits on it.</td></tr>
+    <tr><td><strong>T4 &middot; EVERY LEASH BREAKS</strong></td><td class="num">32</td><td>The uprising against The Collar.</td></tr>
+    <tr><td><strong>T5 &middot; BLOCK WAR</strong></td><td class="num">98</td><td>Turf against turf. The war proper.</td></tr>
+    <tr><td><strong>T6 &middot; MYTHICS</strong></td><td class="num">10</td><td>The four who outgrew the story.</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="sub">Cards carry multiple tags, so the totals exceed 106.</p>
+
+<h3>The twelve bosses, all written</h3>
+<p>THE LOT WARDEN &middot; METER, THE NEON RUNNER &middot; THE IRON HANDLER &middot;
+<strong>THE DOCK SOVEREIGN</strong> &middot; TERMINUS, THE STATION KING &middot; THE SIGNAL KING &middot;
+GANGRENE, THE PLAGUE WARDEN &middot; MARKER, THE PIT BOSS &middot; THE COLD SAINT &middot;
+THE REGENT &middot; THE MONGREL KING &middot; <strong>THE COLLAR</strong></p>
+
+<h2><span class="n">04 / The Docks</span>A third of your roster has nowhere to stand</h2>
+
+<div class="callout">
+  <span class="tag">The largest gap in the game</span>
+  <p>The fiction assigns all 106 dogs to <strong>eight districts</strong>. The game ships
+  <strong>six playable zones</strong>. <strong>THE DOCKS holds 34 dogs</strong>, the single biggest
+  district in the saga, and players cannot go there. <strong>THE UNDERCITY</strong> holds 4 more.
+  A boss is already written for it: <em>THE DOCK SOVEREIGN</em>. The names appear in
+  <code>buildmode.js</code> but not as roamable turf.</p>
+</div>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>District</th><th class="num">Dogs</th><th>Playable</th><th>Crew</th><th class="num">Deck-legal?</th></tr></thead>
+  <tbody>
+    <tr><td><strong>THE DOCKS</strong></td><td class="num">34</td><td><span class="pill gap">no</span></td><td>unassigned</td><td class="num">yes (34)</td></tr>
+    <tr><td>NEON HEIGHTS</td><td class="num">23</td><td><span class="pill done">yes</span></td><td>NIGHTSHIFT</td><td class="num">yes (23)</td></tr>
+    <tr><td>THE STRIP</td><td class="num">15</td><td><span class="pill done">yes</span></td><td>SNAKE EYES</td><td class="num">yes (15)</td></tr>
+    <tr><td>DOWNTOWN</td><td class="num">10</td><td><span class="pill done">yes</span></td><td>K-CLUB</td><td class="num" style="color:#E2481F">no (10)</td></tr>
+    <tr><td>THE YARDS</td><td class="num">8</td><td><span class="pill done">yes</span></td><td>SCRAPJAW</td><td class="num" style="color:#E2481F">no (8)</td></tr>
+    <tr><td>FACTORY ROW</td><td class="num">7</td><td><span class="pill done">yes</span></td><td>ASHLINE</td><td class="num" style="color:#E2481F">no (7)</td></tr>
+    <tr><td>HOME TURF / THE LOT</td><td class="num">5</td><td><span class="pill done">yes</span></td><td>BONEGUARD</td><td class="num" style="color:#E2481F">no (5)</td></tr>
+    <tr><td><strong>THE UNDERCITY</strong></td><td class="num">4</td><td><span class="pill gap">no</span></td><td>RUST HALO</td><td class="num" style="color:#E2481F">no (4)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout gold">
+  <span class="tag">The decision this forces</span>
+  <p>The deck is <strong>11 cards</strong>, and the canon says you assign them to buildings
+  <em>"according to their TRAITS + FACTIONS."</em> So a mono-crew deck needs 11 cards in that crew.
+  <strong>Five of the eight districts cannot field one.</strong> Either rebalance the roster toward
+  ~13 dogs per district, or accept that crews operate across turf and faction is culture rather
+  than a deck filter. Pick one deliberately. Right now it is neither.</p>
+</div>
+
+<h2><span class="n">05 / The Roster</span>106 dogs, fully specified</h2>
+<div class="grid g3">
+  <div class="card"><h4>43 breeds</h4><p class="meta">Real, and named</p>
+    <p>Dogo Argentino, Mastiff, Boxer, Rottweiler, Cane Corso, Whippet, Saluki, Borzoi and on. Every card is a specific dog, not a palette swap.</p></div>
+  <div class="card"><h4>5 rarities</h4><p class="meta">4 / 10 / 29 / 29 / 34</p>
+    <p>Mythic, Legendary, Epic, Rare, Common. Already the drop-table and chest-ladder spine.</p></div>
+  <div class="card"><h4>4 combat roles</h4><p class="meta">26 / 26 / 28 / 26</p>
+    <p>Bruiser, sprinter, tech-ops, turret-util. Near-perfectly balanced, and the basis for 4 shared rigs.</p></div>
+  <div class="card"><h4>Full stat block</h4><p class="meta">The strengths and weaknesses</p>
+    <p>hp, damage, attack_speed, move_speed, range, cost, splash, splashRadius, targets, domain, queen_target.</p></div>
+  <div class="card"><h4>Named ability</h4><p class="meta">Per card, with cooldown</p>
+    <p>Every dog has one active with a name, description and cooldown. Stonejaw's Armor Pulse is "the crew's heartbeat."</p></div>
+  <div class="card"><h4>Tagline plus bio</h4><p class="meta">106 / 106</p>
+    <p>Voice is done. "Walls fall down. I don't." That is Stonejaw, in five words, already written.</p></div>
+</div>
+
+<h2><span class="n">06 / Is it finished?</span>The honest answer</h2>
+
+<div class="callout good">
+  <span class="tag">What is genuinely done</span>
+  <p>The <strong>writing</strong>, the <strong>card data</strong>, the <strong>combat feel</strong>
+  (screen shake, hitstop, hit flash, floating damage all real and good), the <strong>PVP loop</strong>
+  (real players raid real bases through a server-authoritative edge function), the
+  <strong>economy math</strong>, and <strong>2D art at depth</strong>. This is not a shell. It is a
+  real game with a real spine.</p>
+</div>
+
+<div class="callout">
+  <span class="tag">What is broken, ranked by what it costs you</span>
+  <p><strong>1.</strong> Cosmetics grant with no charge, and an unauthenticated shop is live on the
+  old project. You cannot sell skins today. <strong>2.</strong> 34 dogs have no home. <strong>3.</strong>
+  Five chest tiers share one animation, so a 20x reward feels identical to the smallest.
+  <strong>4.</strong> 105 of 106 cards share 7 generic FX clips, which is why the roster reads
+  generic. <strong>5.</strong> The rig layer is a stub. <strong>6.</strong> Zero 3D.</p>
+</div>
+
+<p><strong>So: is it finished?</strong> No. But the unfinished parts are not the hard parts. You
+have the novel, the engine, the balance and the art. What is missing is <em>the last mile of every
+system</em>: the chest that never learned it had tiers, the shop that never learned to charge, the
+district that never got built, the rigs that never got names.</p>
+
+<div class="quote">The pattern is the same everywhere: someone scaffolded the archetype,
+shipped it, and never came back to fill it in.</div>
+
+<h2><span class="n">07 / Where the work goes</span>In order</h2>
+<ol>
+  <li><strong>Fix the ledger.</strong> Charge for cosmetics, bind identity to the JWT, kill the zombie endpoint. Three small edits. Without them every other item on this list earns zero.</li>
+  <li><strong>Wire the juice you already own.</strong> Tap-gated card reveals with real art, rarity-gated audio, per-tier chests. No Unity, no credits, no art. Pure wiring.</li>
+  <li><strong>Build The Docks and The Undercity.</strong> 38 dogs come home and a written boss becomes fightable.</li>
+  <li><strong>Author the 8 crews and the 20 rigs.</strong> Writing, not spending.</li>
+  <li><strong>Generate 106 full-body refs</strong> free on FLUX, then mesh through Tripo.</li>
+  <li><strong>Port to Unity.</strong> ~2,530 draw sites across 26 modules. engine.js survives at 87%.</li>
+</ol>
+
+<div class="callout gold">
+  <span class="tag">The one-line answer to "where are we at"</span>
+  <p>You are one finished novel, one working engine, and one broken cash register away from a real
+  game. The ideas are done. The wiring is not.</p>
+</div>
+
+<footer>Alley Kingz &middot; State of the Game &middot; counted from the filesystem 2026-07-17:
+106 cards, 106 books, 106 taglines, 12 bosses, 6 arcs, 8 districts, 44 modules, 1,859 assets,
+973 MB, 0 meshes &middot; Everlight Ventures</footer>
+</div>

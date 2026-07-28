@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""
+Alley Kingz -- LAYER 1: Pack Bonds (dog to dog), extracted, not invented.
+
+Every one of the 106 books carries a relationshipTags web: real card-to-card ally
+and rival edges, keeper links, boss rivalries, timeline arcs, and themes. The bonds
+are already written into the saga. This reads them out into a data layer the deck
+system can fire on.
+
+Emits per-dog bondTags across five families, plus the ally/rival edge graph:
+  CREW    origin crew, from district (origin is stable whether or not allegiance
+          ends up decoupled from turf -- see SYNERGY_SPEC layer 1)
+  ARC     the timeline arcs the dog belongs to (already in the book)
+  STANCE  COLLAR_RESISTANT if the dog is in the leash-breaking arc
+  NATURE  ALPHA / RUNT, derived from rarity, flagged as derived
+  BLOOD   breed, for mono-breed decks
+  EDGES   the literal ally/rival pairs the books name
+
+Read-only on the repo. Writes one data file. Nothing here needs art.
+"""
+import re, json, collections
+from pathlib import Path
+
+HERE = Path(__file__).parent
+GAME = HERE.parent / "game"
+STORIES = GAME / "data" / "cards_stories.js"
+CARDS = HERE.parent / "unity_migration" / "cards.json"
+
+DISTRICT_CREW = {
+    "HOME_TURF": "CROWN LOT", "THE_YARDS": "SCRAPJAW", "NEON_HEIGHTS": "NIGHTSHIFT",
+    "DOWNTOWN": "K-CLUB", "FACTORY_ROW": "ASHLINE", "THE_STRIP": "SNAKE EYES",
+    "THE_DOCKS": "MUTT$", "THE_UNDERCITY": "RUST HALO",
+}
+ARC_SHORT = {
+    "T1_JUNKYARD_DYNASTY": "DYNASTY", "T2_CHOPSHOP_SPLIT": "CHOPSHOP",
+    "T3_CROWN_CITADEL": "CITADEL", "T4_EVERY_LEASH_BREAKS": "LEASHBREAK",
+    "T5_BLOCK_WAR": "BLOCKWAR", "T6_MYTHICS": "MYTHIC",
+}
+
+
+def parse_books(src):
+    marks = [(m.start(), m.group(1)) for m in re.finditer(r'"(\d{4})"\s*:\s*\{', src)]
+    out = {}
+    for i, (pos, cid) in enumerate(marks):
+        end = marks[i + 1][0] if i + 1 < len(marks) else len(src)
+        chunk = src[pos:end]
+        arcs = re.findall(r'"(T\d+_[A-Z_]+)"', chunk)
+        district = re.search(r'district:\s*"([A-Z_]+)"', chunk)
+        name = re.search(r'codename:\s*"([^"]+)"', chunk)
+        # ally/rival edges that point at a real card number
+        edges = []
+        for e in re.finditer(r'\{\s*cardNumber:\s*"(\d{4})",\s*rel:\s*"([a-z]+)"', chunk):
+            edges.append({"to": e.group(1), "rel": e.group(2)})
+        out[cid] = {
+            "id": cid,
+            "name": name.group(1) if name else cid,
+            "district": district.group(1) if district else None,
+            "arcs": arcs,
+            "edges": edges,
+        }
+    return out
+
+
+def main():
+    books = parse_books(STORIES.read_text())
+    cards = {str(c["cardNumber"]).zfill(4): c for c in json.loads(CARDS.read_text())["cards"]}
+
+    dogs = {}
+    for cid, b in books.items():
+        card = cards.get(cid, {})
+        rarity = card.get("rarity", "Common")
+        breed = card.get("breed", "")
+        tags = []
+        # CREW (origin)
+        crew = DISTRICT_CREW.get(b["district"])
+        if crew:
+            tags.append("CREW:" + crew)
+        # ARC
+        for a in b["arcs"]:
+            if a in ARC_SHORT:
+                tags.append("ARC:" + ARC_SHORT[a])
+        # STANCE
+        if "T4_EVERY_LEASH_BREAKS" in b["arcs"]:
+            tags.append("STANCE:COLLAR_RESISTANT")
+        # NATURE (derived from rarity)
+        if rarity in ("Mythic", "Legendary"):
+            tags.append("NATURE:ALPHA")
+        elif rarity == "Common":
+            tags.append("NATURE:RUNT")
+        # BLOOD
+        if breed:
+            tags.append("BLOOD:" + breed.upper().replace(" ", "_"))
+        # dedupe, preserve order: a dog carries each bond tag once
+        seen = set()
+        tags = [t for t in tags if not (t in seen or seen.add(t))]
+        dogs[cid] = {
+            "id": cid, "name": b["name"], "rarity": rarity, "breed": breed,
+            "originCrew": crew, "bondTags": tags,
+            "allies": [e["to"] for e in b["edges"] if e["rel"] == "ally"],
+            "rivals": [e["to"] for e in b["edges"] if e["rel"] == "rival"],
+        }
+
+    # how many dogs share each tag -> how "fireable" each bond is
+    fam = collections.Counter()
+    tagcount = collections.Counter()
+    for d in dogs.values():
+        for t in d["bondTags"]:
+            tagcount[t] += 1
+            fam[t.split(":")[0]] += 1
+    # count real named edges
+    edge_pairs = set()
+    for d in dogs.values():
+        for a in d["allies"]:
+            edge_pairs.add(tuple(sorted((d["id"], a))) + ("ally",))
+        for r in d["rivals"]:
+            edge_pairs.add(tuple(sorted((d["id"], r))) + ("rival",))
+
+    payload = {
+        "version": 1,
+        "layer": "1 -- Pack Bonds (dog to dog)",
+        "note": "originCrew is ORIGIN not allegiance; allegiance model is pending operator decision",
+        "count": len(dogs),
+        "dogs": dogs,
+    }
+    out = HERE / "pack_bonds.json"
+    out.write_text(json.dumps(payload, indent=2))
+
+    print(f"wrote {out}\n")
+    print(f"dogs tagged: {len(dogs)}")
+    print(f"tag families: {dict(fam)}")
+    print(f"named ally/rival pairs in the saga: {len(edge_pairs)}")
+    print("\ntop crew tags (deck-fireable bonds):")
+    for t, n in sorted(tagcount.items()):
+        if t.startswith("CREW") or t.startswith("STANCE") or t.startswith("NATURE"):
+            print(f"  {t:28} {n} dogs")
+    breeds = {t: n for t, n in tagcount.items() if t.startswith("BLOOD") and n >= 3}
+    print(f"\nbreeds with 3+ dogs (mono-breed decks viable): {len(breeds)}")
+    for t, n in sorted(breeds.items(), key=lambda x: -x[1])[:6]:
+        print(f"  {t:28} {n}")
+    print(f"\nsample dog 0001: {json.dumps(dogs['0001'], indent=0)[:300]}")
+
+
+if __name__ == "__main__":
+    main()

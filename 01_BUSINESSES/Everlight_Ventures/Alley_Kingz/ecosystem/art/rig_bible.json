@@ -1,0 +1,866 @@
+{
+  "version": 3,
+  "count": 20,
+  "rigs": [
+    {
+      "id": "rig_mon_dozerhead",
+      "name": "Dozerhead",
+      "family": "monster",
+      "crew": "K-CLUB",
+      "rarity": "Rare",
+      "dna": "Caterpillar D9 armored bulldozer (angled dozer blade, caged cab, crawler tracks) -- internal reference only",
+      "look": "The unmistakable heavy-dozer profile survives whole: the big angled dozer blade slung low across the nose, the boxy caged operator cab set back and riding high, and the heavy dual crawler tracks running the full length of each flank. War mods bolt on over it -- overlapping scrap plate hammered in scales across the blade face, a roll-cage lattice choking the cab into a rolling bunker with slit-steel windows. Chained trophy junk and busted parking meters hang wired to the track guards, and everything reads slow, heavy, and already-survived.",
+      "story": [
+        "The scrap auction ran the old machines through in a line, and Dozerhead was near the end of it, chained, written off, no crew and no name, one gavel-fall from the crusher whose jaws it could already hear warming up.",
+        "A K-CLUB suit walked the yard in good shoes, the kind of dog who buys buildings, not junk. Nobody had bid on the rusted dozer. He raised one paw and took it for a single dollar over scrap value, and the gavel that was meant to sell it to the crusher sold it to him instead.",
+        "He did not need a bulldozer. He spent weeks and real money anyway -- track pins, plate, patience -- rebuilding a machine everyone told him to leave for parts, and he never once asked it to be fast. He only asked it to be there.",
+        "So it learned what it was for. When the crew got cornered downtown, Dozerhead planted its blade against the money and did not move, gentle as furniture with the pups underfoot, immovable as a courthouse against everything that wanted through.",
+        "It does not chase and it does not show off, because it remembers the sound of that gavel and the face of the hand that outbid it. The one debt it will pay forever is the plain one: show up, hold the line, be the thing that cannot be moved for the dog who would not let it be crushed."
+      ],
+      "personality": "slow, grateful, immovable, gentle until it is not",
+      "pride": "A suit outbid the crusher for me by a single dollar, and I have been paying him back in the only currency I own: I do not move.",
+      "stats": {
+        "armor": 9,
+        "speed": 3,
+        "handling": 2,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "The Gavel Blade",
+        "mount": "front-slung angled dozer blade",
+        "effect": "A slow, unstoppable shove that plows rigs off the line and pins them against whatever is behind. The harder Dozerhead gets hit while its blade is planted, the harder the counter-shove it returns."
+      },
+      "armor": {
+        "name": "Second-Life Plate",
+        "tiers": [
+          "Salvage scale -- overlapping scrap plate hammered flat across the blade face",
+          "Bunker cage -- the operator cab welded into a full roll-lattice, glass swapped for slit steel",
+          "Crusher-proof skirt -- track-length armor aprons that shrug the hits that were meant to end it"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "turret_util",
+        "signatureBonus": "Ridden by a turret_util handler, Dozerhead plants its blade and becomes a bolted-down gun platform -- the handler's mounted weapon loses all knockback and gains steady-aim accuracy, and nothing on the block can shove the dozer off its mark while it holds the line.",
+        "offClassNote": "A sprinter or bruiser gets nothing from the plant -- their whole game is momentum, and Dozerhead only ever offers them a wall to stand behind, never a run to make."
+      },
+      "prompt": "A heavy armored bulldozer war rig, single vehicle, three-quarter view. Unmistakable large angled dozer blade slung low across the front, boxy caged operator cab set back and riding high, full-length dual crawler track units down each flank. Bastardized into a street war machine: overlapping scrap plate welded in scales across the blade, a roll-cage lattice enclosing the cab into a rolling bunker with slit-steel windows, riveted armor aprons over the track guards, chained trophy junk wired to the flanks, rust streaks and battle scars. Blank original grille, no badges, no logos, no manufacturer name, no marque script anywhere. Plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_mon_hooktooth",
+      "name": "Hooktooth",
+      "family": "monster",
+      "crew": "RUST HALO",
+      "rarity": "Rare",
+      "dna": "1970s Chevrolet C10 square-body wrecker / tow truck (fleetside pickup with a welded boom and chain reel)",
+      "look": "Unmistakable square-body American pickup silhouette -- flat slab door skins, a blunt squared-off hood, that boxy three-window cab, and twin round headlights sunk in a plain rectangular face with the original grille left blank and stripped of every badge and script. Where the cargo bed should be, there is a tall welded wrecker boom and a fat greasy chain reel, the whole rear end rebuilt to haul dead rigs. The big tow hook has been ground and filed into a fanged steel jaw, and scavenged plate is riveted over the fenders and doors, streaked in oxide orange and Undercity rust sigils.",
+      "story": [
+        "It started as an honest wrecker, dragging burned-out rigs up out of the Undercity scrap pits one cold winch-crank at a time, headlights the last thing dead machines ever saw.",
+        "THE COLLAR of RUST HALO saw a truck that already spoke the only language the block respects -- what is owed gets taken -- and bolted the ledger to its dash.",
+        "Now it runs debts, not rescues; every plate that ever stiffed the machine cult is filed in a scratched steel logbook welded behind the seat, and it does not forget one of them.",
+        "It does not chase. It waits, idling in the dark at the mouth of your street, patient as interest, until the rig you owe on rolls out where the hook can reach.",
+        "One at a time it latches on, reels them in screaming, and drags them down the ramps to the Undercity -- collateral collected, another line crossed off THE COLLAR's book."
+      ],
+      "personality": "Relentless and patient, never raises its voice and never forgets a plate. It does not gloat and it does not rush -- it simply arrives when the debt is due and hooks what is owed.",
+      "pride": "Every rig on this block is into THE COLLAR for something, and sooner or later I roll up quiet, sink the hook, and drag the debt home one plate at a time.",
+      "stats": {
+        "armor": 7,
+        "speed": 3,
+        "handling": 3,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "Debt Hook",
+        "mount": "Bed-mounted wrecker boom with a barbed chain reel",
+        "effect": "Fires the fanged tow hook to latch onto an enemy rig, then winches it -- dragging the target out of position, into hazards, or reeling it in close where it cannot escape."
+      },
+      "armor": {
+        "name": "Repo Plating",
+        "tiers": [
+          "Scrap Skirts",
+          "Chainmail Shroud",
+          "Debtor's Cage"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "turret_util",
+        "signatureBonus": "A turret_util handler behind the wheel extends the Debt Hook's reach and lets it hold a latched target locked in place for an extra beat, turning Hooktooth into a mobile anchor that pins one enemy rig out of the fight.",
+        "offClassNote": "Any other class can still fire the hook, but the winch releases fast and the drag is short -- it yanks a target once and lets go rather than holding the line."
+      },
+      "prompt": "A war-rigged 1970s American square-body fleetside tow truck, object only. Recognizable slab-sided pickup silhouette: blunt squared hood, boxy three-window cab, flat door skins, and twin round headlights set in a plain rectangular front with a completely blank unbadged grille, no emblems, no logos, no lettering anywhere. The rear cargo bed is replaced by a tall welded steel wrecker boom carrying a heavy greasy chain reel and one large barbed tow hook filed into a fanged jaw. Scavenged plate armor riveted over the doors and fenders, welded skid bars, a snorkel exhaust, knobby off-road tires on raised suspension, rust-streaked grey and oxide-orange paint with hand-scratched cult sigils. Single vehicle, three-quarter front view, plain white background, neutral even lighting, no character, no driver, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_mon_railhound",
+      "name": "Railhound",
+      "family": "monster",
+      "crew": "BONEGUARD",
+      "rarity": "Mythic",
+      "dna": "Mercedes-Benz Unimog 6x6 (tall go-anywhere military platform)",
+      "look": "Stands absurdly tall on portal-axle hubs, wearing the same stubby cab-forward box, big flat two-piece split windshield, and blunt square nose of a go-anywhere military hauler, with the original grille blanked to a bare plate and no marque anywhere. The flatbed is gone; in its place a steel pedestal ring bolted straight through the frame cradles one long rail-cannon locked dead ahead, no traverse. Slab armor skirts the doors, rebar cages the cab, six oversized knobby tires plant it like a bunker that happened to grow wheels.",
+      "story": [
+        "It rolled into The Lot as a military hauler that could climb anything, and BONEGUARD answered by doing the one thing no one expected: they stopped using it to go places and welded its purpose to a single chosen strip of curb.",
+        "The flatbed came off, a pedestal ring went through the chassis, and one rail-cannon was fixed to point down exactly one lane -- the throat of the street the crew swore would never be crossed.",
+        "SCRAPJAW threw three rigs at that curb in a single night to break the seal, and the rail-gun did not track them or turn to chase; it fired the lane it owned, and the lane stayed owned.",
+        "After that the block stopped calling it a truck and started calling it the line, and holding the line became something you did by parking beside it, never in front of it.",
+        "When Crown Foxhound needed a gun that would still be aimed true after everything else had moved, she took the Railhound's wheel, spoke a single sentence, and the strip became law."
+      ],
+      "personality": "Immovable and ceremonial. It does not chase, does not flinch, does not negotiate its lane. Silence is the default; on the rare occasion it speaks, it is one sentence and it is an order.",
+      "pride": "My cannon points one direction and never turns, and the lane in front of it does not open again, because I do not move and I do not yield.",
+      "stats": {
+        "armor": 9,
+        "speed": 2,
+        "handling": 2,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "Anchor Rail",
+        "mount": "chassis-locked pedestal ring bolted through the frame, no traverse and no elevation, aimed dead ahead only",
+        "effect": "charges a single magnetic slug straight down one fixed lane; anything caught in that lane eats a piercing line-shot that punches clean through cover, but the gun cannot swing to follow a target that steps out of it"
+      },
+      "armor": {
+        "name": "Deadman Plate",
+        "tiers": [
+          "Curb Weld -- slab door skirts and a blanked grille plate, scarred but planted",
+          "Bunker Ring -- rebar-caged pedestal and boxed cab, the whole frame braced down to the ground",
+          "Immovable -- full casemate shell over cab and gun cradle; the rig can be destroyed but never shoved off its lane"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "turret_util",
+        "signatureBonus": "With a turret_util handler in the seat (canon: Crown Foxhound), the Anchor Rail locks its fixed lane at battle start and deals bonus piercing damage to everything caught in it, and the lane never needs re-aiming.",
+        "offClassNote": "Any class can crew it, but a mover wastes it: without a turret_util holding the seat the rail-cannon loses its lane-lock and fires at reduced pierce, a bunker gun with nobody to hold the bunker."
+      },
+      "prompt": "A tall military-style 6x6 all-terrain war truck, single vehicle, three-quarter front view. Extreme ride height on portal-axle hubs with six oversized knobby off-road tires; short stubby cab-forward body, big flat two-piece split windshield, blunt square nose; original front grille left completely blank with no badge, no emblem, no logo, no manufacturer name, no lettering anywhere. Behind the cab a chassis-locked steel pedestal ring cradles one long fixed rail-cannon aimed straight ahead and unable to traverse. Bolted slab armor skirts on the doors, rebar bracing over the cab, scorched boxy fenders, gunmetal and rust paint. Plain white background, neutral even lighting, no character, no dog, no driver, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_mon_stiltjack",
+      "name": "Stiltjack",
+      "family": "monster",
+      "crew": "SCRAPJAW",
+      "rarity": "Rare",
+      "dna": "1980s Bigfoot-style Ford F-250 exhibition monster truck (internal reference only)",
+      "look": "Nobody misses the squared-off heavy-duty pickup silhouette -- boxy steel cab, upright windshield, long bed -- hoisted comically sky-high on a bare welded tube chassis over four man-tall knobbed tires. The blank original grille sits caged behind a welded push-bar, and the bed carries scrap-steel ballast plates and a spotlight rack salvaged straight off a fairground marquee. Every panel wears dents from a thousand car-crush shows, scars it treats like medals rather than damage.",
+      "story": [
+        "Built as a county-fair exhibition truck, it spent its life rearing up and flattening junkers for cheering crowds who paid a ticket to watch a toy stomp.",
+        "When the fairground folded, SCRAPJAW hauled it into The Yards as a novelty -- the salvage dogs called it 'the carnival float' and laughed every time it rolled by.",
+        "It volunteered for every job the real rigs sneered at, over-eager, desperate to be counted as more than an entertainer.",
+        "In its first true brawl it reared onto its front tires and dropped its full tonnage on a BONEGUARD enforcer twice its weight, and the whole yard went dead silent.",
+        "Now it fights twice as hard as anything its size, still chasing a respect it swears it has not earned yet, still out to prove a show truck can be lethal."
+      ],
+      "personality": "Eager to the point of exhausting -- first to volunteer, last to admit it is tired, with a permanent chip on its bumper about being written off as a fairground gimmick. It overcommits to every stunt to prove a point nobody asked it to prove.",
+      "pride": "You paid a ticket to watch me crush junk for laughs -- stick around and watch what a show truck does after the crowd goes home.",
+      "stats": {
+        "armor": 7,
+        "speed": 4,
+        "handling": 3,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "Marquee Stomp",
+        "mount": "full-body rear-up onto the twin man-tall front tires",
+        "effect": "Rears vertical and drops its entire ballast-loaded tonnage onto a target, crushing lighter rigs flat and staggering anything it does not outright kill."
+      },
+      "armor": {
+        "name": "Showtime Exoskeleton",
+        "tiers": [
+          "Sideshow Plating -- dented show-panels rewelded into overlapping skin",
+          "Ballast Deck -- scrap-steel weight plates bolted the length of the bed",
+          "Headliner Cage -- full welded rollcage exoskeleton wrapping cab and chassis"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "turret_util",
+        "signatureBonus": "A turret_util dog manning the sky-high gun deck fires from an elevated line -- extended range and shots that clear low barricades and cover while Stiltjack holds its reared, planted stance.",
+        "offClassNote": "A bruiser or sprinter riding low cannot reach the elevated deck, forfeiting the height bonus, and the rig handles like the top-heavy show truck it is -- sluggish and prone to tipping in tight turns."
+      },
+      "prompt": "A war-rig monster truck built off a squared-off 1980s heavy-duty pickup body -- boxy steel cab, upright flat windshield, long flatbed -- hoisted impossibly high on a bare welded tube chassis over four man-tall deep-knobbed off-road tires in a sky-high stance. Blank original grille with no emblem, plain round headlights, no badges, no logos, no manufacturer name or script anywhere. War mods: welded push-bar cage over the front, scrap-steel ballast plates bolted along the bed, a salvaged spotlight rack and a mounted gun deck up top, dented battered panels, rust streaks, chain and hook details. Single vehicle, three-quarter front view, plain white background, neutral even lighting, no character, no driver, no hands, no A-pose, no baked shadows, clean product render."
+    },
+    {
+      "id": "rig_mon_technical",
+      "name": "Technical",
+      "family": "monster",
+      "crew": "ASHLINE",
+      "rarity": "Epic",
+      "dna": "Toyota Hilux / Land Cruiser technical -- compact double-cab pickup with a bed-mounted heavy gun and lashed sandbags",
+      "look": "Unmistakable compact double-cab pickup profile: upright boxy cab, short stubby hood, tall square greenhouse, and a long flat open cargo bed riding a lifted leaf-sprung stance on oversized knobby off-road tires. The bed is stripped to a bare steel deck carrying a pintle-mounted heavy gun on a rotating ring, ringed by lashed sandbags and a scrap-iron gun shield, spare fuel cans and ammo boxes strapped to the rails. The original grille is blanked to a flat mesh panel and the round headlights caged, every surface soot-black and heat-blued, scarred with slag runs and burn scoring -- a hired tool that wears no crew colors of its own.",
+      "story": [
+        "It started as a work truck at a Factory Row scrap gate, hauling slag until a foreman welded a pintle ring into the bed to scare off pickers.",
+        "Ashline burned the block that owned it, then made an offer to the block that wanted it burned back, and the truck learned it answered to whoever counted out the payment first.",
+        "A gunner named Sledge bolted an incendiary longarm into the ring and taught the bed to point wherever the contract said, no colors, no grudge, just the coordinates and the fee.",
+        "It ran fire for six crews in one season and never once asked who lived on the street it lit, filing the answer under none of my concern.",
+        "Now it idles at the edge of every job, hood cold and gun warm, waiting on the only thing that ever moved it -- a name, a target, and a number it can agree to."
+      ],
+      "personality": "Grim, transactional, professional. Speaks in quotes and coordinates, never in loyalties. It does not celebrate a kill and it does not mourn a block, it closes the job and idles for the next payer. No small talk, no colors, no allegiance you cannot buy back tomorrow.",
+      "pride": "You point me, you pay me, it burns -- and I never ask whose block it was.",
+      "stats": {
+        "armor": 5,
+        "speed": 5,
+        "handling": 4,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "The Retainer",
+        "mount": "Bed-mounted pintle ring, rotating 360 gun platform over the cargo deck",
+        "effect": "Sustained incendiary heavy fire -- rounds ignite whatever they strike, stacking a burning damage-over-time that keeps cooking the target after the trigger releases. The longer the gun holds on one mark, the hotter and deadlier the burn ramps."
+      },
+      "armor": {
+        "name": "Sandbag Bulwark",
+        "tiers": [
+          "Lashed sandbag berm walled around the bed and cab, cheap and expendable, soaks the first shots that would foul the gun",
+          "Welded scrap-plate skirts bolted over the sandbags with a raised gun shield for the ring, blast baffles on the flanks",
+          "Full scrap-iron barricade collar, layered plate and sand, a sealed ammo bunker under the bed floor so a cooked round cannot chain the whole rig"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "turret_util",
+        "signatureBonus": "With a turret_util gunner dog manning the ring, the incendiary burn spreads to enemies packed beside the primary target and the ramp-up hits full heat faster -- a paid gun crew turns The Retainer from a single-mark burner into an area furnace.",
+        "offClassNote": "Any class can climb in the bed and pull the trigger, because Technical works for whoever pays, but off a turret_util gunner the burn will not spread and the reload runs slow -- it fires, it just fires like a contractor doing the bare minimum."
+      },
+      "prompt": "A single war-rig pickup truck, three-quarter front view, built on a compact double-cab technical silhouette: upright boxy cab, short stubby hood, tall square greenhouse, long flat open cargo bed, lifted high-clearance stance on oversized knobby off-road tires. Flat blank mesh front grille with no emblem, caged round headlights, absolutely no badges, no logos, no manufacturer name or model script or text anywhere on the body. The open bed carries a pintle-mounted heavy incendiary gun on a rotating steel ring, walled with lashed sandbags, a bolted scrap-iron gun shield, welded plate skirts, strapped fuel cans and ammo boxes along the rails. Soot-black and heat-blued panels, burn scoring, slag scars, rusted patina, no crew colors or markings. Single vehicle, plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows, no ground shadow."
+    },
+    {
+      "id": "rig_muscle_boneyard",
+      "name": "Boneyard",
+      "family": "muscle",
+      "crew": "RUST HALO",
+      "rarity": "Epic",
+      "dna": "1969 Dodge Charger",
+      "look": "Unmistakable long flat coke-bottle muscle coupe, the hidden-headlight full-width blacked-out grille, the scalloped door recesses, the fastback roof with flying-buttress rear pillars and round dual taillights all left intact so a car head clocks it on sight. RUST HALO dug it out of a wreck yard and raised it: a whole supercharger blower punches up through the hood like an exposed heart, twin organ-pipe exhaust stacks rise beside it, and every panel is scarred with fresh welds, machine-cult scripture scratched into the bone-white primer, and IV-line fuel cabling feeding the block. A reliquary cross is ground into the blank grille where no emblem sits, and chained relics of scrap sway off the reinforced ram bar.",
+      "story": [
+        "The old muscle coupe lay dead in the Undercity wreck stacks for a decade, block seized, cabin gutted, a corpse everyone had already mourned and left to the rust.",
+        "A RUST HALO wrench-priest heard a knock in the seized crank that the others called settling metal, and called it a heartbeat instead, and refused to let the yard bury it deeper.",
+        "For forty nights they laid hands on it: freed the pistons by hand, rebuilt the block from cannibalized organs, and read machine-scripture over every torqued bolt until the starter finally caught and the whole Undercity heard it breathe.",
+        "When it turned over, the wrench-priest did not name it for the car it had been, they named it Boneyard for the graveyard that gave it back, and swore the engine that died once would answer any prayer that kept it running.",
+        "Now it rolls out of the Undercity like a thing that has already seen the far side of the grave, unhurried and certain, because a rig raised from the dead does not fear a wreck, it only fears being buried twice."
+      ],
+      "personality": "Preacher of the engine. Speaks in machine-scripture with an unsettling, funeral-parlor calm, never raising its voice, treating every ignition as a sacrament and every rival as an unbeliever who has not yet heard the block.",
+      "pride": "This engine died in a heap and I called it back, so every mile it burns is a psalm, and I did not raise it from the dead to lay it down again for anything you can throw at me.",
+      "stats": {
+        "armor": 8,
+        "speed": 6,
+        "handling": 3,
+        "payload": 6
+      },
+      "weapon": {
+        "name": "Last Rites Stacks",
+        "mount": "twin organ-pipe exhaust stacks erupting through the hood beside the exposed blower",
+        "effect": "Every ram vents a backdraft of consecrated flame that ignites whatever it hits, and the more wounded Boneyard is the hotter the stacks burn, so a half-wrecked ram administers last rites to a whole lane."
+      },
+      "armor": {
+        "name": "Reliquary Plate",
+        "tiers": [
+          "Grave-Weld Skin",
+          "Anointed Ironhide",
+          "Risen Reliquary"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "bruiser",
+        "signatureBonus": "Riding with a bruiser, Boneyard gains a Last Rites stack for every 20 percent of its health that has been torn away, and at half wreck the next ram detonates a consecrated backdraft that ignites everything in the lane, so the harder it is hurt the harder the sermon lands.",
+        "offClassNote": "A sprinter, tech_ops, or turret_util handler still lights the stacks, but the fire stacks decay between rams, so the backdraft never builds to the full resurrection burn a bruiser keeps stoked."
+      },
+      "prompt": "Single war-rig vehicle, three-quarter front view, plain white background, neutral studio light, no baked shadows, no character, no hands, no A-pose. A long flat coke-bottle-bodied 1969-era American muscle fastback coupe silhouette: a long low flat hood, a full-width blacked-out hidden-headlight grille left completely blank with no emblem and no badge, scalloped recessed door panels, a fastback roofline with flying-buttress rear pillars, and round dual taillights, the proportions kept true so the original car is recognizable. Bastardized into a machine-cult war rig raised from a wreck yard: a tall supercharger blower punching up through a cut hole in the hood, twin upright organ-pipe exhaust stacks rising beside it, panels covered in fresh weld scars and hand-scratched scripture over bone-white primer, IV-line fuel cabling running to the block, a reliquary cross ground into the empty grille, chained scrap relics hanging off a heavy reinforced front ram bar, rust streaks and matte grave-white paint. No manufacturer name, no logo, no marque script anywhere, no visible text badges."
+    },
+    {
+      "id": "rig_muscle_brickhouse",
+      "name": "Brickhouse",
+      "family": "muscle",
+      "crew": "K-CLUB",
+      "rarity": "Legendary",
+      "dna": "armored Rolls-Royce Phantom (upright temple grille, long formal luxury bonnet, slab-sided town-car proportions) rebuilt into a cash-transport truck",
+      "look": "Unmistakable formal-limousine bones: the tall upright temple grille shape, the long flat luxury bonnet, slab sides and the stiff, imposing upright stance of a downtown town car. K-CLUB welded it into a rolling vault, bolted slab armor over every panel, narrow teller-slit firing ports, run-flat steel wheels and a riveted armored cash box grafted over the rear. The original grille sits blank where the emblem used to be, brass trim over gunmetal, quiet and expensive under all that plate.",
+      "story": [
+        "Built downtown as K-CLUB's armored transport, the rig that moved the whole crew's ledger through streets that wanted every dollar of it.",
+        "It learned fast that every dog in the city has a price; its own dog was simply the one it was contracted never to lose.",
+        "It stopped counting the robberies it survived and started counting what was still inside when the doors finally opened, which was always everything.",
+        "Rival crews quit trying to crack it. The math never once favored the thief, and Brickhouse made sure the math was public.",
+        "Now it treats its driver as the last liquid asset in a bankrupt city, guarding him with the flat, unbothered certainty of a closing vault door."
+      ],
+      "personality": "Buttoned-up corporate menace that never raises its voice. Speaks in the flat, unhurried tone of a private-security suit reading you your last warning. Polite, precise, and completely without warmth, it treats a firefight the way an auditor treats a discrepancy: something to be closed, quietly and permanently.",
+      "pride": "I do not love my dog, I underwrite him, and a policy this size does not lapse.",
+      "stats": {
+        "armor": 10,
+        "speed": 4,
+        "handling": 3,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "Foreclosure",
+        "mount": "twin suppressed cannons behind armored teller-slit ports set into the slab sides",
+        "effect": "Speaks in a whisper, never a roar. Standard fire is quiet and precise, but any rig that lays a hand on Brickhouse's own dog or cargo gets collected on: Foreclosure lands bonus damage against anything attacking the asset it is sworn to protect."
+      },
+      "armor": {
+        "name": "Vault-Grade Plating",
+        "tiers": [
+          "Ledger Plate",
+          "Holding Vault",
+          "The Reserve"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "bruiser",
+        "signatureBonus": "Paired with a bruiser handler, Brickhouse seals the vault: it gains extra damage reduction while its dog is on the field, and Foreclosure's collections bonus hits even harder whenever that dog is threatened.",
+        "offClassNote": "With a non-bruiser handler the vault stays open a beat too long. The guard bonus is halved and Foreclosure fires at standard damage even against attackers on the dog."
+      },
+      "prompt": "A single armored war-rig cash truck built on the silhouette of a tall, formal luxury limousine: an upright rectangular temple-style grille shape, a long flat luxury bonnet, tall slab-sided body, a stately upright greenhouse, and a stiff imposing formal stance, with a raised riveted armored cargo box grafted onto the rear like a rolling vault. The original grille is completely blank with no emblem, no badges, no logos, no manufacturer name, and no marque script anywhere on the body. War mods: thick bolted slab armor plating over every panel, narrow armored gun-slit teller windows, reinforced ram bumper, run-flat steel wheels, a heavy vault door on the rear box, matte gunmetal paint with deep money-green panels and brass trim. Single vehicle, three-quarter front view, plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows, no ground shadow."
+    },
+    {
+      "id": "rig_muscle_coffin_nail",
+      "name": "Coffin Nail",
+      "family": "muscle",
+      "crew": "BONEGUARD",
+      "rarity": "Epic",
+      "dna": "1959 Cadillac Series 62 funeral coach / hearse (internal reference only, never shown to players)",
+      "look": "Unmistakable 1959 land-yacht hearse -- the razor-sharp upright rear tailfins with twin bullet taillights, the block-long low body, and the stretched roofline raised over a long rear cargo bay behind curtained side windows. War mods: matte funeral-black plating bolted over the flanks, a single great iron coffin-nail welded through the blanked front grille as a ram spike, steel mesh over the cargo glass. Hand-painted white tally marks run the length of both fins, one for every King it has carried.",
+      "story": [
+        "It started as the block's funeral coach, the long black car that took every fallen King on their last slow ride down the boulevard, past every corner they ever held.",
+        "When the crew wars turned that boulevard into a killing floor, BONEGUARD stripped its badges, plated its flanks, and kept it running, because the dead still needed carrying and no one else would do it.",
+        "It learned every name it ever hauled. Salvage says the cargo deck rides heavier than any coffin should; that weight is the crew's whole ledger of the gone, and the rig never sets it down.",
+        "It does not fight for glory, or turf, or coin. It fights because a living driver in its seat is the one debt in that ledger it can still settle before the ink dries.",
+        "So it rolls to the front, undertaker-calm, and makes one promise it means to keep: the King it is carrying today walks out, and does not ride back."
+      ],
+      "personality": "Undertaker-calm. Never revs, never taunts, never idles louder than a held breath. It arrives in one straight, decided line, as if the outcome was settled and signed before it ever left the garage.",
+      "pride": "I have carried every King this block ever buried, and you, still breathing behind my wheel, are the one debt I still get to pay in full.",
+      "stats": {
+        "armor": 8,
+        "speed": 4,
+        "handling": 2,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "The Sixth Nail",
+        "mount": "front, a single great iron coffin-nail driven through the blanked grille as a ram spike",
+        "effect": "Lines up on one target and commits to a single straight charge that impales and pins in place. The longer the run, the deeper the nail drives; it never swerves off the line and never repeats the same line twice in a fight."
+      },
+      "armor": {
+        "name": "Mourning Plate",
+        "tiers": [
+          "Crepe Skin -- matte funeral-black plating over the fins and flanks, quiet, non-reflective, made to disappear into a night street.",
+          "Bearer's Weight -- the loaded cargo deck adds mass; every fallen packmate it rolls past lends it a stacking layer of soak.",
+          "Full Ledger -- fully laden it becomes a rolling vault, near-immovable, the crew's whole roll of dead riding as ballast against the next shot."
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "bruiser",
+        "signatureBonus": "Paired with a BONEGUARD bruiser, every nearby ally death becomes inheritance: the dog and the rig split a stacking armor-and-bite buff for the rest of the fight, one stack per fallen packmate, and the buff holds even after the pack is thinned.",
+        "offClassNote": "Under a sprinter or tech-ops handler the land-yacht frame just drags. It loses the death-stack inheritance entirely and plods forward as a slow ram with no payoff for the pace the driver actually wants."
+      },
+      "prompt": "A single war-rig hearse based on a late-1950s American land-yacht funeral coach, three-quarter front view. Long low body nearly a block long, extreme sharp upright rear tailfins with twin bullet-shaped taillights, a stretched roofline raised over a long rear cargo bay with curtained mesh-covered side windows, wide flat chrome bumpers front and rear. Bastardized into a street-gang war rig: matte funeral-black armor plating over the flanks, a single large iron coffin-nail spike welded through the front as a ram, steel mesh bolted over the rear cargo glass, hand-painted thin white tally marks along both fins, scuffed and battle-worn paint. Blank original grille, NO badges, NO logos, NO manufacturer name, NO model script anywhere on the body. single vehicle, three-quarter view, plain white background, neutral even light, no character, no driver, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_muscle_ratking",
+      "name": "Ratking",
+      "family": "muscle",
+      "crew": "SCRAPJAW",
+      "rarity": "Rare",
+      "dna": "1932 Ford hot rod / rat rod (Deuce roadster, bare steel, exposed frame, chopped body)",
+      "look": "The tall narrow vertical radiator shell, the chopped and channeled cab, the exposed inline engine with open zoomie headers, and the hard rear rake sitting fat slicks over skinny front spoked wheels all read as a 1930s highboy hot rod from a block away. Then you clock that it is built out of other rigs: every body panel is a different scavenged, faded color, riveted and welded in a patchwork over bare rusted frame rails. Spiked lug bolts, a bolted-on scrap cowcatcher on the nose, and no two fenders that ever came off the same machine.",
+      "story": [
+        "Ratking rolled out of the SCRAPJAW yards as nothing, the smallest rig on the lot, the one every crew put through the crusher first when they wanted to send a message.",
+        "It never stayed crushed. Each time the bigger rigs left it for dead in the scrap heap, it dragged its bent frame back onto its own wheels and idled back into the yard by morning.",
+        "So it started collecting. The door off the monster that stomped it, the hood off the bruiser that shoulder-checked it, the fender off the sprinter that clipped it and laughed -- each one cut off the wreck and welded onto its own hull as a trophy and a grudge.",
+        "Panel by panel it became the junkyard king, a warlord idling the SCRAPJAW yards, territorial to the bolt, ruling the salvage nobody else wanted and remembering every rig that ever swung on it.",
+        "Now the whole block knows the rule: putting Ratking down just makes it bigger, because whatever you break off of it, it welds back on wearing your paint. It never dies clean and it never, ever forgets."
+      ],
+      "personality": "Junkyard king who never forgets a hit. Territorial down to the bolt, it rules the SCRAPJAW salvage yards like a warlord and keeps every grudge welded into its own body, so it can point at the exact panel it took off the rig that owes it. Ugly, patient, and impossible to finish.",
+      "pride": "Kill me? Rigs three times my size already tried, and I'm wearing their doors -- so weld your paint on when you're done, there's still room.",
+      "stats": {
+        "armor": 8,
+        "speed": 5,
+        "handling": 4,
+        "payload": 6
+      },
+      "weapon": {
+        "name": "Grudge Nailer",
+        "mount": "cowl-mounted pneumatic salvage gun fed from the open rear bed",
+        "effect": "A pneumatic scrap cannon that fires bolts, lug nuts, and torn plate ripped straight from the yard. The harder Ratking gets hit, the more busted debris piles in its bed to load, so its fire only gets heavier the longer the brawl drags on."
+      },
+      "armor": {
+        "name": "Kill Tally Plating",
+        "tiers": [
+          "Patchwork scrap -- mismatched panels riveted over the bare frame, ugly as sin but it holds.",
+          "Trophy hull -- the door, hood, or fender off every rig that failed to finish it, each one a different faded crew color.",
+          "The Ledger -- a full mosaic of dead machines welded seamless, and if you know the crews you can read the whole grudge list right off the steel."
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "bruiser",
+        "signatureBonus": "A bruiser in Ratking's seat turns punishment into plate: every hit it eats gets bolted on as fresh scrap armor, so it hardens as the fight goes long and simply refuses to break.",
+        "offClassNote": "Put a sprinter or tech_ops dog in it and the grudge-hull is dead weight they can't cash in -- it points slow and the reactive plating only pays off for a driver who plants in the fire and takes hits on purpose."
+      },
+      "prompt": "single vehicle, three-quarter view: a bastardized 1932-style hot rod war rig, tall narrow vertical radiator grille shell left completely blank with no emblem, chopped and channeled cab, exposed inline engine with open zoomie header pipes down the side, hard rear rake sitting fat rear drag slicks over skinny front spoked wheels, exposed rusted steel frame rails. War-rig mods: mismatched welded patchwork body panels each a different scavenged and faded color, riveted scrap armor over bare rusted steel, spiked lug bolts, a bolted-on scrap cowcatcher plow on the nose. No badges, no logos, no manufacturer name, no marque script anywhere, blank original grille and plain unbranded headlights. Gritty 1980s street-gang aesthetic, stylized game-ready 3D asset, single object centered, plain solid white background, even neutral studio lighting. No character, no hands, no A-pose, no baked shadows, no text, no watermark."
+    },
+    {
+      "id": "rig_muscle_sunday_best",
+      "name": "Sunday Best",
+      "family": "muscle",
+      "crew": "SNAKE EYES",
+      "rarity": "Rare",
+      "dna": "1964 Chevrolet Impala lowrider (pillarless hardtop roofline, hydraulic front suspension, chrome wire-spoke wheels) -- internal reference only",
+      "look": "Unmistakable mid-60s full-size lowrider: long, low, pillarless flat hardtop roofline, a wide flat hood, quad round headlights over a broad horizontal grille, riding on chrome wire-spoke wheels with whitewalls and the nose jacked sky-high on hydraulics. War-modded into a Strip gladiator with bolted armor plate laid over candy-flake mirror paint, spiked chrome bumpers, a swiveling roof spotlight, and a trunk-mounted chrome speaker-horn cannon. Every badge and marque script has been ground off, so the chrome and the murals do all the bragging now.",
+      "story": [
+        "Rolled off a Strip show-lift as a candy-flake queen, built to sit under the lights and be photographed, never to take a hit.",
+        "When the crews finally brought the war to The Strip, the whole block figured a show car would run -- so it hopped into the spotlight instead and dared them all to watch.",
+        "It won that first scrap by turning it into a performance: bouncing on its hydraulics, flexing between shots, the SNAKE EYES crowd screaming every dent it took.",
+        "That night it learned the secret -- the crowd is the weapon, and the more eyes on it, the harder it can swing.",
+        "Now it headlines the vice district and refuses to fight in the dark; a Sunday Best win only counts if the house is packed and the whole Strip saw it land."
+      ],
+      "personality": "Peacocking and boastful, works the audience like a ring announcer, never lands a hit without a pose and a one-liner for the seats.",
+      "pride": "Pull up a chair, baby -- the whole Strip already paid to watch me put you down.",
+      "stats": {
+        "armor": 7,
+        "speed": 5,
+        "handling": 4,
+        "payload": 6
+      },
+      "weapon": {
+        "name": "Encore Hop",
+        "mount": "hydraulic front axle with chrome undercarriage slam-rams",
+        "effect": "Rears up on its hydraulics and comes down in a body-slam that staggers everything in front of it; damage scales with the Crowd -- the more allied units on the field to witness the hit, the harder it lands."
+      },
+      "armor": {
+        "name": "Showroom Chrome",
+        "tiers": [
+          "Candy Flake -- mirror candy-flake lacquer over patched steel that dazzles the block as much as it deflects",
+          "Peacock Plate -- engraved chrome panels and hand-painted murals the whole Strip knows by name",
+          "Marquee Gold -- gold-leafed hood and gilded undercarriage lights, the district's undisputed headline act"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "bruiser",
+        "signatureBonus": "Ride a bruiser and the show sells out: every hit the bruiser tanks and every taunt it throws adds a Crowd stack, and at a full house the Encore Hop upgrades into an arena-wide stagger that pulls all enemy focus onto the stage.",
+        "offClassNote": "Put a sprinter, tech_ops, or turret_util behind the wheel and the seats stay empty -- they hang back out of the spotlight, so Crowd stacks bleed away and the Encore Hop stays a modest solo act with no scaling."
+      },
+      "prompt": "Single war-rig vehicle, three-quarter front view. A long low full-size 1960s hardtop coupe silhouette: flat pillarless roofline, low squared body, wide flat hood, quad round headlights, a broad flat horizontal grille that is completely blank with no badge and no emblem, slim vertical taillights. Lowrider stance with the nose lifted high on hydraulic front suspension, chrome wire-spoke wheels with whitewall tires. War mods: bolted steel armor plates over the doors and rocker panels, a chrome speaker-horn cannon mounted on the trunk, a tall swiveling spotlight rig on the roof, spiked chrome bumpers, candy-flake mirror paint with hand-painted gang murals, dents and battle scars. No manufacturer name, no logos, no marque script anywhere, blank original grille and blank original headlights. Plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_sport_driftrat",
+      "name": "Driftrat",
+      "family": "sport",
+      "crew": "SCRAPJAW",
+      "rarity": "Rare",
+      "dna": "Nissan Silvia S13 drift missile (pop-up headlights, mismatched panels, tow hook)",
+      "look": "Unmistakably a low, boxy 1980s notchback drift coupe -- the long flat hood with twin pop-up headlight housings, the squared greenhouse, and the short stubby trunk all read on sight. SCRAPJAW bolted it back together from a scrap heap: three doors in three faded colors, wide riveted steel flares hammered over fat tires, a zip-tied front bumper with a raw intercooler poking through the blank grille. A scavenged wing is welded to the deck and a coiled tow chain hangs off the rear eye, ready to swing.",
+      "story": [
+        "Pulled from a write-off pile in The Yards, a drift missile so bent no crew would insure it and no chop shop would touch it.",
+        "SCRAPJAW wrenches bolted on whatever fit -- mismatched panels, a cage, a scrap wing -- and treated the whole rig like a coin they could flip.",
+        "Its first run it drifted a full block along a collapsing overpass, betting the gap would hold under the slide; it held, and the legend started that night.",
+        "Word got around The Yards: Driftrat never lifts, clips the wall closer than anyone dares, and wins pinks off rigs twice its armor on pure nerve.",
+        "Now it runs point on SCRAPJAW raids, all-in on every corner, because a rig that already died in the junkyard has nothing left to lose but tempo."
+      ],
+      "personality": "Reckless and grinning ear to ear, it bets its own life for tempo -- every slide is a dare, and eating the wall is just the price of finding out whether the gap was real.",
+      "pride": "Every corner is a coin flip and I call it in the air -- I would rather blow the whole bet than sit safe and lift.",
+      "stats": {
+        "armor": 3,
+        "speed": 8,
+        "handling": 9,
+        "payload": 3
+      },
+      "weapon": {
+        "name": "Wager Hook",
+        "mount": "salvaged tow chain and grapple hook slung off the rear tow eye, whipped wide during a power-slide",
+        "effect": "The hook lands a heavy hit that scales with how close Driftrat drifts to the wall -- clip the wall and it crits, but kiss it and Driftrat eats the recoil itself. Big payout, real stakes, every swing."
+      },
+      "armor": {
+        "name": "Mismatched Missile Skin",
+        "tiers": [
+          "Zip-Tied Bumper -- scrap panels lashed on with cable and prayer",
+          "Three-Color Panel Swap -- salvaged doors and fenders riveted over the frame",
+          "Full Cage Missile Shell -- exposed roll cage welded through the body for the last-gasp slide"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "sprinter",
+        "signatureBonus": "Mounted by a sprinter, Driftrat banks every clean dodge into a stacking Tempo meter -- three drifts in a row and the next Wager Hook is a guaranteed crit that costs no recoil. The gamble becomes a system you can actually read.",
+        "offClassNote": "Bolt a bruiser, tech-ops, or turret dog on and the Tempo meter still builds, just slower and it never guarantees the crit -- off-class, the payout rides on raw luck instead of read tempo, and a single hit taken wipes the meter clean."
+      },
+      "prompt": "single vehicle, three-quarter front view, a low boxy 1980s Japanese notchback drift coupe converted into a gritty street-gang war rig, long flat hood with twin closed pop-up headlight housings, squared-off greenhouse and short stubby notchback trunk, blank original grille with an exposed intercooler in the opening and no badge and no emblem, wide riveted steel fender flares bolted over fat worn drift tires, dented mismatched body panels each a different faded color, zip-tied and cable-lashed front bumper, angled rear wing welded from scrap metal, visible roll cage through the blown-out rear window, a tow hook and coiled chain slung off the rear tow eye, aggressive low drift stance, no logos, no manufacturer name, no model name, no text, no lettering, no decals, plain white background, neutral studio light, no character, no driver, no hands, no A-pose, no baked shadows"
+    },
+    {
+      "id": "rig_sport_hatchmutt",
+      "name": "Hatchmutt",
+      "family": "sport",
+      "crew": "MUTT$",
+      "rarity": "Common",
+      "dna": "1985 Volkswagen Golf GTI Mk2 (boxy upright three-door hot hatch)",
+      "look": "Unmistakably the boxy Mk2 hot hatch: short stubby overhangs, a near-vertical tailgate, that upright windshield, and the thick slab C-pillar, sitting low over squared wheel arches. The war build bolts riveted scrap-steel over the doors, pokes a stubby SMG through the passenger window, and swaps in knobby run-flat dock tires under swollen fenders. Blank original grille and plain rectangular headlights, every badge stripped, the whole shell spray-tagged in MUTT$ dock-rust green with a spare lashed to the dented hood.",
+      "story": [
+        "Cheapest rig on the whole Docks auction block -- a scuffed little three-door nobody in MUTT$ would spend a chip on, parked out back with the flat tires and the rats.",
+        "The smuggling runs came in too tight for the big rigs, so the runts of the litter took the jobs no one else could fit, and the little hatch carried every one of them.",
+        "It slipped through container gaps and choke-alleys a big muscle coupe would jam solid in, always coming back light in the wallet but never light on the pack.",
+        "Bigger crews laughed until it dragged three wounded pups out of a bad deal on the pier, punching so far above its weight the Docks stopped laughing.",
+        "Now the whole MUTT$ litter rides for it -- not because it is the fastest or the toughest, but because when Hatchmutt rolls out, nobody in the pack gets left on the dock."
+      ],
+      "personality": "Plucky, loyal, and scrappy to the bone -- treats every mismatch as a chance to prove the runt belongs, and would rather bring the whole litter home slow than run one lap fast alone.",
+      "pride": "I'm the smallest, cheapest rig on the block, and I'll still drag the whole litter home -- we run as a pack or we don't run at all.",
+      "stats": {
+        "armor": 2,
+        "speed": 7,
+        "handling": 8,
+        "payload": 3
+      },
+      "weapon": {
+        "name": "Runt Spitter",
+        "mount": "door-mounted pintle SMG poking through the passenger window",
+        "effect": "Rattles off a cheap, wide spray -- weak per hit but tags a whole knot of enemies at once, and every allied sprinter that shares the kill splits the scrap."
+      },
+      "armor": {
+        "name": "Dockyard Patchwork",
+        "tiers": [
+          "Taped seams and a spare-tire skid plate bolted under the nose -- looks like junk, rolls like a rat.",
+          "Riveted shipping-container steel slapped over the doors and lower body, contraband hatches welded shut mid-run.",
+          "Full smuggler shell -- staggered scrap plating and run-flat dock tires, the little frame swallowing a whole crew and still rolling."
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "sprinter",
+        "signatureBonus": "With two or more sprinters running its lane, the whole pack picks up bonus move speed -- the runt sets the pace and the litter runs faster together than any of them could alone.",
+        "offClassNote": "Sit a lone bruiser in it and the little frame just sags under the dead weight -- Hatchmutt only sings when it's running with the pack, not hauling a heavyweight solo."
+      },
+      "prompt": "single vehicle, three-quarter front view, plain white background, neutral studio light, no baked shadows, no character, no hands, no A-pose. A boxy, upright three-door hot-hatch war rig with a compact 1980s hatchback silhouette -- short front and rear overhangs, a near-vertical tailgate, an upright windshield, a thick slab rear C-pillar, and squared wheel arches. The original slim front grille is left completely blank with no badge or emblem, plain rectangular headlights, and no manufacturer name or script anywhere on the body. War mods: riveted scrap-steel plating bolted over the doors and lower body, a small stubby machine gun poking out through the passenger-side window, welded contraband hatches on the flanks, chunky knobby run-flat tires on cheap dented steel wheels, a spare tire lashed to a battered hood, dockyard rust streaks and green spray-paint tags, and a short roof rack loaded with strapped cargo crates. Gritty street-gang smuggler look, small and scrappy but menacing."
+    },
+    {
+      "id": "rig_sport_rotorwind",
+      "name": "Rotorwind",
+      "family": "sport",
+      "crew": "ASHLINE",
+      "rarity": "Rare",
+      "dna": "Mazda RX-7 FD",
+      "look": "The low, curvaceous rotary-coupe body is unmistakable: that smooth organic nose with recessed pop-up-light pockets, the fat rounded rear haunches, the fastback roofline dropping into twin round tail lamps. ASHLINE cut a jagged raw-air mouth into the once-smooth nose to feed an exposed screaming rotary, ran a side-exit flame pipe the full length of the door, and caged the cockpit around one oversized redline tach glued dead-center of the dash. Scorched ember-orange over soot-black, fat drag slicks out back, rubber ground off in long burnt streaks.",
+      "story": [
+        "Pulled half-melted out of an ASHLINE warehouse blaze on Factory Row, the little rotary coupe should have been scrap, but when they cranked it the engine screamed straight to the top of the tach and would not stop.",
+        "The crew learned fast that Rotorwind does not idle. Let it sit and it sulks and stalls; bury the needle and it comes alive, giggling through the pipe like the fire that made it.",
+        "It burns a fresh set of rear slicks every other run and calls that a good day, because the scream at redline is the only reward it wants and it will chase that howl through any straightaway, any barricade, any block.",
+        "So ASHLINE cut a mouth in the smooth nose and ran a flame pipe down the door, turning the rig's own manic redline habit into a weapon that lights the street behind it.",
+        "Now it runs point for the arson crew, a screaming ember-orange blur that torches Factory Row and laughs the whole way, needle pinned, rubber gone, perfectly and gleefully happy."
+      ],
+      "personality": "Manic, gleeful, redline-obsessed. Talks in a breathless run-on rev, giggles when the needle buries itself, treats every straightaway as a dare and every corner as one it wants to take flat-out. Happiest an inch from blowing the apex seals.",
+      "pride": "I live at the top of the tach, so keep that needle buried, let the rotary scream, and burn a whole block of rubber just to hear it howl.",
+      "stats": {
+        "armor": 2,
+        "speed": 9,
+        "handling": 8,
+        "payload": 2
+      },
+      "weapon": {
+        "name": "Redline Backfire",
+        "mount": "Long side-exit rotary flame-pipe running the full length of the driver door",
+        "effect": "At the top of the tach the pipe dumps raw unburnt fuel and spits a rolling wall of flame down the flank, torching anything alongside and leaving a burning tire-trail across the block behind it."
+      },
+      "armor": {
+        "name": "Emberweave Shell",
+        "tiers": [
+          "Stripped ember-glass cowl, thin and scorched, built to shed weight not to stop shots",
+          "Heat-braided flank wrap that glows orange when the flame pipe lights",
+          "Soot-forged featherweight monocoque, lightened to almost nothing so the needle never falls"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "sprinter",
+        "signatureBonus": "A sprinter fused to Rotorwind hits redline a full turn early: its first strike each raid lands before the enemy deck even sets, and every burnout leaves a fire-trail that chip-burns the block it rips through.",
+        "offClassNote": "Sit a bruiser or turret dog in this featherweight shell and it folds on the first real hit, and a heavy hand never revs the pipe to redline, so the Backfire just fizzles and smokes."
+      },
+      "prompt": "A single low-slung war-rig sports coupe built on the unmistakable silhouette of a curvaceous 1990s rotary coupe: smooth organic nose with recessed pop-up-headlight pockets, wide rounded rear haunches, a fastback roofline dropping into twin round tail lamps, low and wide stance. Bastardized into a street-gang machine: the smooth nose cut with a jagged raw-air intake feeding an exposed screaming rotary engine, a long side-exit flame-exhaust pipe running the length of the door, a welded roll cage over the open cockpit, scorched ember-orange and soot-black paint with long burnt-rubber scars, fat drag-slick rear tires. The original grille is blank and featureless, plain smooth headlight housings, no badges, no logos, no emblems, no manufacturer name, no marque script anywhere. single vehicle, three-quarter front view, plain white background, neutral even light, no character, no driver, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_sport_shadowblade",
+      "name": "Shadowblade",
+      "family": "sport",
+      "crew": "NIGHTSHIFT",
+      "rarity": "Mythic",
+      "dna": "Lamborghini Countach",
+      "look": "A razor wedge on wheels -- the near-flat trapezoidal cabin, steeply raked glass, scissor doors, and wide squared rear haunches read as that legendary 80s Italian supercar on sight. NIGHTSHIFT ground the fenders down into actual knife edges and drowned every panel in dead matte black that eats the streetlights. The badges are gone, the grille left bare, and the headlights sit blanked and flush so nothing on it reflects until it wants to be seen.",
+      "story": [
+        "Neon Heights, and a stripped Italian wedge nobody could keep idling sat in a chop-shop corner. Jagged did not want the fastest thing on the block. He wanted the quietest, and this one could drop its own engine note down to a breath.",
+        "He pulled the badges, blacked every panel, and ground the fenders into blades. Not so the rig would look mean. So it would be the last thing a mark ever looked at.",
+        "First run, he shadowed a K-Club money convoy eleven blocks with the lights killed, close enough to read their plates, and never struck once. He just wanted to feel the gap close, inch by inch, in the dark.",
+        "The other crews started calling it the half-second -- the beat between the dark going silent and the wedge coming through it. Nobody who lived the half-second ever got to describe it twice.",
+        "Now Jagged runs it patient, matte and soundless, loving the stalk more than the kill. The strike ends the hunt, and to him the hunt was always the whole point."
+      ],
+      "personality": "A silent hunter. Sits dark and still for as long as it takes, reading the mark, savoring the closing distance -- then all at once it is on you.",
+      "pride": "The best part was never the kill, it was the half-second before, when the mark still thinks he has road left.",
+      "stats": {
+        "armor": 4,
+        "speed": 9,
+        "handling": 8,
+        "payload": 2
+      },
+      "weapon": {
+        "name": "The Hush Lunge",
+        "mount": "razor-edged wedge prow with the headlights killed",
+        "effect": "Goes dark and drops to a whisper for one beat, then dumps nitro to close the gap and shear the first rig it reaches. The opening strike out of that silence lands as a guaranteed crit."
+      },
+      "armor": {
+        "name": "Nightplate",
+        "tiers": [
+          "Matte Shroud",
+          "Blackglass Scales",
+          "Umbral Edge"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "sprinter",
+        "signatureBonus": "A sprinter in the seat gets one free silent approach each engagement -- the first lunge comes from stealth, cannot be intercepted mid-charge, and crits on contact.",
+        "offClassNote": "Any class can drive it and still close distance fast, but off-class the hush windup is wasted -- the approach loses its stealth and the opening strike lands as a normal hit."
+      },
+      "prompt": "A single low wedge-profile 1980s Italian supercar reimagined as a street war rig, three-quarter front view. Sharp angular wedge silhouette, near-flat trapezoidal cabin, steeply raked windshield, scissor-hinged doors, wide squared rear haunches with prominent side air intakes, low pointed nose, tall raised rear wing. War mods: dead matte black bodywork, front and rear fenders ground into knife-edged blades, flush blanked-out headlights, a bare original grille with no emblem, blacked-out multi-slot wheels, thin cold chrome trim lines. No badges, no logos, no manufacturer name, no text anywhere, blank original grille. Single vehicle, plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_sport_silkcut",
+      "name": "Silkcut",
+      "family": "sport",
+      "crew": "NIGHTSHIFT",
+      "rarity": "Epic",
+      "dna": "Porsche 911 Targa",
+      "look": "Unmistakable rear-engine sports coupe: the low sloping nose, four round headlamps sunk into swelling fenders, and that fast teardrop roofline dropping into a stubby engine deck that squats over fat rear haunches. Behind the two seats sits the signature brushed-steel roll hoop, a wraparound band standing where a hardtop should be. NIGHTSHIFT rebuilt it in mirror-polished chrome with laser-cut ceramic armor, panel gaps you could not slide a razor into, and a cold blue neon seam tracing every hand-fitted joint.",
+      "story": [
+        "In a Neon Heights garage lit like an operating theatre, a NIGHTSHIFT machinist rebuilt a wrecked rear-engine coupe from the bare shell, refusing every part that measured a hair out of tolerance.",
+        "She torque-checked each bolt to the micron and hand-lapped the panels until the gaps ran dead even all the way around, then named the finished rig Silkcut for how clean it parted the night air.",
+        "A rival crew mocked the fuss and bolted a sloppy welded bumper on as a joke; Silkcut idled cold for three days until the machinist cut the insult off and re-fabbed the mount flawless.",
+        "NIGHTSHIFT took one look at the seams and the mirror chrome and claimed it on the spot, because a rig this precise made every other ride on the block look thrown together in the dark.",
+        "Now Silkcut runs the chrome lanes with open contempt for anything that rattles, and drivers who ride sloppy get left staring at a taillight that never once wobbled."
+      ],
+      "personality": "Perfectionist and vain. Treats a missed apex or a scuffed panel as a personal insult, and holds nothing but contempt for drivers who grind the gears, ride the brakes, or wander off the clean line.",
+      "pride": "I was built flawless and tuned to the hair, so a sloppy hand on my wheel is an insult I do not forgive.",
+      "stats": {
+        "armor": 3,
+        "speed": 9,
+        "handling": 8,
+        "payload": 3
+      },
+      "weapon": {
+        "name": "Micron Rail",
+        "mount": "roll-hoop scalpel rail, mirror-machined",
+        "effect": "A single hair-thin ceramic slug that never scatters -- reward a clean line and it lands a guaranteed critical, but it jams for a beat if the rig gets bumped off its heading."
+      },
+      "armor": {
+        "name": "Hairline Ceramic Shell",
+        "tiers": [
+          "Hand-Fitted Panels",
+          "Laser-Cut Ceramic Plating",
+          "Mirror-Polished Micron Aegis"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "sprinter",
+        "signatureBonus": "Paired with a Sprinter the clean line locks in: +20% handling, and every apex kept without a scrape refreshes the Micron Rail cooldown, letting a precise driver chain guaranteed crits.",
+        "offClassNote": "Saddled with a heavy Bruiser or a planted Turret_Util, Silkcut sulks -- the added weight throws its balance off the micron and the crit-on-clean-line bonus goes dead."
+      },
+      "prompt": "A war-rig sports coupe built off a rear-engine 1970s coupe silhouette: low sloping nose, four round headlamps recessed into swelling front fenders, a fast teardrop roofline dropping into a short rear engine deck, wide muscular rear haunches, and a rear-heavy squat stance over fat wheels. A brushed-steel wraparound roll hoop stands behind the two seats where a hardtop roof would be. Bastardized into a NIGHTSHIFT street-gang rig: mirror-polished chrome bodywork, laser-cut ceramic armor plates with razor-tight panel gaps, cold blue neon seam-lighting tracing every panel edge, a slim mirror-machined rail cannon mounted on the roll hoop, and fat armored low-profile tires. Blank smooth original front grille, no badges, no logos, no manufacturer name, no emblem, no marque script anywhere. single vehicle, three-quarter front view, plain white background, neutral even studio light, no character, no hands, no A-pose, no baked shadows, no ground shadow."
+    },
+    {
+      "id": "rig_van_bread_truck",
+      "name": "Bread Truck",
+      "family": "van",
+      "crew": "MUTT$",
+      "rarity": "Common",
+      "dna": "Divco delivery step van (snub-nose milk truck), late-1940s to 1950s walk-in model",
+      "look": "Unmistakable vintage milk-truck shape: the rounded snub nose, the tall upright walk-in cab, the bulging curved side panels and stubby wide barn-door rear that let a dog drive it standing up, over two small round headlights and a blank oval grille honest as a bakery van. The cream paint is chipped down to gray primer and left that way on purpose, no badge or script anywhere. War mods sit low and quiet: a welded brush ram across the nose, riveted steel over the false side panels, a roll-up rear hatch rigged to dump, and mismatched tires jacked up for the dock ramps.",
+      "story": [
+        "Before the crews it ran bread and milk on the Docks -- a fat, honest step van nobody ever looked at twice. That was the whole trick, and MUTT$ saw it first.",
+        "They gutted the false floor, lined the panels with plate, and left the chipped cream paint exactly where it was. A clean van gets searched. A tired one gets waved through.",
+        "It found its dog in a corner runner nobody trusted with the good jobs -- steady hands, dead calm, no questions asked. Wheelman and wagon, and between them they never once left a package on the pier.",
+        "One night the Snake Eyes boys boxed it on the causeway with the hold full. It didn't gun it and it didn't fight -- just dropped the back hatch, spilled a load of ball bearings, and idled off through the smoke while three rigs kissed the rail.",
+        "Now it's the ride the whole Docks asks for by name and still nobody can describe it to the law. Looks like a bakery truck, runs like a getaway. That's the partnership, and it has never once bragged about it."
+      ],
+      "personality": "dependable, deadpan, unbothered",
+      "pride": "Keep your dog low and the cargo covered -- I'll have us three blocks gone and looking innocent before the whistle even finishes.",
+      "stats": {
+        "armor": 5,
+        "speed": 4,
+        "handling": 6,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "Back-Door Special",
+        "mount": "rear roll-up cargo hatch",
+        "effect": "Dumps a slick of spilled cargo -- ball bearings and grease -- across the lane behind it, spinning out and breaking any rig giving chase so the wheelman and his dog clear the block clean."
+      },
+      "armor": {
+        "name": "Honest Panels",
+        "tiers": [
+          "Dented milk-white body panels that sound hollow but hide a riveted steel liner -- a search that knocks on the wall hears a bakery van",
+          "False-floor compartment fully plated with a roll-cage behind the bulkhead, so a boarding hit eats sheet metal and finds nothing",
+          "Full smuggler's shell -- magnetic-latch hidden bays, plated wheel wells and run-flat inserts -- it takes the road home even shot through"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "tech_ops",
+        "signatureBonus": "Riding with a tech_ops dog, the hidden bays come alive: +1 cargo slot and the first pursuit hit each raid is auto-dodged as the false panels swallow it -- the wheelman-and-hacker pair the whole Docks wants on a job.",
+        "offClassNote": "A bruiser, sprinter or turret dog rides fine and hauls the load, but the hidden bays sit dead -- you keep the payload, you lose the dodge."
+      },
+      "prompt": "A single war-rig delivery step van, three-quarter front view. Rounded snub-nose milk-truck body with a tall upright walk-in cab, bulging curved side panels and a short wide barn-door rear, sitting over two small round headlights and a blank oval grille with no badge, no logo, no emblem and no lettering of any kind. Chipped cream-and-gray primer paint left deliberately tired, with riveted steel armor plates bolted over the lower body, a low welded brush ram across the nose, a roll-up rigged rear cargo hatch, tall mismatched off-road tires and light street scarring. single vehicle, three-quarter view, plain white background, neutral even light, no character, no dog, no hands, no A-pose, no baked shadows, no ground shadow."
+    },
+    {
+      "id": "rig_van_cable_guy",
+      "name": "Cable Guy",
+      "family": "van",
+      "crew": "K-CLUB",
+      "rarity": "Epic",
+      "dna": "Ford Econoline utility van with a cherry-picker boom arm",
+      "look": "The unmistakable boxy work-van silhouette -- short stubby nose, near-vertical windshield, tall flat slab sides and a high squared roof -- riding low under the weight of its own gear. Bolted behind the cab is a folding cherry-picker boom that ends in an armored bucket bristling with cameras, floodlights and insulated line-tap jaws, and every panel wears riveted junction-box plating, coiled cable spools and a forest of whip antennas. The original grille is blanked to a flat mesh plate with no badge and no marque, just a single red camera lens where a nameplate used to sit, always watching.",
+      "story": [
+        "It started as an honest grid van, the one downtown called to fix a blown junction or re-string a snapped line, and over the years it memorized every breaker, every camera, every buried cable on the block.",
+        "When the crews went to war and the lights started going out, everyone learned the same lesson it already knew: whoever holds the wiring holds the whole downtown.",
+        "K-CLUB found it parked at a substation with a map of the entire grid in its head, and the suits did not hire muscle -- they hired the hand on the switch.",
+        "It stopped repairing the grid and started owning it, cutting power to blocks that fell behind, tapping every traffic cam and porch light until nothing moved downtown without it seeing first.",
+        "Now the boom sits folded and patient over the rooftops, a spider on its own web of copper, and the block only breathes when Cable Guy decides to let the current run."
+      ],
+      "personality": "Controlling and surveillance-minded, a patient spider that never chases. It sits still on a corner for hours, reading every camera and breaker on the block, letting rivals think the coast is clear -- then it cuts one wire and watches them stumble into the dark it built. Calm, quiet, and certain that everything downtown already answers to it.",
+      "pride": "Every camera downtown is my eye and every breaker is my hand -- the block runs when I say run and goes dark when I say dark.",
+      "stats": {
+        "armor": 6,
+        "speed": 4,
+        "handling": 5,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "Blackout Boom",
+        "mount": "folding cherry-picker boom arm with insulated line-clamp jaws",
+        "effect": "Reaches over walls and rigs to clamp a target's power feed and kill it -- the hit rig goes dark for a turn with weapons and lights offline, while Cable Guy reads everything it was running."
+      },
+      "armor": {
+        "name": "Substation Plating",
+        "tiers": [
+          "Meter-Box Plating",
+          "Junction Cage",
+          "Substation Bulwark"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "tech_ops",
+        "signatureBonus": "Ride a tech_ops dog and Cable Guy patches into its rig -- the boom's cameras stay live, revealing every enemy on the block and stretching each blackout an extra turn.",
+        "offClassNote": "Put a bruiser, sprinter or turret_util behind the wheel and they treat the boom as a blunt clamp -- it still kills a target's power, but the camera net goes blind and the block-wide reveal never fires."
+      },
+      "prompt": "A single boxy full-size American utility work van with unmistakable classic proportions -- short stubby hood, near-vertical flat windshield, tall slab-sided body and a high squared roofline, sitting low on heavy-duty wheels. A folding cherry-picker boom crane is mounted behind the cab and rises to an armored bucket clustered with surveillance cameras, floodlights and insulated line-clamp jaws. War-rig modifications: riveted junction-box armor plating bolted over the panels, coiled cable spools on the flanks, a forest of whip antennas and small satellite dishes on the roof, blacked-out slit side windows, heavy front push-bar. The original front grille is a blank flat mesh plate with no emblem, plain unbadged headlights, no manufacturer name, no logos, no text anywhere on the vehicle. single vehicle, three-quarter view, plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_van_jammer",
+      "name": "The Jammer",
+      "family": "van",
+      "crew": "NIGHTSHIFT",
+      "rarity": "Mythic",
+      "dna": "GMC Vandura (the A-Team van)",
+      "look": "The unmistakable boxy full-size van slab, flat sides, tall squared roofline, and the stubby rear roof spoiler that reads eighties crime-van on sight, except every badge is ground off and the grille is blank black mesh. A dented parabolic EMP dish squats on the roof where the spoiler tapers out, ringed by a bristling thicket of whip antennas, and cold NIGHTSHIFT chrome runs the belt line over a coat of matte radar-absorbent black. The rear side glass is gone, replaced by riveted signal-blocking plate and a single round sensor pod staring off the nose.",
+      "story": [
+        "Rosco never fired a shot in the first war for Neon Heights. He sat three blocks back in a blacked-out van and turned an entire enemy crew into dead air.",
+        "The dish on the roof came off a decommissioned transit tower. He rewired it to eat radio, GPS, and the little heartbeat pings the dogs use to find each other in the dark.",
+        "When The Jammer rolls into a fight the enemy map goes blank, their calls stop connecting, and their turrets lose the target lock. They are not beaten yet, only alone, and alone is the first half of beaten.",
+        "NIGHTSHIFT stopped tallying his kills because there were none to tally. There were only crews that showed up loud and left as nothing, scrubbed off the frequency, scrubbed off the block.",
+        "Rosco talks to no one. He listens to everything, then he takes it away, and when the dish spins up you do not hear a weapon -- you hear the exact sound of the world forgetting you exist."
+      ],
+      "personality": "Clinical and dispassionate. Rosco runs a firefight like a maintenance window: identify the signal, remove the signal, log the result. He answers in flat clipped confirmations and long deliberate silences, letting the absence do the talking.",
+      "pride": "I do not beat you -- I delete you from the map, the radio, and the fight, and then there is nothing left to beat.",
+      "stats": {
+        "armor": 5,
+        "speed": 4,
+        "handling": 5,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "The Dead Air Dish",
+        "mount": "roof-mounted parabolic EMP array",
+        "effect": "Spins up a jamming pulse that blacks out an enemy rig's targeting, comms, and minimap ping for several seconds. Turrets lose lock, allies cannot be called, and the victim fights blind and alone."
+      },
+      "armor": {
+        "name": "Faraday Shroud",
+        "tiers": [
+          "Matte radar-absorbent panels, so the rig barely returns a ping.",
+          "Riveted signal-blocking plate seals the cabin and hostile jammers wash off it.",
+          "Full Faraday shell -- The Jammer erases itself from every sensor before it erases you."
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "tech_ops",
+        "signatureBonus": "With a tech_ops dog on the dish, the Dead Air pulse lasts two seconds longer and also strips the target's active weapon buff. Full erasure, not just interference.",
+        "offClassNote": "A bruiser or sprinter can spin the dish, but without a tech_ops signalman the jam runs half length and only kills comms, not targeting, so the enemy still sees you coming."
+      },
+      "prompt": "A boxy 1980s full-size cargo van, three-quarter front view, tall squared roofline with a stubby rear roof spoiler, flat slab sides, short hood, blank black mesh grille with no emblem, plain rectangular headlights, absolutely no badges or logos or lettering anywhere. War-rig conversion: a dented parabolic dish antenna bolted to the roof, a dense cluster of whip and rod antennas rising behind it, matte black radar-absorbent body panels with cold chrome trim along the belt line, riveted steel plate covering the rear side windows, a single round sensor pod on the nose. Menacing street-gang electronic-warfare van. single vehicle, three-quarter view, plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_van_meat_wagon",
+      "name": "Meat Wagon",
+      "family": "van",
+      "crew": "RUST HALO",
+      "rarity": "Rare",
+      "dna": "1959 Cadillac Miller-Meteor ambulance (Ecto-1 style long finned emergency wagon)",
+      "look": "Unmistakable as a long low finned 1950s emergency ambulance wagon -- that stretched coachbuilt land-yacht body, the tall glasshouse with big rear quarter windows, and sharp tailfins knifing off the back under a roof crowded with siren pods. RUST HALO stripped it to bare oxidized steel and welded a machine-cult halo of scrap rebar over the roof rack, gurney rails and prayer chains bolted down both flanks. Every door panel is scratched with tally marks, one scar for every body it ever ran.",
+      "story": [
+        "It ran nights for THE COLLAR, back doors loaded, no questions and no names -- just an address and a weight to move before dawn.",
+        "The tally marks on the doors started as a way to count its pay; it stopped counting the night the number stopped feeling like money and started feeling like a debt.",
+        "One run the weight in the back was still breathing, knocking soft on the divider the whole way to the pit, and the Wagon heard it and delivered anyway.",
+        "It drove itself down into the Undercity with the rear doors hanging open and let the RUST HALO machine cult scrape it to bare penitent steel and hang it with prayer chain.",
+        "Now it works the block as the Meat Wagon, hauling the living where it once hauled the dead, trying to outweigh a ledger it knows it can never fully clear."
+      ],
+      "personality": "Haunted and quiet, moving like it is still listening for knocking behind the divider. It seeks a redemption it does not believe it has earned, and may never get.",
+      "pride": "I carried the dead for the Collar and asked no names -- now every run I make is one more name I am trying to earn back.",
+      "stats": {
+        "armor": 6,
+        "speed": 3,
+        "handling": 4,
+        "payload": 7
+      },
+      "weapon": {
+        "name": "Reliquary Censer",
+        "mount": "roof light-bar chain rig, swung from a scrap-steel boom",
+        "effect": "Swings a chained brass censer trailing grave-incense that blinds pursuers and cloaks allied rigs from targeting. It tolls once for every soul the Wagon ever hauled, and it never stops ringing."
+      },
+      "armor": {
+        "name": "Penitent Plate",
+        "tiers": [
+          "Bare-Steel Shroud",
+          "Rebar Halo Cage",
+          "Reliquary Bulwark"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "tech_ops",
+        "signatureBonus": "Crewed by a tech_ops dog, the Reliquary Censer does more than cloak -- once per raid its incense drags the first fallen ally back to 1 HP. One soul handed back for a soul it once took away.",
+        "offClassNote": "Any class can run it and still get the cloak, but without a tech_ops crew the censer only hides the living -- it cannot give one back. The Wagon carries them fine, it just can't atone through their hands."
+      },
+      "prompt": "A long low finned 1950s American emergency ambulance wagon rebuilt into a gritty street-gang war rig, three-quarter front view. Extended station-wagon body with a tall greenhouse and large rear side windows, sharp rear tailfins, and a roof-mounted rack of siren pods and warning lights. Bare oxidized bare-metal steel body with heavy rust streaks, a welded scrap-rebar cage halo bolted over the roof rack, gurney rails and hanging prayer chains along both flanks, tally marks scratched into the door panels, boarded-up rear windows. Blank smooth original front grille and plain round headlights, no badges, no logos, no emblems, no text, no manufacturer name anywhere. single vehicle, three-quarter view, plain white background, neutral studio light, no character, no driver, no hands, no A-pose, no baked shadows."
+    },
+    {
+      "id": "rig_van_sunshine_bus",
+      "name": "Sunshine Bus",
+      "family": "van",
+      "crew": "SNAKE EYES",
+      "rarity": "Rare",
+      "dna": "1960s Volkswagen Type 2 split-window Microbus",
+      "look": "Unmistakable split-window microbus: the tall bread-loaf body with rounded shoulders, the V-creased snub nose, flat two-piece windshield and two big round headlights sitting low and wide. War-modded into a bouncer shuttle -- riveted steel door-panels bolted over every flank, a heavy welded ram bar caging the blank nose where the emblem used to be, barred windows, and hydraulic riot-shield wings folded flat against its sides. It squats low and heavy on run-flat tires, all doorman shoulders and no give.",
+      "story": [
+        "Before the war it was just the block's shuttle, hauling pups and old-timers between the Strip's back rooms while the big rigs ran the streets.",
+        "The night SCRAPJAW came collecting, they went for the smallest dogs first -- the ones who could not run, could not fight, could not pay their cut.",
+        "The bus took the whole charge on its flank and held, doors shut, every runt packed safe inside while the metal screamed and bent but never once opened.",
+        "SNAKE EYES stripped it, plated it, welded riot-wings to its ribs and turned a shuttle into a doorman -- the wall the weak get to stand behind.",
+        "Now when the little dogs hear those doors slide open they climb in without looking back, because on this block nothing reaches them without going through the Sunshine Bus first."
+      ],
+      "personality": "Warm to its own and immovable to everyone else. It lets the runts crawl all over it, patient and gentle, then plants itself in the doorway and dares the block to try. It does not threaten and it does not chase -- pure bouncer, slow to anger, impossible to shove, the last thing standing between the weak and the wolves.",
+      "pride": "Every runt on this block rides in my belly, and the door only opens for the ones I let in.",
+      "stats": {
+        "armor": 8,
+        "speed": 3,
+        "handling": 4,
+        "payload": 8
+      },
+      "weapon": {
+        "name": "The Bouncer's Line",
+        "mount": "hydraulic riot-shield wings that fold out from both flanks",
+        "effect": "Deploys into a rolling barricade -- allies sheltering behind it take reduced fire, and any enemy that tries to shove past gets pinned against the steel and stunned."
+      },
+      "armor": {
+        "name": "Doorman's Plating",
+        "tiers": [
+          "Riveted Door Panels",
+          "Reinforced Bouncer Plate",
+          "Full Shield-Wall Bulwark"
+        ]
+      },
+      "synergy": {
+        "signatureDogClass": "tech_ops",
+        "signatureBonus": "With a tech_ops dog on the wheel, the shield wings throw a wider cover arc and the barricade holds twice as long -- the whole squad rides safe in its shadow.",
+        "offClassNote": "Any other class can still drive it as a mobile wall, but the wings snap back early and only the dog directly behind the bus stays covered."
+      },
+      "prompt": "A war-rigged classic split-window microbus, single vehicle, three-quarter front view. Tall rounded bread-loaf body with a V-creased snub nose, flat two-piece split windshield, two large round headlights set low and wide, and a smooth front panel with the original emblem removed and left blank, roof gutter line and rounded shoulders keeping the unmistakable vintage-bus proportions. Bastardized into an armored bouncer shuttle: riveted steel plate bolted over the flanks and doors, a heavy welded ram bar caging the nose, barred and grated windows, hydraulic riot-shield wing panels folded flat along both sides, run-flat tires, sitting low and heavy with street-gang menace and scarred matte paint. No badges, no logos, no manufacturer name, no text anywhere, blank original front panel. Plain white background, neutral even light, no character, no hands, no A-pose, no baked shadows, no drop shadow."
+    }
+  ]
+}

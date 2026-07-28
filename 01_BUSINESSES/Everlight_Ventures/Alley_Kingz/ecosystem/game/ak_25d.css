@@ -1,0 +1,97 @@
+/* ===========================================================================
+   ALLEY KINGZ // ak_25d.css -- SHARED 2.5D "LIFE FEEL" LAYER  (Section A, 2026-06-20)
+   ---------------------------------------------------------------------------
+   ONE canonical source for the Brawl-Stars "extruded photo" 2.5D treatment.
+   Consolidates the byte-identical copies that used to live inline in
+   game/index.html (~L84-123) and game/shop/shop.css (~L592-631). Loaded by
+   index.html, game.html and shop/shop.html (paired with ak_25d.js, the pointer
+   shim). Pure CSS 3D transforms -- GPU/compositor only, ~0KB, NO WebGL.
+   Per AK_DEEP_DIVE_SYNTHESIS Part 1 + AK_GRAPHICS_UPDATE_PLAN Section A.
+
+   TWO usage modes (unchanged contract -- existing surfaces look identical):
+     MODE A (single element): the scene parent gets .ak-3d; ONE box that has NO
+       overflow:hidden gets BOTH .ak-3d-tilt and .ak-3d-face  (#int-card,#thp-box)
+     MODE B (wrapper): .ak-3d > .ak-3d-tilt > .ak-3d-face, used when the face
+       keeps overflow:hidden/clip-path (shop .aks-card art window). The shop's
+       wrap3d() helper builds exactly this.
+   The shim (ak_25d.js) writes --ak-rx / --ak-ry (deg) onto .ak-3d-tilt; CSS reads
+   them. prefers-reduced-motion + coarse-pointer fall back to a static resting
+   tilt + extrusion only (phones keep the thickness, drop the steer).
+   =========================================================================== */
+.ak-3d{ display:block; perspective:1100px; perspective-origin:50% 50%; }
+.ak-3d-tilt{
+  display:block; position:relative; transform-style:preserve-3d;
+  transform:rotateX(var(--ak-rx,3deg)) rotateY(var(--ak-ry,0deg));
+  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.ak-3d.ak-3d-live .ak-3d-tilt{ transition:none; will-change:transform; }
+/* extruded thickness: two squeezed dark faces folded off the slab edges.
+   On .ak-3d-tilt (never clipped) so it works on a face that has overflow:hidden. */
+.ak-3d-tilt::before, .ak-3d-tilt::after{ content:""; position:absolute; pointer-events:none; }
+.ak-3d-tilt::before{ left:2px; right:2px; bottom:0; height:16px;
+  transform-origin:bottom center; transform:rotateX(-90deg);
+  background:linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,.18)); }
+.ak-3d-tilt::after{ top:2px; bottom:2px; right:0; width:16px;
+  transform-origin:right center; transform:rotateY(90deg);
+  background:linear-gradient(to left, rgba(0,0,0,.62), rgba(0,0,0,.2)); }
+/* face marker -- NO transform/shadow by default so it never fights an existing
+   :hover transform or a gold glow already on the surface. */
+.ak-3d-face{ position:relative; }
+/* OPT-IN contact shadow (use ONLY on surfaces with no rest box-shadow, e.g. .aks-card) */
+.ak-3d-shadow{ box-shadow:0 16px 30px -10px rgba(0,0,0,.6); }
+/* phones: no hover-steer -> keep ONLY the cheap static resting tilt + extrusion */
+@media (hover:none),(pointer:coarse){
+  .ak-3d-tilt{ transform:rotateX(2.5deg) rotateY(0deg); transition:none; }
+  .ak-3d.ak-3d-live .ak-3d-tilt{ will-change:auto; }
+}
+@media (prefers-reduced-motion:reduce){
+  .ak-3d-tilt{ transform:none; transition:none; }
+  .ak-3d-tilt::before, .ak-3d-tilt::after{ display:none; }
+}
+
+/* ===========================================================================
+   GENERIC "LIFE FEEL" UTILITIES -- the reusable shimmer / glow / float that any
+   surface (lobby tiles, HUD chips, game.html menus, system overlays) can opt
+   into WITHOUT pulling in shop.css. These mirror the shop's .aks-card-scoped
+   effects but are unscoped helper classes with DISTINCT keyframe names so they
+   never collide with shop.css (aksShine/aksFloat/akAuraBreath/akCardFloat stay
+   exactly as they are -- the already-treated shop cards are untouched).
+   Compositor-only: every animation is transform OR opacity; box-shadows are
+   STATIC and we breathe the pseudo-element's OPACITY. $100-Android safe, 60fps.
+   --ak-glow tints the glow (default brand gold). Reduced-motion kills the loops.
+   =========================================================================== */
+@keyframes ak25Shine{
+  0%   { transform:translateX(-140%) skewX(-18deg); opacity:0; }
+  8%   { opacity:.9; }
+  48%  { transform:translateX(260%)  skewX(-18deg); opacity:0; }
+  100% { transform:translateX(260%)  skewX(-18deg); opacity:0; }
+}
+@keyframes ak25Float{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+@keyframes ak25Breath{ 0%,100%{ opacity:.28; } 50%{ opacity:.82; } }
+
+/* gold diagonal shimmer sweep -- host must be position:relative + overflow:hidden.
+   Uses ::after, so apply only where ::after is free (plain divs, not .aks-card). */
+.ak25-shimmer{ position:relative; overflow:hidden; }
+.ak25-shimmer::after{
+  content:""; position:absolute; top:-10%; bottom:-10%; left:0; width:38%; z-index:2; pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(232,197,90,.16), rgba(255,255,255,.26), rgba(232,197,90,.12), transparent);
+  mix-blend-mode:screen; transform:translateX(-140%) skewX(-18deg); opacity:0;
+  animation:ak25Shine 7.5s ease-in-out infinite;
+}
+
+/* breathing rim glow -- static tinted inner box-shadow, opacity-breathing pseudo.
+   Uses ::before, so it composes with .ak25-shimmer (::after) on the same node. */
+.ak25-glow{ position:relative; }
+.ak25-glow::before{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
+  box-shadow:inset 0 0 24px -8px var(--ak-glow,#c9a84c), inset 0 0 0 1px var(--ak-glow,#c9a84c);
+  opacity:.28; animation:ak25Breath 5.4s ease-in-out infinite;
+}
+
+/* faint idle float (featured / selected hero tiles) */
+.ak25-float{ animation:ak25Float 4.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion:reduce){
+  .ak25-shimmer::after, .ak25-glow::before{ animation:none !important; opacity:0 !important; }
+  .ak25-float{ animation:none !important; }
+}

@@ -1,0 +1,2147 @@
+{
+  "version": 1,
+  "layer": "1 -- Pack Bonds (dog to dog)",
+  "note": "crew = ORIGIN BLOCK (where the dog is from, 8 crews). faction/class = DECK AXIS (4 factions, 11-card decks). Two separate axes on purpose -- five crews are too small to field a deck. No token is shared between the axes.",
+  "count": 127,
+  "dogs": {
+    "0001": {
+      "id": "0001",
+      "name": "$BCARDD",
+      "rarity": "Mythic",
+      "breed": "Dogo Argentino",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:DYNASTY",
+        "ARC:MYTHIC",
+        "NATURE:ALPHA",
+        "BLOOD:DOGO_ARGENTINO"
+      ],
+      "allies": [
+        "0002"
+      ],
+      "rivals": []
+    },
+    "0005": {
+      "id": "0005",
+      "name": "Granite Saint",
+      "rarity": "Rare",
+      "breed": "St. Bernard",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "BLOOD:ST._BERNARD"
+      ],
+      "allies": [
+        "0008"
+      ],
+      "rivals": []
+    },
+    "0049": {
+      "id": "0049",
+      "name": "Cinderblock",
+      "rarity": "Legendary",
+      "breed": "Boxer",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:BOXER"
+      ],
+      "allies": [
+        "0006"
+      ],
+      "rivals": []
+    },
+    "0050": {
+      "id": "0050",
+      "name": "Knuckles",
+      "rarity": "Rare",
+      "breed": "Boxer",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:BOXER"
+      ],
+      "allies": [
+        "0009"
+      ],
+      "rivals": []
+    },
+    "0037": {
+      "id": "0037",
+      "name": "Crown Foxhound",
+      "rarity": "Mythic",
+      "breed": "Foxhound",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CITADEL",
+        "ARC:MYTHIC",
+        "NATURE:ALPHA",
+        "BLOOD:FOXHOUND"
+      ],
+      "allies": [
+        "0044"
+      ],
+      "rivals": []
+    },
+    "0002": {
+      "id": "0002",
+      "name": "Stonejaw",
+      "rarity": "Legendary",
+      "breed": "Mastiff",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:MASTIFF"
+      ],
+      "allies": [
+        "0001"
+      ],
+      "rivals": []
+    },
+    "0013": {
+      "id": "0013",
+      "name": "Jagged",
+      "rarity": "Mythic",
+      "breed": "Doberman",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CITADEL",
+        "ARC:MYTHIC",
+        "NATURE:ALPHA",
+        "BLOOD:DOBERMAN"
+      ],
+      "allies": [],
+      "rivals": [
+        "0021"
+      ]
+    },
+    "0025": {
+      "id": "0025",
+      "name": "Rosco",
+      "rarity": "Mythic",
+      "breed": "Australian Cattle Dog",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:MYTHIC",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:ALPHA",
+        "BLOOD:AUSTRALIAN_CATTLE_DOG"
+      ],
+      "allies": [
+        "0026"
+      ],
+      "rivals": []
+    },
+    "0051": {
+      "id": "0051",
+      "name": "Tombstone",
+      "rarity": "Legendary",
+      "breed": "Rottweiler",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:ROTTWEILER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0067": {
+      "id": "0067",
+      "name": "Rollcage",
+      "rarity": "Legendary",
+      "breed": "Vizsla",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:VIZSLA"
+      ],
+      "allies": [],
+      "rivals": [
+        "0068"
+      ]
+    },
+    "0075": {
+      "id": "0075",
+      "name": "Deadweight",
+      "rarity": "Legendary",
+      "breed": "Malinois",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "NATURE:ALPHA",
+        "BLOOD:MALINOIS"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0077": {
+      "id": "0077",
+      "name": "Firewall",
+      "rarity": "Legendary",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:ALPHA",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [
+        "0025"
+      ],
+      "rivals": []
+    },
+    "0085": {
+      "id": "0085",
+      "name": "Sandbag",
+      "rarity": "Legendary",
+      "breed": "Setter",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:ALPHA",
+        "BLOOD:SETTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0091": {
+      "id": "0091",
+      "name": "Bulwark",
+      "rarity": "Legendary",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:ALPHA",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0099": {
+      "id": "0099",
+      "name": "Casemate",
+      "rarity": "Legendary",
+      "breed": "Retriever",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:RETRIEVER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0105": {
+      "id": "0105",
+      "name": "Emplacement",
+      "rarity": "Legendary",
+      "breed": "German Shepherd",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CITADEL",
+        "ARC:MYTHIC",
+        "NATURE:ALPHA",
+        "BLOOD:GERMAN_SHEPHERD"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0003": {
+      "id": "0003",
+      "name": "Balboa",
+      "rarity": "Epic",
+      "breed": "Boxer",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:DYNASTY",
+        "ARC:CHOPSHOP",
+        "BLOOD:BOXER"
+      ],
+      "allies": [
+        "0006"
+      ],
+      "rivals": []
+    },
+    "0004": {
+      "id": "0004",
+      "name": "Iron Rottweiler",
+      "rarity": "Epic",
+      "breed": "Rottweiler",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:ROTTWEILER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0014": {
+      "id": "0014",
+      "name": "Razor Vizsla",
+      "rarity": "Epic",
+      "breed": "Vizsla",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:VIZSLA"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0015": {
+      "id": "0015",
+      "name": "Aero Malinois",
+      "rarity": "Epic",
+      "breed": "Malinois",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:MALINOIS"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0026": {
+      "id": "0026",
+      "name": "Synth Collie",
+      "rarity": "Epic",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:CHOPSHOP",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [
+        "0025"
+      ],
+      "rivals": []
+    },
+    "0027": {
+      "id": "0027",
+      "name": "Noir Setter",
+      "rarity": "Epic",
+      "breed": "Setter",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:SETTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0028": {
+      "id": "0028",
+      "name": "Pulse Border Collie",
+      "rarity": "Epic",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0038": {
+      "id": "0038",
+      "name": "Circuit Retriever",
+      "rarity": "Epic",
+      "breed": "Retriever",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:RETRIEVER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0039": {
+      "id": "0039",
+      "name": "Nova Shepherd",
+      "rarity": "Epic",
+      "breed": "German Shepherd",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:GERMAN_SHEPHERD"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0053": {
+      "id": "0053",
+      "name": "Anvil",
+      "rarity": "Epic",
+      "breed": "St. Bernard",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:ST._BERNARD"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0055": {
+      "id": "0055",
+      "name": "Bonecrusher",
+      "rarity": "Epic",
+      "breed": "Bulldog",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:BULLDOG"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0057": {
+      "id": "0057",
+      "name": "Warhorse",
+      "rarity": "Epic",
+      "breed": "Akita",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:AKITA"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0059": {
+      "id": "0059",
+      "name": "Ironhide",
+      "rarity": "Epic",
+      "breed": "Newfoundland",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:NEWFOUNDLAND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0061": {
+      "id": "0061",
+      "name": "Slab",
+      "rarity": "Epic",
+      "breed": "Cane Corso",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:CANE_CORSO"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0063": {
+      "id": "0063",
+      "name": "Roadblock",
+      "rarity": "Epic",
+      "breed": "Greyhound",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:GREYHOUND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0065": {
+      "id": "0065",
+      "name": "Bullbar",
+      "rarity": "Epic",
+      "breed": "Shiba Inu",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SHIBA_INU"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0069": {
+      "id": "0069",
+      "name": "Crashcage",
+      "rarity": "Epic",
+      "breed": "Saluki",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SALUKI"
+      ],
+      "allies": [],
+      "rivals": [
+        "0070"
+      ]
+    },
+    "0071": {
+      "id": "0071",
+      "name": "Bumper",
+      "rarity": "Epic",
+      "breed": "Corgi",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0073": {
+      "id": "0073",
+      "name": "Gridiron",
+      "rarity": "Epic",
+      "breed": "Basenji",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:BASENJI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0079": {
+      "id": "0079",
+      "name": "Deadbolt",
+      "rarity": "Epic",
+      "breed": "Husky",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:HUSKY"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0081": {
+      "id": "0081",
+      "name": "Bunkerlink",
+      "rarity": "Epic",
+      "breed": "Samoyed",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:SAMOYED"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0083": {
+      "id": "0083",
+      "name": "Faraday",
+      "rarity": "Epic",
+      "breed": "Poodle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:POODLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0087": {
+      "id": "0087",
+      "name": "Blacksite",
+      "rarity": "Epic",
+      "breed": "Pointer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:POINTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0089": {
+      "id": "0089",
+      "name": "Hardline",
+      "rarity": "Epic",
+      "breed": "Spaniel",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:SPANIEL"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0093": {
+      "id": "0093",
+      "name": "Bunker",
+      "rarity": "Epic",
+      "breed": "Beagle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:BEAGLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0095": {
+      "id": "0095",
+      "name": "Howitzer",
+      "rarity": "Epic",
+      "breed": "Corgi",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0097": {
+      "id": "0097",
+      "name": "Flakwall",
+      "rarity": "Epic",
+      "breed": "Schnauzer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SCHNAUZER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0101": {
+      "id": "0101",
+      "name": "Pillbox",
+      "rarity": "Epic",
+      "breed": "Airedale",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:AIREDALE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0103": {
+      "id": "0103",
+      "name": "Stronghold",
+      "rarity": "Epic",
+      "breed": "Basset",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:BASSET"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0006": {
+      "id": "0006",
+      "name": "Grit Bulldog",
+      "rarity": "Rare",
+      "breed": "Bulldog",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "BLOOD:BULLDOG"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0007": {
+      "id": "0007",
+      "name": "Alloy Akita",
+      "rarity": "Rare",
+      "breed": "Akita",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:AKITA"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0008": {
+      "id": "0008",
+      "name": "Warden Newfie",
+      "rarity": "Rare",
+      "breed": "Newfoundland",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "ARC:CITADEL",
+        "BLOOD:NEWFOUNDLAND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0009": {
+      "id": "0009",
+      "name": "Rust Cane Corso",
+      "rarity": "Rare",
+      "breed": "Cane Corso",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:CANE_CORSO"
+      ],
+      "allies": [
+        "0050"
+      ],
+      "rivals": []
+    },
+    "0016": {
+      "id": "0016",
+      "name": "Pixel Greyhound",
+      "rarity": "Rare",
+      "breed": "Greyhound",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:GREYHOUND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0017": {
+      "id": "0017",
+      "name": "Circuit Shiba",
+      "rarity": "Rare",
+      "breed": "Shiba Inu",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SHIBA_INU"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0018": {
+      "id": "0018",
+      "name": "Flash Saluki",
+      "rarity": "Rare",
+      "breed": "Saluki",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SALUKI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0019": {
+      "id": "0019",
+      "name": "Bolt Corgi",
+      "rarity": "Rare",
+      "breed": "Corgi",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0020": {
+      "id": "0020",
+      "name": "Glitch Basenji",
+      "rarity": "Rare",
+      "breed": "Basenji",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:BASENJI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0029": {
+      "id": "0029",
+      "name": "Holo Husky",
+      "rarity": "Rare",
+      "breed": "Husky",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:HUSKY"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0030": {
+      "id": "0030",
+      "name": "Chill Samoyed",
+      "rarity": "Rare",
+      "breed": "Samoyed",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:SAMOYED"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0031": {
+      "id": "0031",
+      "name": "Prism Poodle",
+      "rarity": "Rare",
+      "breed": "Poodle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:POODLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0032": {
+      "id": "0032",
+      "name": "Signal Pointer",
+      "rarity": "Rare",
+      "breed": "Pointer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:POINTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0033": {
+      "id": "0033",
+      "name": "Ghost Spaniel",
+      "rarity": "Rare",
+      "breed": "Spaniel",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:SPANIEL"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0040": {
+      "id": "0040",
+      "name": "Laser Beagle",
+      "rarity": "Rare",
+      "breed": "Beagle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:BEAGLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0041": {
+      "id": "0041",
+      "name": "Volt Corgi",
+      "rarity": "Rare",
+      "breed": "Corgi",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0042": {
+      "id": "0042",
+      "name": "Grid Schnauzer",
+      "rarity": "Rare",
+      "breed": "Schnauzer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:SCHNAUZER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0043": {
+      "id": "0043",
+      "name": "Chrome Airedale",
+      "rarity": "Rare",
+      "breed": "Airedale",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:AIREDALE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0052": {
+      "id": "0052",
+      "name": "Razorgums",
+      "rarity": "Rare",
+      "breed": "Rottweiler",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:ROTTWEILER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0068": {
+      "id": "0068",
+      "name": "Ricochet",
+      "rarity": "Rare",
+      "breed": "Vizsla",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:VIZSLA"
+      ],
+      "allies": [],
+      "rivals": [
+        "0067"
+      ]
+    },
+    "0076": {
+      "id": "0076",
+      "name": "Flatline",
+      "rarity": "Rare",
+      "breed": "Malinois",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:MALINOIS"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0078": {
+      "id": "0078",
+      "name": "Glitchfork",
+      "rarity": "Rare",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0086": {
+      "id": "0086",
+      "name": "Whitenoise",
+      "rarity": "Rare",
+      "breed": "Setter",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:SETTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0092": {
+      "id": "0092",
+      "name": "Brownout",
+      "rarity": "Rare",
+      "breed": "Border Collie",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:BORDER_COLLIE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0100": {
+      "id": "0100",
+      "name": "Shrapnel",
+      "rarity": "Rare",
+      "breed": "Retriever",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:RETRIEVER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0106": {
+      "id": "0106",
+      "name": "Salvo",
+      "rarity": "Rare",
+      "breed": "German Shepherd",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:GERMAN_SHEPHERD"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0044": {
+      "id": "0044",
+      "name": "Beacon Basset",
+      "rarity": "Rare",
+      "breed": "Basset",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "BLOOD:BASSET"
+      ],
+      "allies": [],
+      "rivals": [
+        "0037"
+      ]
+    },
+    "0010": {
+      "id": "0010",
+      "name": "Tank Pug",
+      "rarity": "Common",
+      "breed": "Pug",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:PUG"
+      ],
+      "allies": [
+        "0005",
+        "0008"
+      ],
+      "rivals": []
+    },
+    "0011": {
+      "id": "0011",
+      "name": "Copper Chow",
+      "rarity": "Common",
+      "breed": "Chow",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:CHOW"
+      ],
+      "allies": [
+        "0006"
+      ],
+      "rivals": []
+    },
+    "0012": {
+      "id": "0012",
+      "name": "Brick Bullmastiff",
+      "rarity": "Common",
+      "breed": "Bullmastiff",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:BULLMASTIFF"
+      ],
+      "allies": [
+        "0009",
+        "0005"
+      ],
+      "rivals": []
+    },
+    "0021": {
+      "id": "0021",
+      "name": "Neon Whippet",
+      "rarity": "Common",
+      "breed": "Whippet",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:WHIPPET"
+      ],
+      "allies": [
+        "0018"
+      ],
+      "rivals": [
+        "0016"
+      ]
+    },
+    "0022": {
+      "id": "0022",
+      "name": "Turbo Jack",
+      "rarity": "Common",
+      "breed": "Jack Russell",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:JACK_RUSSELL"
+      ],
+      "allies": [
+        "0019"
+      ],
+      "rivals": [
+        "0017"
+      ]
+    },
+    "0023": {
+      "id": "0023",
+      "name": "Drift Sheltie",
+      "rarity": "Common",
+      "breed": "Sheltie",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:SHELTIE"
+      ],
+      "allies": [
+        "0021",
+        "0019"
+      ],
+      "rivals": []
+    },
+    "0024": {
+      "id": "0024",
+      "name": "Byte Beagle",
+      "rarity": "Common",
+      "breed": "Beagle",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:BEAGLE"
+      ],
+      "allies": [
+        "0020",
+        "0019"
+      ],
+      "rivals": []
+    },
+    "0034": {
+      "id": "0034",
+      "name": "Echo Dalmatian",
+      "rarity": "Common",
+      "breed": "Dalmatian",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:DALMATIAN"
+      ],
+      "allies": [
+        "0031"
+      ],
+      "rivals": [
+        "0027"
+      ]
+    },
+    "0035": {
+      "id": "0035",
+      "name": "Static Sheba Inu",
+      "rarity": "Common",
+      "breed": "Shiba Inu",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:SHIBA_INU"
+      ],
+      "allies": [
+        "0026"
+      ],
+      "rivals": [
+        "0017"
+      ]
+    },
+    "0036": {
+      "id": "0036",
+      "name": "Vibe Shih Tzu",
+      "rarity": "Common",
+      "breed": "Shih Tzu",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:SHIH_TZU"
+      ],
+      "allies": [],
+      "rivals": [
+        "0034"
+      ]
+    },
+    "0045": {
+      "id": "0045",
+      "name": "Neon Dachshund",
+      "rarity": "Common",
+      "breed": "Dachshund",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:DACHSHUND"
+      ],
+      "allies": [],
+      "rivals": [
+        "0042"
+      ]
+    },
+    "0046": {
+      "id": "0046",
+      "name": "Flux Pomeranian",
+      "rarity": "Common",
+      "breed": "Pomeranian",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:POMERANIAN"
+      ],
+      "allies": [],
+      "rivals": [
+        "0041"
+      ]
+    },
+    "0047": {
+      "id": "0047",
+      "name": "Rail Terrier",
+      "rarity": "Common",
+      "breed": "Terrier",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:TERRIER"
+      ],
+      "allies": [],
+      "rivals": [
+        "0093"
+      ]
+    },
+    "0048": {
+      "id": "0048",
+      "name": "Pixel Pug",
+      "rarity": "Common",
+      "breed": "Pug",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:PUG"
+      ],
+      "allies": [],
+      "rivals": [
+        "0010"
+      ]
+    },
+    "0054": {
+      "id": "0054",
+      "name": "Hatchet",
+      "rarity": "Common",
+      "breed": "St. Bernard",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:ST._BERNARD"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0056": {
+      "id": "0056",
+      "name": "Switch",
+      "rarity": "Common",
+      "breed": "Bulldog",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:BULLDOG"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0058": {
+      "id": "0058",
+      "name": "Lugnut",
+      "rarity": "Common",
+      "breed": "Akita",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:AKITA"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0060": {
+      "id": "0060",
+      "name": "Snaggle",
+      "rarity": "Common",
+      "breed": "Newfoundland",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "NATURE:RUNT",
+        "BLOOD:NEWFOUNDLAND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0062": {
+      "id": "0062",
+      "name": "Brassknuck",
+      "rarity": "Common",
+      "breed": "Cane Corso",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:CANE_CORSO"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0064": {
+      "id": "0064",
+      "name": "Nitro",
+      "rarity": "Common",
+      "breed": "Greyhound",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:BLOCKWAR",
+        "ARC:CHOPSHOP",
+        "NATURE:RUNT",
+        "BLOOD:GREYHOUND"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0066": {
+      "id": "0066",
+      "name": "Switchblade",
+      "rarity": "Common",
+      "breed": "Shiba Inu",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:SHIBA_INU"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0070": {
+      "id": "0070",
+      "name": "Hotwire",
+      "rarity": "Common",
+      "breed": "Saluki",
+      "originCrew": "SNAKE EYES",
+      "bondTags": [
+        "CREW:SNAKE EYES",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:SALUKI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0072": {
+      "id": "0072",
+      "name": "Backfire",
+      "rarity": "Common",
+      "breed": "Corgi",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0074": {
+      "id": "0074",
+      "name": "Skidmark",
+      "rarity": "Common",
+      "breed": "Basenji",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "NATURE:RUNT",
+        "BLOOD:BASENJI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0080": {
+      "id": "0080",
+      "name": "Static",
+      "rarity": "Common",
+      "breed": "Husky",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:BLOCKWAR",
+        "ARC:CHOPSHOP",
+        "NATURE:RUNT",
+        "BLOOD:HUSKY"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0082": {
+      "id": "0082",
+      "name": "Shortcircuit",
+      "rarity": "Common",
+      "breed": "Samoyed",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "NATURE:RUNT",
+        "BLOOD:SAMOYED"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0084": {
+      "id": "0084",
+      "name": "Hexer",
+      "rarity": "Common",
+      "breed": "Poodle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:CITADEL",
+        "NATURE:RUNT",
+        "BLOOD:POODLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0088": {
+      "id": "0088",
+      "name": "Carrier",
+      "rarity": "Common",
+      "breed": "Pointer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:POINTER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0090": {
+      "id": "0090",
+      "name": "Spike",
+      "rarity": "Common",
+      "breed": "Spaniel",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:SPANIEL"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0094": {
+      "id": "0094",
+      "name": "Buckshot",
+      "rarity": "Common",
+      "breed": "Beagle",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:BLOCKWAR",
+        "ARC:CHOPSHOP",
+        "NATURE:RUNT",
+        "BLOOD:BEAGLE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0096": {
+      "id": "0096",
+      "name": "Tripwire",
+      "rarity": "Common",
+      "breed": "Corgi",
+      "originCrew": "NIGHTSHIFT",
+      "bondTags": [
+        "CREW:NIGHTSHIFT",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:CORGI"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0098": {
+      "id": "0098",
+      "name": "Deadeye",
+      "rarity": "Common",
+      "breed": "Schnauzer",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:BLOCKWAR",
+        "ARC:CHOPSHOP",
+        "NATURE:RUNT",
+        "BLOOD:SCHNAUZER"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0102": {
+      "id": "0102",
+      "name": "Hairtrigger",
+      "rarity": "Common",
+      "breed": "Airedale",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:AIREDALE"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0104": {
+      "id": "0104",
+      "name": "Snubnose",
+      "rarity": "Common",
+      "breed": "Basset",
+      "originCrew": "MUTT$",
+      "bondTags": [
+        "CREW:MUTT$",
+        "ARC:CITADEL",
+        "ARC:CHOPSHOP",
+        "NATURE:RUNT",
+        "BLOOD:BASSET"
+      ],
+      "allies": [],
+      "rivals": []
+    },
+    "0107": {
+      "id": "0107",
+      "name": "Coatcheck",
+      "rarity": "Common",
+      "breed": "Mudi",
+      "originCrew": "K-CLUB",
+      "bondTags": [
+        "CREW:K-CLUB",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:MUDI"
+      ],
+      "allies": [
+        "0016",
+        "0022"
+      ],
+      "rivals": []
+    },
+    "0108": {
+      "id": "0108",
+      "name": "Sawtooth",
+      "rarity": "Rare",
+      "breed": "Tosa Inu",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "BLOOD:TOSA_INU"
+      ],
+      "allies": [
+        "0004"
+      ],
+      "rivals": [
+        "0052"
+      ]
+    },
+    "0109": {
+      "id": "0109",
+      "name": "Ratchet",
+      "rarity": "Common",
+      "breed": "Bergamasco",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:DYNASTY",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:BERGAMASCO"
+      ],
+      "allies": [
+        "0010",
+        "0005"
+      ],
+      "rivals": []
+    },
+    "0110": {
+      "id": "0110",
+      "name": "Gantry",
+      "rarity": "Epic",
+      "breed": "Anatolian Shepherd",
+      "originCrew": "SCRAPJAW",
+      "bondTags": [
+        "CREW:SCRAPJAW",
+        "ARC:DYNASTY",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "BLOOD:ANATOLIAN_SHEPHERD"
+      ],
+      "allies": [
+        "0004",
+        "0109"
+      ],
+      "rivals": []
+    },
+    "0111": {
+      "id": "0111",
+      "name": "Cinderpike",
+      "rarity": "Rare",
+      "breed": "Presa Canario",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:PRESA_CANARIO"
+      ],
+      "allies": [
+        "0002",
+        "0011"
+      ],
+      "rivals": []
+    },
+    "0112": {
+      "id": "0112",
+      "name": "Ashwater",
+      "rarity": "Rare",
+      "breed": "Chinook",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "BLOOD:CHINOOK"
+      ],
+      "allies": [
+        "0053",
+        "0111"
+      ],
+      "rivals": []
+    },
+    "0113": {
+      "id": "0113",
+      "name": "Flashover",
+      "rarity": "Epic",
+      "breed": "Boerboel",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:BOERBOEL"
+      ],
+      "allies": [
+        "0027"
+      ],
+      "rivals": [
+        "0111"
+      ]
+    },
+    "0114": {
+      "id": "0114",
+      "name": "Scorchmark",
+      "rarity": "Common",
+      "breed": "Catahoula Leopard Dog",
+      "originCrew": "ASHLINE",
+      "bondTags": [
+        "CREW:ASHLINE",
+        "ARC:CHOPSHOP",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:CATAHOULA_LEOPARD_DOG"
+      ],
+      "allies": [
+        "0012",
+        "0054"
+      ],
+      "rivals": []
+    },
+    "0115": {
+      "id": "0115",
+      "name": "Countsheet",
+      "rarity": "Common",
+      "breed": "Neapolitan Mastiff",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:DYNASTY",
+        "ARC:CITADEL",
+        "BLOOD:NEAPOLITAN_MASTIFF"
+      ],
+      "allies": [
+        "0001",
+        "0006"
+      ],
+      "rivals": []
+    },
+    "0116": {
+      "id": "0116",
+      "name": "Fusebox",
+      "rarity": "Common",
+      "breed": "Pumi",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:PUMI"
+      ],
+      "allies": [
+        "0009",
+        "0045"
+      ],
+      "rivals": []
+    },
+    "0117": {
+      "id": "0117",
+      "name": "Toll",
+      "rarity": "Rare",
+      "breed": "Rhodesian Ridgeback",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:DYNASTY",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "BLOOD:RHODESIAN_RIDGEBACK"
+      ],
+      "allies": [
+        "0115",
+        "0055"
+      ],
+      "rivals": []
+    },
+    "0118": {
+      "id": "0118",
+      "name": "Vig",
+      "rarity": "Rare",
+      "breed": "Xoloitzcuintli",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CITADEL",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:XOLOITZCUINTLI"
+      ],
+      "allies": [
+        "0115",
+        "0031"
+      ],
+      "rivals": []
+    },
+    "0119": {
+      "id": "0119",
+      "name": "Curbstone",
+      "rarity": "Epic",
+      "breed": "Caucasian Shepherd",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:CAUCASIAN_SHEPHERD"
+      ],
+      "allies": [
+        "0001",
+        "0117"
+      ],
+      "rivals": []
+    },
+    "0120": {
+      "id": "0120",
+      "name": "Inheritance",
+      "rarity": "Legendary",
+      "breed": "Dogue de Bordeaux",
+      "originCrew": "CROWN LOT",
+      "bondTags": [
+        "CREW:CROWN LOT",
+        "ARC:DYNASTY",
+        "ARC:CITADEL",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:DOGUE_DE_BORDEAUX"
+      ],
+      "allies": [
+        "0001",
+        "0115"
+      ],
+      "rivals": [
+        "0055"
+      ]
+    },
+    "0121": {
+      "id": "0121",
+      "name": "Drip",
+      "rarity": "Common",
+      "breed": "Sloughi",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "NATURE:RUNT",
+        "BLOOD:SLOUGHI"
+      ],
+      "allies": [
+        "0033",
+        "0074"
+      ],
+      "rivals": []
+    },
+    "0122": {
+      "id": "0122",
+      "name": "Rebar",
+      "rarity": "Common",
+      "breed": "Azawakh",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:AZAWAKH"
+      ],
+      "allies": [
+        "0047",
+        "0121"
+      ],
+      "rivals": []
+    },
+    "0123": {
+      "id": "0123",
+      "name": "Brood",
+      "rarity": "Common",
+      "breed": "Thai Ridgeback",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "NATURE:RUNT",
+        "BLOOD:THAI_RIDGEBACK"
+      ],
+      "allies": [
+        "0045",
+        "0090"
+      ],
+      "rivals": []
+    },
+    "0124": {
+      "id": "0124",
+      "name": "Grayscale",
+      "rarity": "Rare",
+      "breed": "Ibizan Hound",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CITADEL",
+        "ARC:LEASHBREAK",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:IBIZAN_HOUND"
+      ],
+      "allies": [
+        "0033"
+      ],
+      "rivals": [
+        "0027"
+      ]
+    },
+    "0125": {
+      "id": "0125",
+      "name": "Ironlung",
+      "rarity": "Rare",
+      "breed": "Kai Ken",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "BLOOD:KAI_KEN"
+      ],
+      "allies": [
+        "0020",
+        "0121"
+      ],
+      "rivals": []
+    },
+    "0126": {
+      "id": "0126",
+      "name": "Halogen",
+      "rarity": "Epic",
+      "breed": "Karelian Bear Dog",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "BLOOD:KARELIAN_BEAR_DOG"
+      ],
+      "allies": [
+        "0124",
+        "0090"
+      ],
+      "rivals": [
+        "0049"
+      ]
+    },
+    "0127": {
+      "id": "0127",
+      "name": "Lastlight",
+      "rarity": "Legendary",
+      "breed": "Alaskan Malamute",
+      "originCrew": "RUST HALO",
+      "bondTags": [
+        "CREW:RUST HALO",
+        "ARC:CITADEL",
+        "ARC:LEASHBREAK",
+        "ARC:BLOCKWAR",
+        "NATURE:ALPHA",
+        "STANCE:COLLAR_RESISTANT",
+        "BLOOD:ALASKAN_MALAMUTE"
+      ],
+      "allies": [
+        "0126",
+        "0121"
+      ],
+      "rivals": [
+        "0122"
+      ]
+    }
+  }
+}

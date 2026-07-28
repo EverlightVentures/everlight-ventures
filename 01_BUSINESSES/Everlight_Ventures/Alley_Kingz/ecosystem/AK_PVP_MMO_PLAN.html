@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alley Kingz -- Real-Player PvP / MMO Architecture Plan</title>
+<style>
+  :root{
+    --bg:#0b0a0f; --panel:#12111a; --panel2:#171522; --gold:#e8c55a; --gold-dim:#b9982f;
+    --ink:#e9e6df; --mut:#9a94a6; --line:rgba(232,197,90,.18); --line2:rgba(255,255,255,.06);
+    --cyan:#4fd6e0; --green:#5fd39a; --red:#e46a6a; --purple:#9d8bff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -8%, rgba(157,139,255,.10), transparent 60%),
+      radial-gradient(1000px 520px at 90% 4%, rgba(79,214,224,.08), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:16px; letter-spacing:.1px;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:26px 18px 90px}
+  h1,h2,h3{font-family:"Playfair Display",Georgia,"Times New Roman",serif;font-weight:700;line-height:1.18;letter-spacing:.2px}
+  h1{font-size:clamp(28px,6vw,46px);margin:0 0 6px;color:var(--gold)}
+  h2{font-size:clamp(21px,4.4vw,30px);margin:0;color:var(--ink)}
+  h3{font-size:clamp(16px,3.4vw,20px);margin:20px 0 6px;color:var(--gold)}
+  p{margin:9px 0}
+  a{color:var(--cyan);text-decoration:none}
+  code,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em}
+  code{background:rgba(255,255,255,.05);border:1px solid var(--line2);padding:1px 6px;border-radius:6px;color:#f0e6c8}
+
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-dim);font-weight:700}
+  .wordmark{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--mut);font-weight:700}
+  .head{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+  .sub{color:var(--mut);font-size:14px;margin-top:8px}
+
+  .phase-card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-left:3px solid var(--gold);border-radius:14px;padding:18px 20px;margin:22px 0;
+    box-shadow:0 6px 26px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03)}
+  .phase-card.p2{border-left-color:var(--cyan)}
+  .phase-card.p3{border-left-color:var(--purple)}
+  .phase-card.p0{border-left-color:var(--green)}
+  .phase-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    padding:3px 9px;border-radius:999px;border:1px solid var(--line)}
+  .tag.done{color:var(--green);border-color:rgba(95,211,154,.4);background:rgba(95,211,154,.08)}
+  .tag.build{color:var(--gold);border-color:rgba(232,197,90,.4);background:rgba(232,197,90,.08)}
+  .tag.later{color:var(--purple);border-color:rgba(157,139,255,.4);background:rgba(157,139,255,.08)}
+  .tag.hard{color:var(--red);border-color:rgba(228,106,106,.4);background:rgba(228,106,106,.08)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}}
+  .box{background:var(--panel);border:1px solid var(--line2);border-radius:11px;padding:14px 15px}
+  .box h4{margin:0 0 6px;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold-dim)}
+
+  ul{margin:8px 0 8px;padding-left:20px}
+  li{margin:5px 0}
+  .lead{font-size:17px;color:#f2eede}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;display:block;overflow-x:auto}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{color:var(--gold-dim);font-size:11px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+  td .mono{color:#f0e6c8}
+  .ok{color:var(--green);font-weight:700}
+  .no{color:var(--red);font-weight:700}
+  .warn{color:var(--gold);font-weight:700}
+
+  .callout{border-radius:12px;padding:14px 16px;margin:16px 0;border:1px solid var(--line)}
+  .callout.crux{background:linear-gradient(180deg,rgba(232,197,90,.08),rgba(232,197,90,.02));border-color:rgba(232,197,90,.35)}
+  .callout.win{background:linear-gradient(180deg,rgba(95,211,154,.08),rgba(95,211,154,.02));border-color:rgba(95,211,154,.35)}
+  .callout h4{margin:0 0 5px;color:var(--gold);font-family:"Playfair Display",Georgia,serif;font-size:18px}
+  .callout.win h4{color:var(--green)}
+
+  pre{background:#0d0c14;border:1px solid var(--line2);border-left:2px solid var(--gold-dim);border-radius:10px;
+    padding:13px 15px;overflow-x:auto;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;color:#d8d2e6;line-height:1.55}
+  pre .c{color:#6f6a80}
+  pre .k{color:var(--gold)}
+  pre .s{color:var(--green)}
+
+  .steps{counter-reset:step;padding-left:0;list-style:none}
+  .steps li{position:relative;padding:8px 0 8px 40px;border-bottom:1px solid var(--line2)}
+  .steps li:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:7px;
+    width:26px;height:26px;border-radius:50%;background:rgba(232,197,90,.1);border:1px solid var(--line);
+    color:var(--gold);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+
+  .foot{margin-top:40px;border-top:1px solid var(--line);padding-top:16px;color:var(--mut);font-size:12.5px}
+  .pill{display:inline-block;background:rgba(255,255,255,.04);border:1px solid var(--line2);border-radius:999px;
+    padding:2px 10px;font-size:12px;color:var(--mut);margin:2px 4px 2px 0}
+  hr{border:0;border-top:1px solid var(--line2);margin:26px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="wordmark">EVERLIGHT VENTURES &nbsp;/&nbsp; SAAS FACTORY &nbsp;/&nbsp; BACKEND ARCHITECTURE</div>
+    <div class="kicker" style="margin-top:14px">Alley Kingz</div>
+    <h1>From Ghost World to Real Players</h1>
+    <div class="lead">A phased architecture plan for turning the AI-populated world into a real-account PvP / MMO.</div>
+    <div class="sub">
+      Author: Amara Osei, Backend Architect (Iron Stack) &nbsp;|&nbsp; Grounded inventory: 2026-07-12 &nbsp;|&nbsp;
+      Supabase project <span class="mono">mfghdobptredxxhbjwyz</span> (AK own project, separate from the casino rail).
+      Planning deliverable only. No tables created, nothing shipped.
+    </div>
+  </div>
+
+  <!-- ============================ EXEC READ ============================ -->
+  <h2>Executive read: where the "multiplayer" really is today</h2>
+  <p>
+    The honest picture is better than expected. Alley Kingz is not a single-player game bolted to a login box.
+    A real backend already exists, is deployed, and has real accounts on it. But the competitive loop that would
+    make the world feel <em>alive with other people</em> has never actually closed. Two things are true at once:
+  </p>
+
+  <div class="grid">
+    <div class="box">
+      <h4>What is simulated (AI / ghost)</h4>
+      <ul>
+        <li><b>Every rival you see on your block.</b> The defense engine (<span class="mono">systems/defense.js</span>)
+        resolves incoming raids fully offline against <span class="mono">AK_POPULATION</span>: a deterministic pack of
+        ~6 AI dogs per clan plus strays, built from one fixed seed. It never touches Supabase.</li>
+        <li><b>The leaderboard</b> is that same ghost roster plus a "_you" row spliced in.</li>
+        <li><b>Getting raided while you sleep</b> is a mulberry32 dice roll seeded by the Pacific-time day. The same
+        absence always resolves the same. Nobody is really hitting you.</li>
+        <li><b>War-map raid targets backfill</b> from procedurally generated bot bases.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h4>What is already real (server-side)</h4>
+      <ul>
+        <li><b>Real identity.</b> Google OAuth through Supabase Auth. <span class="mono">ak_player_id = auth uid</span>.
+        Real signups since 2026-06-17.</li>
+        <li><b>Real cloud saves.</b> <span class="mono">ak_player_saves</span> holds <b>4 real accounts</b>' full game state
+        (the whole <span class="mono">ak_*</span> blob, newest-wins merge).</li>
+        <li><b>Real crew + real chat.</b> <span class="mono">ak_crews</span> has 1 live crew,
+        <span class="mono">ak_chat_messages</span> has 3 real messages over Supabase Realtime.</li>
+        <li><b>Real published bases.</b> <b>2 real players</b> have already pushed their base snapshot to
+        <span class="mono">ak_player_bases</span> so others can raid them.</li>
+        <li><b>A server-authoritative loot rail.</b> <span class="mono">ak_grants</span> has delivered 8 grants.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout crux">
+    <h4>The crux: the real-player loop is built and deployed, but has never fired once</h4>
+    <p style="margin:6px 0">
+      The async real-player raid backend is live. The <span class="mono">ak-raid</span> edge function
+      (<code>targets</code>, <code>publish-base</code>, <code>resolve</code>, <code>revenge</code>, <code>buy-shield</code>)
+      is deployed. The client already publishes bases and pulls server targets. And yet:
+    </p>
+    <p style="margin:6px 0" class="mono">
+      ak_raid_log = <span class="no">0 rows</span> &nbsp;&middot;&nbsp; ak_raid_revenge = <span class="no">0 rows</span>
+    </p>
+    <p style="margin:6px 0">
+      Zero real raids have ever been server-settled. Zero real revenge has ever been pushed. The last mile of the loop
+      is unverified, and the defense side never consumes real attackers at all. <b>Turning the ghost world into a real
+      world is not a greenfield build. It is closing and verifying a loop that is roughly ninety percent already there.</b>
+    </p>
+  </div>
+
+  <h3>The through-line to real players</h3>
+  <p>
+    You do not flip a switch from "AI world" to "real world." You <b>blend</b>. Real bases lead the war map, bots backfill
+    the empty seats. As the real population grows, the bots fade on their own (the <code>targets</code> matchmaker already
+    does exactly this: real players first, bots to fill up to six). Single-player never breaks, because every server call
+    degrades to the local procedural fallback. Signed-out equals exactly today's game. That is the migration path, and it
+    is already the design.
+  </p>
+
+  <!-- ============================ LIVE INVENTORY ============================ -->
+  <h2>Grounded inventory: the live Supabase tables (read-only, 2026-07-12)</h2>
+  <p class="sub">Probed directly against project <span class="mono">mfghdobptredxxhbjwyz</span> with the service role, count-only. No writes.</p>
+  <table>
+    <thead><tr><th>Table</th><th>Status</th><th>Rows</th><th>What it proves is real</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">ak_player_saves</td><td class="ok">LIVE</td><td>4</td><td>Cloud save works. 4 real accounts have persisted state.</td></tr>
+      <tr><td class="mono">ak_crews</td><td class="ok">LIVE</td><td>1</td><td>A real crew of real accounts exists.</td></tr>
+      <tr><td class="mono">ak_crew_members</td><td class="ok">LIVE</td><td>1</td><td>Membership rail live.</td></tr>
+      <tr><td class="mono">ak_chat_messages</td><td class="ok">LIVE</td><td>3</td><td>Real Realtime chat has happened.</td></tr>
+      <tr><td class="mono">ak_crew_wars / ak_war_battles</td><td class="warn">LIVE (idle)</td><td>0 / 0</td><td>Crew-war tables deployed, awaiting Phase 2 activation.</td></tr>
+      <tr><td class="mono">ak_crew_requests / donations / chat_bans / chat_reports</td><td class="warn">LIVE (idle)</td><td>0</td><td>Join queue, gifting, moderation rails deployed, unused.</td></tr>
+      <tr><td class="mono">ak_bot_bases</td><td class="ok">LIVE</td><td>48</td><td>Ghost raid targets, seeded and rotating per ~12 min window.</td></tr>
+      <tr><td class="mono">ak_player_bases</td><td class="ok">LIVE</td><td><b>2</b></td><td><b>2 real players published a raidable base snapshot.</b></td></tr>
+      <tr><td class="mono">ak_raid_state</td><td class="ok">LIVE</td><td>1</td><td>Shield / anti-chain state rail live.</td></tr>
+      <tr><td class="mono">ak_raid_log</td><td class="no">LIVE (empty)</td><td><b>0</b></td><td><b>No raid has ever been server-settled. The loop is not closed.</b></td></tr>
+      <tr><td class="mono">ak_raid_revenge</td><td class="no">LIVE (empty)</td><td><b>0</b></td><td><b>No real revenge has ever fired.</b></td></tr>
+      <tr><td class="mono">ak_grants</td><td class="ok">LIVE</td><td>8</td><td>Server-authoritative loot delivery is proven.</td></tr>
+      <tr><td class="mono">ak_trade_listings</td><td class="warn">LIVE (idle)</td><td>0</td><td>Trading table exists, unused.</td></tr>
+    </tbody>
+  </table>
+  <p class="sub">
+    Migrations on disk that are not deployed to this project (probe returned 404): pass, quests, cosmetics, seasons,
+    ladder, marketplace. Those are single-player economy features and are out of scope for the multiplayer through-line.
+  </p>
+
+  <div class="callout win">
+    <h4>The biggest reuse win</h4>
+    <p style="margin:6px 0">
+      The entire Block War defense system already produces the exact shape the server stores. A player's defended base
+      (posted defenders, wall HP, fortify, producer levels) is computed by <span class="mono">defense.js</span>, and
+      <span class="mono">ak_player_bases</span> was deliberately built to mirror <span class="mono">ak_bot_bases</span> so
+      "the war map renders a player base byte-identically to a bot." The raid renderer
+      (<span class="mono">raidscene.js</span>) turns any snapshot into a walkable, playable base. This means <b>a real
+      opponent and an AI opponent are already the same object to the game.</b> That is why Phase 1 is wiring, not building.
+    </p>
+  </div>
+
+  <!-- ============================ PHASE 0 ============================ -->
+  <div class="phase-card p0">
+    <div class="phase-head"><h2>Phase 0 &nbsp;-&nbsp; Foundation: server-side identity and base state</h2>
+      <span class="tag done">Mostly done</span></div>
+    <p>A real MMO needs one thing before anything else: a player identity and their base state that live on the server,
+    not in a browser. Alley Kingz already has this.</p>
+
+    <div class="grid">
+      <div class="box"><h4>Already in place</h4>
+        <ul>
+          <li><b>Identity:</b> Google OAuth via Supabase Auth (<span class="mono">ak_account.js</span>).
+          <span class="mono">auth.users.id</span> is the canonical player id, mirrored to <span class="mono">ak_player_id</span>.</li>
+          <li><b>State:</b> full game blob in <span class="mono">ak_player_saves.save</span> (jsonb, one row per user,
+          newest-wins on login, debounced push).</li>
+          <li><b>Server-authoritative write pattern:</b> the raid + crew tables have <b>no client insert/update/delete
+          policy</b>. Edge functions (service role) are the sole writers. Clients only ever read their own rows. This is
+          the correct anti-cheat posture and it is already enforced with RLS FORCE.</li>
+        </ul>
+      </div>
+      <div class="box"><h4>What to add (small)</h4>
+        <ul>
+          <li><b>A thin identity projection</b> so matchmaking and leaderboards do not scan jsonb blobs:
+          an <span class="mono">ak_players</span> row (<span class="mono">user_id, handle, trophies, tier, faction,
+          last_active</span>), written server-side whenever a base publishes or a save lands. Defer the table itself to
+          Phase 2; Phase 1 can read trophies off <span class="mono">ak_player_bases</span>.</li>
+          <li><b>Competitive integrity note:</b> the save blob is client-writable state and must never be trusted for
+          competitive reads (trophies, loot, rank). Those must be server-derived. This is already true for loot; extend
+          it to trophy deltas when Phase 2 leaderboards go live.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="sub"><b>RLS + anti-cheat:</b> every competitive table is <span class="mono">enable + force row level security</span>,
+    own-row select only, all mutations through the service-role edge function. Keep this invariant on every new table. No exceptions.</p>
+  </div>
+
+  <!-- ============================ PHASE 1 ============================ -->
+  <div class="phase-card">
+    <div class="phase-head"><h2>Phase 1 &nbsp;-&nbsp; Async real-player raiding (the Clash of Clans model)</h2>
+      <span class="tag build">Build next</span></div>
+    <p class="lead">This is where real organic life first appears, and it is the tractable first step.</p>
+    <p>
+      No live sockets. No matchmaking servers. You raid a snapshot of a real opponent's base while they are offline.
+      Matchmaking pulls a real base near your trophy range out of <span class="mono">ak_player_bases</span>; you raid it
+      using the existing base-as-battlefield renderer; the server caps and awards the loot, updates both accounts, and
+      arms a shield plus a revenge row for the victim. It reuses the entire Block War system. This is the Clash / Boom
+      Beach async cadence, and it is the correct place to start because it is fault-tolerant: if the network hiccups, you
+      raided a bot instead and nothing breaks.
+    </p>
+
+    <h3>The good news: this is deployed and 90 percent wired</h3>
+    <ul>
+      <li><span class="mono">publish-base</span> already fires from the client. Proof: 2 real bases sit in <span class="mono">ak_player_bases</span> right now.</li>
+      <li><span class="mono">targets</span> already matchmakes: real players first (freshest, caller excluded, shielded skipped), bots backfill, capped at six.</li>
+      <li><span class="mono">modes.js</span> already calls <span class="mono">resolve</span> on a raid win when the target id is a real server uuid. The server caps loot, writes <span class="mono">ak_grants</span>, ledgers <span class="mono">ak_raid_log</span> once per window, and pushes a 24h <span class="mono">ak_raid_revenge</span> row to a real victim.</li>
+    </ul>
+
+    <div class="callout crux">
+      <h4>Why the loop is not closing (the exact gap)</h4>
+      <p style="margin:6px 0">Three concrete blockers, all small:</p>
+      <ol>
+        <li><b>The base id may not survive enrichment.</b> <span class="mono">raidscene.enrich</span> rebuilds a base and can
+        stamp a local, prefixed id (<span class="mono">rs_</span> / <span class="mono">wm_loc_</span>). <span class="mono">modes.js
+        isServerBaseId()</span> rejects prefixed ids, so <span class="mono">resolve</span> is skipped and the client pays a
+        local fallback instead. Result: <span class="mono">ak_raid_log</span> stays at zero. This is the single most likely
+        cause and must be verified end to end.</li>
+        <li><b>A stale flag.</b> <span class="mono">raid.js callAkRaid</span> still carries a <code>TODO-SERVER: SPEC-ONLY</code>
+        comment even though the function is deployed. The code path works, but the comment shows the wiring was never confirmed live.</li>
+        <li><b>The defense snapshot is thin.</b> <span class="mono">publish-base</span> currently sends trophies plus producer
+        levels only. It does <b>not</b> send the four posted defenders that <span class="mono">defense.js</span> already computes.
+        So a raided real base does not reflect the defense its owner actually set. The strongest reuse in the whole plan is sitting unused.</li>
+      </ol>
+    </div>
+
+    <h3>Where "real life" enters the defense side</h3>
+    <p>
+      Right now <span class="mono">defense.js</span> is 100 percent offline and never reads Supabase. The "while you were
+      gone" report is always ghosts. The seam is <span class="mono">ak_raid_revenge</span>: when a real player raids your
+      published base, the server already pushes a real revenge row with the attacker's crew name and faction. Have
+      <span class="mono">defense.js</span> pull that inbox on load and fold real attackers into the incoming-raid report.
+      That single wire turns "a ghost hit your block" into "a real rival hit your block, hit them back."
+    </p>
+
+    <h3>Cold-start (the population problem)</h3>
+    <p>
+      With 2 real bases you cannot fill a war map from real players alone. You do not need to. The blend is already there:
+      real bases lead, the 48 bot bases backfill. Keep the bots dense while the population is small, then let the ratio
+      drift as <span class="mono">ak_player_bases</span> grows. No hard cutover, no empty world, no dead lobby. The bots are
+      the scaffolding you never have to tear down manually.
+    </p>
+  </div>
+
+  <!-- ============================ PHASE 2 ============================ -->
+  <div class="phase-card p2">
+    <div class="phase-head"><h2>Phase 2 &nbsp;-&nbsp; Presence and social: real crews, boards, wars</h2>
+      <span class="tag later">After Phase 1</span></div>
+    <p>Once real players are raiding each other, make the world feel populated between raids. Most of this is deployed and idle.</p>
+    <div class="grid">
+      <div class="box"><h4>Real leaderboards</h4>
+        <ul>
+          <li>Replace the ghost roster board with a server board sorted by trophies (the <span class="mono">ak_players</span>
+          projection from Phase 0). Global, per-faction, and per-crew boards.</li>
+          <li>Move the trophy delta to the server (raid resolve already knows the outcome) so ranks cannot be spoofed by
+          editing the local save.</li>
+        </ul>
+      </div>
+      <div class="box"><h4>Real crews and async crew wars</h4>
+        <ul>
+          <li>Crews are already live (<span class="mono">ak_crews</span>, <span class="mono">ak_crew_members</span> via the
+          <span class="mono">ak-crew</span> edge function). Activate <span class="mono">ak_crew_wars</span> +
+          <span class="mono">ak_war_battles</span> (both deployed, empty) as async crew-vs-crew trophy tallies. No live sync needed.</li>
+          <li>Card donations (<span class="mono">ak_donation_requests</span> / <span class="mono">ak_donations</span>) are
+          deployed and ready to switch on.</li>
+        </ul>
+      </div>
+      <div class="box"><h4>Spectate and replays</h4>
+        <ul>
+          <li>Because a base is a deterministic snapshot plus a seed, a raid can be <b>replayed</b> byte for byte with no live
+          socket. Spectate is a replay of a stored snapshot, not a stream. Cheap and free.</li>
+        </ul>
+      </div>
+      <div class="box"><h4>Chat and mail with moderation</h4>
+        <ul>
+          <li>World + crew chat is live over Realtime. The moderation rails exist: <span class="mono">ak_chat_bans</span>,
+          <span class="mono">ak_chat_reports</span>, server-side profanity and rate limit in <span class="mono">ak-chat</span>.</li>
+          <li>Add report review, shadow-ban, and mail (async inbox reusing the grants pattern). Safety detail in cross-cutting below.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ PHASE 3 ============================ -->
+  <div class="phase-card p3">
+    <div class="phase-head"><h2>Phase 3 &nbsp;-&nbsp; Real-time PvP: live 1v1</h2>
+      <span class="tag hard">Hardest / last</span></div>
+    <p>
+      Live 1v1 tower or MOBA-style battle where two real players are in the same match at the same time. This is the hardest
+      piece and should be last, because it is the only phase that cannot hide behind a snapshot. It needs authority, it needs
+      lag handling, and it is the first thing that will not fit the Supabase free tier.
+    </p>
+    <div class="grid">
+      <div class="box"><h4>Transport options</h4>
+        <ul>
+          <li><b>Supabase Realtime broadcast</b> for low-stakes, low-tick sync. Fastest to prototype, no new server, but not
+          authoritative and capped on concurrent connections.</li>
+          <li><b>A small authoritative WebSocket server</b> (Node or Deno) running a fixed tick. This is the correct model for
+          anything competitive. Host on e5-mother behind Cloudflare, or a small Fly / Railway box.</li>
+        </ul>
+      </div>
+      <div class="box"><h4>Authority and lag model</h4>
+        <ul>
+          <li>Server-authoritative simulation at a fixed tick. Client-side prediction plus reconciliation. An input-delay
+          buffer to absorb jitter. Never trust a client-reported hit or a client-reported win.</li>
+          <li>Matchmaking becomes a real queue: a <span class="mono">matchmaking_queue</span> table plus a matchmaker worker
+          that pairs by trophy band and spins up a match room.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="sub"><b>Do not start here.</b> Ship Phase 1 and Phase 2 first. A game feels multiplayer the moment other real
+    people raid your block and message your crew. Real-time 1v1 is the cherry, not the cake.</p>
+  </div>
+
+  <!-- ============================ CROSS-CUTTING ============================ -->
+  <h2>Cross-cutting concerns</h2>
+  <div class="grid">
+    <div class="box"><h4>Anti-cheat</h4>
+      <ul>
+        <li><b>Never trust the client for a competitive result.</b> Already the standing rule: <span class="mono">resolve</span>
+        caps loot (<span class="mono">LOOT_GOLD_CAP</span>, star multiplier clamp), enforces once-per-window anti-farm, and a
+        token regex blocks any <span class="mono">$BCARDD</span> / ALK from a loot line.</li>
+        <li>Extend the same posture to trophies and rank in Phase 2: the server computes the delta from the raid outcome, the
+        client only displays it.</li>
+        <li>RLS FORCE on every table; no client write policy on any competitive table.</li>
+      </ul>
+    </div>
+    <div class="box"><h4>Moderation and safety (real users)</h4>
+      <ul>
+        <li>Age gate exists (<span class="mono">agegate.js</span>). Chat runs server profanity + rate limit + ban check.</li>
+        <li><b>No PII on public surfaces.</b> Bases carry canon gang names chosen server-side, never free-text. Enforced by a
+        DB CHECK on faction and by the edge function.</li>
+        <li>Add: report queue review, shadow-ban, and a block list before any open world chat scales.</li>
+      </ul>
+    </div>
+    <div class="box"><h4>Matchmaking fairness</h4>
+      <ul>
+        <li>The defense resolver already picks rivals by trophy proximity. The server <span class="mono">targets</span> query
+        is freshest-first; add a trophy band filter (<span class="mono">trophies between me-N and me+N</span>) so a whale never
+        lands on a rookie.</li>
+        <li>Shield windows prevent pile-ons; a freshly raided player is skipped as a target.</li>
+      </ul>
+    </div>
+    <div class="box"><h4>Migration path (ghost to real, no breakage)</h4>
+      <ul>
+        <li>Offline-first everywhere. Every server call degrades to the local procedural fallback. Signed-out equals exactly
+        today's single-player game.</li>
+        <li>Blend, do not cut over. Real bases lead, bots backfill, ratio drifts with population. No dead world at any point.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4 style="color:var(--gold);font-family:'Playfair Display',Georgia,serif;font-size:18px;margin:0 0 6px">Cost: what fits free, and when it does not</h4>
+    <table style="display:table">
+      <thead><tr><th>Phase</th><th>Load profile</th><th>Supabase free tier verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 0 / 1 (async raid)</td><td>Tiny jsonb snapshots, cheap resolve, one publish per session</td><td class="ok">Free, comfortably. 500 MB DB, 500k edge invocations/mo, 5 GB egress cover this for a long time.</td></tr>
+        <tr><td>Phase 2 (chat, presence, wars)</td><td>Realtime messages + presence channels</td><td class="warn">Free up to ~200 concurrent Realtime connections. Fine at current scale; watch as DAU climbs.</td></tr>
+        <tr><td>Phase 3 (live 1v1)</td><td>Persistent connections, high tick, authoritative sim</td><td class="no">This is what forces a paid tier or a dedicated WS box. Budget ~5 to 10 USD/mo for a small always-on server, or Supabase Pro at 25 USD/mo, only when Phase 3 ships.</td></tr>
+      </tbody>
+    </table>
+    <p class="sub" style="margin-top:8px">Net: Phases 0, 1, and 2 stay on the free tier. No spend is required to make the world feel real. The first real cost is Phase 3, and only Phase 3.</p>
+  </div>
+
+  <!-- ============================ PHASE 1 SPEC ============================ -->
+  <h2>Recommended Phase 1 spec (concrete enough to green-light)</h2>
+  <p>
+    Phase 1 adds <b>zero new tables</b>. Everything below is already deployed. The work is: extend the snapshot, close the
+    resolve loop, and let defense consume real attackers. Here is the exact shape and the exact wiring points.
+  </p>
+
+  <h3>1. The tables (already live in <span class="mono">mfghdobptredxxhbjwyz</span>)</h3>
+  <table>
+    <thead><tr><th>Concept</th><th>Deployed table</th><th>Key columns</th><th>Writer</th></tr></thead>
+    <tbody>
+      <tr><td>players (identity + state)</td><td class="mono">auth.users + ak_player_saves</td><td class="mono">user_id (pk), save jsonb, saved_at</td><td>client (own row) for save; auth for identity</td></tr>
+      <tr><td>bases (defense snapshot)</td><td class="mono">ak_player_bases</td><td class="mono">user_id (pk), name, faction, tier, trophies, roster jsonb, buildings jsonb, loot jsonb, seed, updated_at</td><td>ak-raid (service role) only</td></tr>
+      <tr><td>decks (defenders)</td><td class="mono">ak_player_bases.roster</td><td class="mono">jsonb array of canon defender names (currently backfilled server-side; Phase 1 sends the real 4 posts)</td><td>ak-raid</td></tr>
+      <tr><td>results (raid ledger)</td><td class="mono">ak_raid_log</td><td class="mono">raider_id, base_id, window_id, is_revenge, loot_gold, loot_scrap; unique(raider_id, base_id, window_id)</td><td>ak-raid</td></tr>
+      <tr><td>results (defender side)</td><td class="mono">ak_raid_revenge</td><td class="mono">victim_id, attacker_name, attacker_faction, tier, claimed, expires_at (now + 24h)</td><td>ak-raid</td></tr>
+      <tr><td>shield / anti-chain</td><td class="mono">ak_raid_state</td><td class="mono">user_id (pk), shield_until, last_raid_at, last_reinforce_at</td><td>ak-raid</td></tr>
+      <tr><td>loot delivery</td><td class="mono">ak_grants</td><td class="mono">user_id, kind, amount, rarity, source, note</td><td>ak-raid; drained by AKSocial.claimGrants</td></tr>
+    </tbody>
+  </table>
+  <p class="sub">RLS on all: own-row select only, no client write policy, service-role edge function is the sole writer. This is already the deployed state.</p>
+
+  <h3>2. The snapshot write point (the key reuse)</h3>
+  <p>
+    <span class="mono">defense.js</span> already computes the exact defense a raider should face:
+    <span class="mono">AK_DEFENSE.posts(p)</span> (the four posted defenders) and <span class="mono">defenseScore(p)</span>
+    (wall HP + fortify + watch). Today <span class="mono">raid.js publishMyBase</span> ignores it and sends only producer
+    levels. The fix: feed the defense roster into the snapshot.
+  </p>
+  <pre><span class="c">// raid.js publishMyBase() -- extend the body sent to ak-raid {action:'publish-base'}</span>
+<span class="k">var</span> posts   = <span class="k">global</span>.AK_DEFENSE ? AK_DEFENSE.posts(p) : [];        <span class="c">// the real 4 posted dogs</span>
+<span class="k">var</span> roster  = posts.map(<span class="k">function</span>(q){ <span class="k">return</span> q.cardName; }).filter(Boolean);
+<span class="k">var</span> defScore = <span class="k">global</span>.AK_DEFENSE ? AK_DEFENSE.defenseScore(p) : 0;
+
+callAkRaid({ action: <span class="s">'publish-base'</span>, trophies: tr, tier: tier,
+             buildings: buildings, roster: roster, def_score: defScore });
+
+<span class="c">// trigger: also call publishMyBase on a DEFENSE change (assign/clear/fortify),</span>
+<span class="c">// not only on session start, so a raided base reflects the defense the owner set.</span></pre>
+  <p class="sub">Server side: <span class="mono">ak-raid publish-base</span> stores <span class="mono">roster</span> into
+  <span class="mono">ak_player_bases.roster</span> (Mythic filtered as today). No schema change; the column already exists.</p>
+
+  <h3>3. The matchmaking query (already deployed, one refinement)</h3>
+  <p>Inside <span class="mono">ak-raid</span> <code>targets</code>: serve real bases first, bots backfill, skip shielded, cap six. Today it is freshest-first. Add a trophy band for fairness.</p>
+  <pre><span class="c">-- current (deployed): freshest real bases, exclude caller, cap the list</span>
+<span class="k">select</span> * <span class="k">from</span> public.ak_player_bases
+<span class="k">where</span> user_id &lt;&gt; :caller
+<span class="k">order by</span> updated_at <span class="k">desc</span> <span class="k">limit</span> 8;   <span class="c">-- then skip shielded, take 3, bots fill to 6</span>
+
+<span class="c">-- Phase 1 refinement: add a trophy band so matches stay fair as the pool grows</span>
+<span class="k">where</span> user_id &lt;&gt; :caller
+  <span class="k">and</span> trophies <span class="k">between</span> :my_trophies - 400 <span class="k">and</span> :my_trophies + 400
+<span class="k">order by</span> updated_at <span class="k">desc</span> <span class="k">limit</span> 8;</pre>
+
+  <h3>4. The client changes (close the loop)</h3>
+  <ol class="steps">
+    <li><b>Verify the base id survives enrichment.</b> Confirm the war-map target keeps its real Supabase uuid through
+    <span class="mono">raidscene.enrich</span> so <span class="mono">modes.js isServerBaseId()</span> returns true and
+    <span class="mono">resolve</span> actually fires. This is the number-one reason <span class="mono">ak_raid_log</span> is still 0.</li>
+    <li><b>Send the defense roster on publish</b> (snippet above) so a raided base fights back with the owner's real dogs.</li>
+    <li><b>Consume real revenge in defense.js.</b> On load, pull <span class="mono">ak-raid {action:'revenge'}</span> and fold
+    real attackers into the "while you were gone" report, so being raided stops being purely a ghost simulation.</li>
+    <li><b>Remove the stale <code>TODO-SERVER: SPEC-ONLY</code> comment</b> in <span class="mono">raid.js</span> and confirm the
+    live path. Documentation lying about deployed state is a trap for the next builder.</li>
+    <li><b>Verify loot drain.</b> After <span class="mono">resolve</span> returns <span class="mono">looted:true</span>, confirm
+    <span class="mono">AKSocial.claimGrants()</span> pulls the queued <span class="mono">ak_grants</span> so loot lands exactly once, server-capped.</li>
+    <li><b>Tune the cold-start blend.</b> Keep bot density high at 2 real bases; expose the real-to-bot ratio so it can drift as the pool grows.</li>
+  </ol>
+
+  <div class="callout win">
+    <h4>Phase 1 build estimate</h4>
+    <p style="margin:6px 0">
+      <b>Effort:</b> roughly 2 to 4 focused build sessions. This is wiring and verification, not new architecture. No new
+      tables, no new edge function, no new infrastructure. The heavy lifting (server, RLS, anti-cheat caps, snapshot renderer,
+      loot rail) is already deployed and partially exercised.
+    </p>
+    <p style="margin:6px 0">
+      <b>Cost:</b> <span class="ok">0 USD.</span> Fits the Supabase free tier with wide headroom.
+    </p>
+    <p style="margin:6px 0">
+      <b>Definition of done:</b> two real accounts raid each other's published bases; <span class="mono">ak_raid_log</span>
+      and <span class="mono">ak_raid_revenge</span> start incrementing; loot lands once, server-capped; a shield and a real
+      revenge card appear. The moment those two counters move off zero, the world has real organic life in it.
+    </p>
+  </div>
+
+  <h3>What needs the operator's GO before any real build</h3>
+  <ul>
+    <li><b>Green-light Phase 1</b> (close the async raid loop) as the first real multiplayer build. Recommended.</li>
+    <li><b>Approve the blend model:</b> AI bot bases stay in the target pool as scaffolding until the real population grows.
+    They are not removed; they fade.</li>
+    <li><b>Approve including posted defender names</b> in the base snapshot (canon gang / card names, no PII) so a real base
+    defends with the owner's real dogs.</li>
+    <li><b>Confirm scope discipline:</b> Phase 1 adds no new tables and touches no destructive migration. Phase 3 (real-time
+    1v1) is explicitly deferred and is the only phase that will require spend.</li>
+  </ul>
+
+  <div class="foot">
+    <div>
+      <span class="pill">Supabase mfghdobptredxxhbjwyz</span>
+      <span class="pill">defense.js Block War</span>
+      <span class="pill">ak-raid edge function</span>
+      <span class="pill">async-first</span>
+      <span class="pill">offline-degrade</span>
+      <span class="pill">RLS force</span>
+    </div>
+    <p style="margin-top:10px">
+      Prepared by <b>Amara Osei</b>, Backend Architect, Bravo "Iron Stack", SaaS Factory, Everlight Ventures.
+      Grounded against the live project and the working tree on 2026-07-12. Planning artifact only: no tables were created,
+      no code was shipped. In service of Lucrex, King of Divine Light.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

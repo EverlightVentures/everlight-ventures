@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alley Kingz | Implementation Plan</title>
+<style>
+  :root{
+    --bg:#0b0a0f; --panel:#141119; --panel2:#181420; --ink:#ece7dd; --dim:#9a9385;
+    --gold:#e8c55a; --gold-dim:#8a7838; --line:#2a2433;
+    --p0:#ff5d5d; --p1:#e8c55a; --p2:#7fb3ff; --free:#5fd58a; --paid:#ff9d4d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; font-size:15px;
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(232,197,90,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(127,179,255,.06), transparent 55%);
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:22px 16px 80px}
+  h1,h2,h3,.serif{font-family:"Playfair Display",Georgia,"Times New Roman",serif}
+  h1{font-size:30px;line-height:1.12;margin:0 0 6px;color:var(--gold);letter-spacing:.3px}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 18px;letter-spacing:.5px;text-transform:uppercase}
+  .exec{background:linear-gradient(180deg,var(--panel),#100d16);border:1px solid var(--line);
+    border-left:3px solid var(--gold);border-radius:12px;padding:16px 18px;margin:0 0 26px;font-size:14.5px}
+  .exec b{color:var(--gold)}
+  h2{font-size:20px;margin:34px 0 4px;color:var(--ink);display:flex;align-items:center;gap:10px}
+  h2 .n{font-family:"Inter",sans-serif;font-size:12px;color:var(--bg);background:var(--gold);
+    border-radius:6px;padding:2px 8px;font-weight:700;letter-spacing:.5px}
+  .lead{color:var(--dim);font-size:13.5px;margin:2px 0 14px;max-width:820px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 15px 13px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold-dim)}
+  .card.p0::before{background:var(--p0)} .card.p1::before{background:var(--p1)} .card.p2::before{background:var(--p2)}
+  .card h3{font-size:15.5px;margin:0 0 8px;color:var(--gold);line-height:1.2;padding-right:52px}
+  .badges{position:absolute;top:12px;right:12px;display:flex;gap:5px}
+  .b{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 6px;letter-spacing:.4px;font-family:"Inter",sans-serif}
+  .b.p0{background:rgba(255,93,93,.16);color:var(--p0);border:1px solid rgba(255,93,93,.4)}
+  .b.p1{background:rgba(232,197,90,.14);color:var(--gold);border:1px solid rgba(232,197,90,.4)}
+  .b.p2{background:rgba(127,179,255,.14);color:var(--p2);border:1px solid rgba(127,179,255,.4)}
+  .row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .chip{font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--dim)}
+  .chip b{color:var(--ink);font-weight:600}
+  .chip.free{border-color:rgba(95,213,138,.4);color:var(--free)}
+  .chip.paid{border-color:rgba(255,157,77,.45);color:var(--paid)}
+  .k{color:var(--gold);font-weight:700;font-size:11px;letter-spacing:.6px;text-transform:uppercase;display:block;margin:9px 0 2px}
+  .card p{margin:0;font-size:13px;color:#cfc9bd}
+  .gap{font-size:12.5px;color:var(--dim);border-top:1px dashed var(--line);margin-top:11px;padding-top:9px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;
+    background:#0f0d14;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:#f0d98a;white-space:nowrap}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;margin-top:6px}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:13px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{background:#100d16;color:var(--gold);font-family:"Playfair Display",Georgia,serif;font-weight:600;position:sticky;top:0}
+  td .tag{font-size:11px;font-weight:700}
+  .fcell{color:var(--free);font-weight:600} .pcell{color:var(--paid);font-weight:600}
+  tfoot td{font-weight:700;color:var(--gold);background:#100d16;border-top:2px solid var(--gold-dim)}
+  .waves{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:12px}
+  .wave{background:linear-gradient(180deg,var(--panel2),#100d16);border:1px solid var(--line);border-radius:14px;padding:16px 17px}
+  .wave .wn{font-family:"Playfair Display",Georgia,serif;color:var(--gold);font-size:17px;margin:0 0 3px}
+  .wave .goal{color:var(--dim);font-size:12px;margin:0 0 11px;font-style:italic}
+  .wave ul{margin:0;padding-left:17px} .wave li{font-size:12.8px;margin:5px 0;color:#d3cdc0}
+  .wave .foot{margin-top:11px;font-size:11.5px;color:var(--dim);border-top:1px dashed var(--line);padding-top:8px}
+  .wave .cost{color:var(--free);font-weight:700}
+  .wave .cost.paid{color:var(--paid)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--dim);margin:14px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  hr.sep{border:0;border-top:1px solid var(--line);margin:30px 0 0}
+  .foot-note{color:var(--dim);font-size:11.5px;margin-top:40px;text-align:center;letter-spacing:.4px}
+  @media(max-width:520px){ h1{font-size:24px} .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Alley Kingz &mdash; Implementation Plan</h1>
+  <p class="sub">Synthesis of 3 read-only audits &middot; Gameplay+Wiring &middot; Art+World &middot; Storyline+Synergy &middot; 2026-07-12</p>
+
+  <div class="exec">
+    The game is <b>not a shell</b>. The core systems are built and reachable: a tower battler, raids, a base-builder, four playable street modes (MOBA, Gulag, Defend, Arcade), a 106-book Chronicles lake, a 7-rung Crown Bloodline meta arc, a 10-act district campaign, a Pokemon-style starter+rival moment, and a needs engine. The through-line across all three audits is the same: <b>the parts exist but the wires between them are cut, dead, or asymmetric</b>. Needs decay with no place to satisfy them; thought-bubbles point at a <code>BARN</code> that was never built; minigames render on black test-harness canvases while the real arena art sits unused on disk; base-building lacks the Clash "board" read even though the shadow/extrude tech already ships in the hub; and the saga's named nemesis (the Mongrel King) is <b>narrated but never fought</b> while the campaign ends on an unrelated boss. Almost every fix below is <b>wiring, not rebuilding</b> &mdash; the biggest, cheapest wins are code-only reuse of assets and APIs that already exist. Paid render spend concentrates on the ~14 flagship portraits and one 2-zone establishing plate: the pixels a player actually stares at.
+  </div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--p0)"></i> P0 breaks/annoys now</span>
+    <span><i class="dot" style="background:var(--p1)"></i> P1 core value</span>
+    <span><i class="dot" style="background:var(--p2)"></i> P2 polish</span>
+    <span><i class="dot" style="background:var(--free)"></i> free (code / CF free tier)</span>
+    <span><i class="dot" style="background:var(--paid)"></i> paid Higgsfield credits</span>
+  </div>
+
+  <!-- ============ QUICK FIXES ============ -->
+  <h2><span class="n">0</span> Quick Fixes &mdash; P0, IN PROGRESS</h2>
+  <p class="lead">All three verified real and located. Being shipped now by the owner &mdash; listed for reference, no action needed in this plan.</p>
+  <div class="grid">
+    <div class="card p0">
+      <div class="badges"><span class="b p0">P0</span></div>
+      <h3>Post-raid CONTINUE dumps to district</h3>
+      <span class="k">What</span><p>Raid victory returns to the map instead of the comic. Manga victory page + chronicle sweep already exist but are skipped.</p>
+      <span class="k">How</span><p>Route <code>akExitRaid</code> through the existing <code>victoryPage</code> before returning to <code>prevZone</code>.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>index.html:1934-1938</code> vs built page <code>:1899-1910</code></div>
+    </div>
+    <div class="card p0">
+      <div class="badges"><span class="b p0">P0</span></div>
+      <h3>No PLAY-AGAIN on raid or street modes</h3>
+      <span class="k">What</span><p>Raid end offers only SHARE+CONTINUE; street modes only banner-close. No fast rematch.</p>
+      <span class="k">How</span><p>Add a REMATCH button on every mode end (shared with the raid play-again work).</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>index.html:1925-1930</code>, <code>modes.js:977</code></div>
+    </div>
+    <div class="card p0">
+      <div class="badges"><span class="b p0">P0</span></div>
+      <h3>Raid fire-rate ~1/sec feels sluggish</h3>
+      <span class="k">What</span><p>Player ranged output is a slow ability-bolt on a decaying cooldown.</p>
+      <span class="k">How</span><p>Owner tuning the <code>RAID.fireCd</code> cadence.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>index.html:1701/1744/1583</code></div>
+    </div>
+  </div>
+
+  <!-- ============ SIM LIFE ============ -->
+  <h2><span class="n">1</span> Sim Life &mdash; a place to satisfy the needs</h2>
+  <p class="lead">The needs engine tracks HUNGER / MORALE / ENERGY / HONOR but only hunger is satisfiable, via a conditional HUD chip. ENERGY has zero active refill. The fix is ONE walk-in building plus three string edits &mdash; no new meters (bible 10.1: "4 needs, not 8").</p>
+  <div class="grid">
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Build THE DEN (walk-in care hub)</h3>
+      <span class="k">What</span><p>One walk-in on HOME_TURF with 4 keeper affordances: FEED THE PACK, REST/SLEEP, RUN THE YARD, WASH/GROOM. Restroom/sleep/wash fold into the existing four needs.</p>
+      <span class="k">How</span><p>~120-line hub-only module mirroring <code>production.js</code> onEnterBuilding. FEED &rarr; <code>AK_NEEDS.feed(n)</code>; REST &rarr; <code>AK_ECON.refillStamina()</code> (built-but-unused API at <code>economy.js:1362</code> finally gets a trigger &mdash; the only thing giving ENERGY player agency); YARD &rarr; <code>AK_NEEDS.boostMorale()</code>; WASH &rarr; cosmetic + tiny morale. Add one <code>B('DEN',...)</code> to the building table. Reuse <code>kennel.png</code> + <code>fixer_den.png</code> as placeholders.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip paid">~2 CF renders (free tier)</span></div>
+      <div class="gap">Needs engine <code>needs.js:289</code> &middot; HUD feed <code>index.html:3442-3467</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Re-point the two dead ad wires</h3>
+      <span class="k">What</span><p>Thought-bubbles route hungry runners to a <code>BARN</code> that does not exist and tired ones to the <code>KENNEL</code> (breeding, never touches stamina). Both dead-end.</p>
+      <span class="k">How</span><p>Three string edits: <code>needs.js:271</code> <code>BARN&rarr;DEN</code>; <code>needs.js:277</code> <code>KENNEL&rarr;DEN</code>; <code>game.html:5670</code> gaunt banner "at the BARN"&rarr;"at the DEN". Requires THE DEN to exist first.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">Dead route <code>index.html:1024-1026</code> (akFlyRoute)</div>
+    </div>
+  </div>
+
+  <!-- ============ MINIGAME ART + MECHANICS ============ -->
+  <h2><span class="n">2</span> Minigame Art + Mechanics</h2>
+  <p class="lead">MOBA, Gulag, Defend and the 3 arcade games are reachable, playable MVPs &mdash; NOT stubs. Do not rebuild; wire. Two audits agree: the "black backdrop" is real art sitting unused on disk, and mode wins drive nothing in the meta-loop.</p>
+  <div class="grid">
+    <div class="card p0">
+      <div class="badges"><span class="b p0">P0</span></div>
+      <h3>WORLD MOBA renders flat black</h3>
+      <span class="k">What</span><p>Plain MOBA draws only a <code>#0a0c12</code> fillRect. Four arena plates already exist on disk and are unused here: <code>assets/arena/{the_lot,arena_a_neon_night,arena_b_golden_industrial,arena_c_rain_docks}.png</code>. Wiring gap, not missing art.</p>
+      <span class="k">How</span><p>Cover-fit <code>hubImg('assets/arena/&lt;arena&gt;.png')</code> into the lane plot (same pattern the ASSAULT branch already uses for <code>midtown_ground</code>), pick by district, add a skyline band, enable <code>drawGrit()</code> for plain MOBA too. Downscale plates to ~1280px WEBP first.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE (art on disk)</span></div>
+      <div class="gap"><code>modes.js:820</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Draw district art behind all mechanics</h3>
+      <span class="k">What</span><p>MOBA/Gulag/Defend mechanics draw over a flat near-black fill with no arena behind them.</p>
+      <span class="k">How</span><p>One <code>drawImage</code> of the already-decoded <code>districtBg</code> (or reuse <code>the_strip_bg.png</code>) at low alpha at the top of each render fn, before the flat fillRect.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>modes.js:272-277 / :1089 / :1675</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>THE STREET picker shows wrong room</h3>
+      <span class="k">What</span><p>Street mode picker paints the generic <code>merchant.png</code>. The correct <code>street_mode.png</code> (1.2MB) exists on disk, unused.</p>
+      <span class="k">How</span><p>One-token change: <code>interiorArt:'assets/interiors/street_mode.png'</code>.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>modes.js:1754</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>THE ARCADE paints a procedural board</h3>
+      <span class="k">What</span><p>Arcade overlay draws a gold-gradient board instead of the real neon-arcade art <code>arcade.png</code> (1.2MB, on disk, unused).</p>
+      <span class="k">How</span><p>Cover-fit <code>arcade.png</code> in <code>drawBg()</code>, dim ~34% for tile contrast, keep the procedural vignette on top as fallback.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>arcade.js buildBg ~L242-291</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Mode wins are dead-end coin islands</h3>
+      <span class="k">What</span><p>MOBA pays 18 trophies, arcade pays a daily gold cap &mdash; none fire morale, feed missions/quests, or move the Alley Pass. A win moves a coin counter and nothing else.</p>
+      <span class="k">How</span><p>On any mode win: <code>AK_NEEDS.boostMorale('crewwin')</code> + report through the existing <code>report*</code> rail (<code>missions.js:308</code>) so it counts toward daily duties + Alley Pass XP. Hook points: <code>modes.js:786 / :977</code>.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">Isolated payout <code>modes.js:785</code></div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Backdrop house-style drift</h3>
+      <span class="k">What</span><p>Mode floors were generated across different tools/waves so the city reads inconsistently (home = stretched photos, MOBA = none, districts = crisp <code>*_bg.png</code>).</p>
+      <span class="k">How</span><p>One style-lock re-render of the odd-one-out floors from a single locked palette, keeping the crisp district <code>*_bg.png</code> set as reference.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE-ish (a few CF plates)</span></div>
+      <div class="gap">Bible S12 consistency</div>
+    </div>
+  </div>
+
+  <!-- ============ DISTRICT + BASE GRAPHICS ============ -->
+  <h2><span class="n">3</span> District + Base Graphics &mdash; the Clash "board" read</h2>
+  <p class="lead">The gap: Clash reads as a fixed camera on a discrete tiled plot; ours is a stretched top-down photo with a faint dot field. Five upgrades, four code-only. Plus the "one plot, two worlds" zoning that makes the defense fantasy legible and gives the farm sim a warm home.</p>
+  <div class="grid">
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Baseplate + contact shadow (port existing tech)</h3>
+      <span class="k">What</span><p>Placed structures float &mdash; no ground shadow or footprint plate. The hub already ships a 2.5D contact shadow + extrude; it is just not ported into build mode.</p>
+      <span class="k">How</span><p>Port <code>bldShadow</code> + <code>BLD_DEPTH</code> into <code>drawStruct</code>: ellipse shadow + snapped footprint rect before the sprite.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE (in-repo)</span></div>
+      <div class="gap">tech at <code>index.html:2148-2155</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Real cell grid on the ground plane</h3>
+      <span class="k">What</span><p>Build mode draws a 2px dot field, no discrete-cell board read.</p>
+      <span class="k">How</span><p>Stroke <code>GRID(64)</code> cell rects in world&rarr;screen space inside BUILD_RANGE + an alternating-cell checker for the iso board feel.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>buildmode.js:1291</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Bounded tiled PLOT + wall ring</h3>
+      <span class="k">What</span><p>Ground is ONE photo stretched over the whole world at 0.80 alpha &mdash; blurs, gives no plot boundary. Opposite of Clash's crisp edge.</p>
+      <span class="k">How</span><p>Draw a bounded plot rect with <code>createPattern</code> from 2-3 seamless 512px terrain tiles + a perimeter wall; outer street stays the photo.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip paid">2-3 CF tiles (free)</span></div>
+      <div class="gap"><code>index.html:2129</code></div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Per-cell placement feedback</h3>
+      <span class="k">What</span><p>Placement ghost is a single translucent rect &mdash; no per-cell footprint tell, no snap pulse.</p>
+      <span class="k">How</span><p>Compute covered cells from the piece footprint around the snapped center; fill each cell green/red by validity + snap pulse on drop.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>buildmode.js:1301</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Zoning: HOMESTEAD vs GAUNTLET (one plot, two worlds)</h3>
+      <span class="k">What</span><p>Sim-life (garden beds, produce, morale) and defense (walls, traps, raid waves) share one undifferentiated ground. Split the plot down a seam: warm HOMESTEAD (soil/grass, string lights, barn, coop, sleep den) vs cold GAUNTLET (concrete/rubble, torches, walls, watchtowers) divided by a fortified GATE raiders must breach.</p>
+      <span class="k">How</span><p>Zone the plot spatially with per-zone ground tiles + lighting tint; raiders spawn on the Gauntlet edge; the gate seam is the single highest-value new establishing render.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip paid">free CF tiles + ~2cr seam plate</span></div>
+      <div class="gap">buildmode GARDEN + <code>defense.js</code> FORTIFY</div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Homestead building art</h3>
+      <span class="k">What</span><p>needs.js references a barn + rest need but no barn/coop/sleep-den art exists &mdash; the sim side is visually absent.</p>
+      <span class="k">How</span><p>3 facades + placeables: Barn (produce store), Coop/Pen (morale), Sleep Den (energy). CF flux for coop/den, Higgsfield for the hero barn.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip paid">free (2 CF) + ~1cr barn</span></div>
+      <div class="gap">ties into THE DEN cluster</div>
+    </div>
+  </div>
+
+  <!-- ============ BIBLE S12 CHARACTER ART ============ -->
+  <h2><span class="n">3b</span> Bible S12 &mdash; Character &amp; Combat Art</h2>
+  <p class="lead">The highest-impact art gap: portraits are 0/106 and the hero picker falls back to STAT CARDS, a direct violation of S12.1 CONTEXT LAW. Paid credits concentrate here.</p>
+  <div class="grid">
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Portraits 0/106 (S12 CONTEXT LAW)</h3>
+      <span class="k">What</span><p>"Who runs the streets" picker shows stat cards where portraits belong. Generate shoulders-up portraits to <code>assets/portraits/NNNN.jpg</code>: 14 flagship Mythic/Legendary first, then the 92 faction-wave dogs.</p>
+      <span class="k">How</span><p>Higgsfield for the 14 flagships; CF flux bulk batches for the remaining 92 (bible 12.4); PIL-verify each batch before ship.</p>
+      <div class="row"><span class="chip">EFFORT <b>L</b></span><span class="chip paid">~14cr flagships + free CF bulk</span></div>
+      <div class="gap">picker fallback <code>index.html:1293</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Victory clip is always $BCARDD + missing fallbacks</h3>
+      <span class="k">What</span><p><code>win.mp4</code> is always $BCARDD (wrong when another dog wins); IDLE/HIT/VICTORY have zero class-fallback clips.</p>
+      <span class="k">How</span><p>Interim (free): victory page reads the winner's card art now. Full: 6 class HIT + 6 class IDLE motion clips via Higgsfield.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip paid">free interim + ~12cr class clips</span></div>
+      <div class="gap">bible S12.1</div>
+    </div>
+  </div>
+
+  <!-- ============ SYNERGY WIRING ============ -->
+  <h2><span class="n">4</span> Synergy Wiring &mdash; connect the dead wires</h2>
+  <p class="lead">Cross-system connectors where data already flows but the last link is missing or asymmetric. All free.</p>
+  <div class="grid">
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>106 story books drive almost nothing</h3>
+      <span class="k">What</span><p>The Chronicles lake feeds one thin next-battle buff and unlocks no modes, cards, areas, or the DEN &mdash; a huge content lake on one wire.</p>
+      <span class="k">How</span><p>Gate tangible rewards behind story progress: arcade high-score cosmetics, DEN groom skins, a Fence LORE-LOCKED stock item (bible 10.4). Reuse the <code>chronChoices</code> + <code>repRank</code> read path.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">read path <code>chronicles.js</code></div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Needs debuff hits tower vs raid asymmetrically</h3>
+      <span class="k">What</span><p>Starvation's <code>dmgMult</code> cannot land in the frozen tower engine (sub-1 mults are clamped), so it is redirected to a match-gold penalty; the real damage debuff only bites in the RAID loop. Not a crash &mdash; an undocumented asymmetry.</p>
+      <span class="k">How</span><p>No fix needed for correctness. If desired, tag starving-match spawns with a small HP/fire-rate reduction (the frozen-engine-safe pattern already used for rage) instead of the clamped dmg mult.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">clamp at <code>engine.js:1333/2469</code></div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Two sealed districts, no unlock path</h3>
+      <span class="k">What</span><p>THE_UNDERCITY and THE_OVERLOOK are <code>locked:true</code> with empty buildings and no unlock &mdash; visible dead content ("sealed (soon)").</p>
+      <span class="k">How</span><p>Add an unlock check in the zone-travel gate keyed to <code>repRank</code> or a chronChoice flag ("reach Rank X to open"), OR hide them from ZNAV until built.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE (unlock) / L if built out</span></div>
+      <div class="gap"><code>index.html:646/674/782/1198</code></div>
+    </div>
+  </div>
+
+  <!-- ============ STORYLINE -> PLAYABLE ============ -->
+  <h2><span class="n">5</span> Storyline &rarr; Playable</h2>
+  <p class="lead">The story is far more wired than "a reader" &mdash; but the saga's climax is narrated not fought, the starter rival is a dead wire, and the retention hook the bible names is missing. These make the story a PLAYED experience.</p>
+  <div class="grid">
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Make the Mongrel King a real boss + heal the canon fracture</h3>
+      <span class="k">What</span><p>Two final villains that never reference each other: the playable campaign ends at THE REGENT; the meta arc's nemesis is the MONGREL KING &mdash; but <code>CHALLENGE_THE_KING</code> advances on a trophy count and the King is only ever narrated. His portrait (<code>nemesis_mongrel.png</code>) already exists.</p>
+      <span class="k">How</span><p>Reuse the STORY_ACTS boss machinery (<code>game.html ~7091-7111</code> + <code>AK_MANGA.battleCall</code>) to field him as the tower/season-final; call the built <code>AKStory.advance(true)</code> force-crown on defeat; add one line naming THE REGENT as his seat/title so the two frameworks become one throne.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE (art + rigs exist)</span></div>
+      <div class="gap">campaign <code>game.html:2636</code> vs meta <code>story.js GEN_I</code></div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Resurrect the starter rival</h3>
+      <span class="k">What</span><p>The bible-11.1 rival ("that grudge don't expire") is WRITTEN at the starter moment (<code>index.html:3659</code>, <code>p.rivalName/p.rivalCard</code>) and read by NOTHING. The nemesis combat rigs exist but are fed random cards.</p>
+      <span class="k">How</span><p>Pure read-side wiring: feed <code>p.rivalCard</code> into <code>encounters.js</code> street-fights and <code>worldmap.js nemesisFor()</code>, scale their tier to player rank, add a "your rival rose" population beat, pay it off with a showdown just before CHALLENGE_THE_KING.</p>
+      <div class="row"><span class="chip">EFFORT <b>S</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">smallest effort / highest emotion on the board</div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Add the CLIFFHANGER retention hook</h3>
+      <span class="k">What</span><p>Bible 9.1 names "TO BE CONTINUED" as THE retention mechanic. It is not implemented anywhere.</p>
+      <span class="k">How</span><p>Add <code>AK_MANGA.cliffhanger()</code> (same canvas page as <code>victoryPage</code>), fire on exit-to-district after a boss clear and on the visibilitychange hook, seeded from <code>AKStory.stage().objective</code> or the next STORY_ACTS boss. Reuses existing panel art.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>manga_fx.js</code> (grep empty)</div>
+    </div>
+    <div class="card p1">
+      <div class="badges"><span class="b p1">P1</span></div>
+      <h3>Chronicles books &rarr; quest fuel</h3>
+      <span class="k">What</span><p>Reading never feeds play beyond a one-shot buff; inter-book feuds have no playable expression (violates bible 9.2 Rule of Reflection).</p>
+      <span class="k">How</span><p>Add an optional <code>target:{cardNumber,tier}</code> to story beats; <code>chronicles.js</code> emits it on beat-complete; <code>mission_active.js</code> spawns a "settle it" Fixer job and <code>encounters.js</code> fields that exact card as the nemesis via the existing launch rig. Start with 5 flagships + the Chop-Shop Split roots (data-authored).</p>
+      <div class="row"><span class="chip">EFFORT <b>L</b></span><span class="chip free">FREE (authoring only)</span></div>
+      <div class="gap">reuses mission_active + encounters rigs</div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Manga grammar for raids / PVP / defense</h3>
+      <span class="k">What</span><p>Bible 9.3 requires the full grammar on raids/PVP/defense, but <code>raid.js / raidscene.js / defense.js</code> make ZERO <code>AK_MANGA</code> calls &mdash; the most-repeated loop is story-mute.</p>
+      <span class="k">How</span><p>Call <code>battleCall({name,accent,crest})</code> at raid entry (target base clan color), <code>victoryPage</code> on raid win (takeover framing), render the nightly <code>defense.js log[]</code> as a "LAST NIGHT" news-strip. Data already flows through these systems.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">rival{name,clan,color} in defense log</div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>Choices that persist + pay off</h3>
+      <span class="k">What</span><p>89-91 choice panels feed only a one-shot buff and "never re-ask" &mdash; no branching, faction shift, or later payoff (bible 10.3 Payoff Register).</p>
+      <span class="k">How</span><p>Extend <code>recordChoice()</code> to write tag deltas to <code>p.storyFlags</code>; surface need-gated (desperate/authority) options off <code>AK_NEEDS.state()</code>; add a payoff resolver that re-reads prior choices when a later book opens.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap"><code>chronicles.js:305/255</code></div>
+    </div>
+    <div class="card p2">
+      <div class="badges"><span class="b p2">P2</span></div>
+      <h3>One SAGA map screen</h3>
+      <span class="k">What</span><p>Three story ladders (10-act campaign, 7-rung Crown Climb, 4-clan standing) are never fused into one "where am I" view.</p>
+      <span class="k">How</span><p>Extend <code>akOpenStory()</code> (<code>index.html:1059</code>) into a saga map composing three existing reads: <code>g.worldCity</code>, <code>AKStory.stage()</code>, <code>AKKarma</code> clan tiers, with nemesis + collar markers. No new data.</p>
+      <div class="row"><span class="chip">EFFORT <b>M</b></span><span class="chip free">FREE</span></div>
+      <div class="gap">codex.js already computes storyTie/faction&rarr;acts</div>
+    </div>
+  </div>
+
+  <!-- ============ RENDER MANIFEST ============ -->
+  <h2><span class="n">6</span> Render Manifest + Credit Estimate</h2>
+  <p class="lead">Chain of command: CF flux (free) for bulk floors and tiles, Higgsfield for hero stills + motion. Credits are rough Higgsfield estimates. Paid spend concentrates on the pixels a player stares at.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Asset</th><th>Tool</th><th>Priority</th><th>Cost</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>WIRE EXISTING &mdash; arena plates + street_mode.png + arcade.png into MOBA/Streets/Arcade (code only)</td><td>&mdash;</td><td><span class="tag" style="color:var(--p0)">P0</span></td><td class="fcell">FREE</td></tr>
+      <tr><td>1</td><td>Homestead ground tiles (2-3 seamless 512px)</td><td>CF flux</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="fcell">free</td></tr>
+      <tr><td>2</td><td>Gauntlet ground tiles (2-3 seamless 512px)</td><td>CF flux</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="fcell">free</td></tr>
+      <tr><td>3</td><td>Seam GATE + fence divider</td><td>CF flux</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="fcell">free</td></tr>
+      <tr><td>4</td><td>Home 2-zone establishing plate (warm-behind / cold-front)</td><td>Higgsfield</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="pcell">~2 cr</td></tr>
+      <tr><td>5</td><td>DEN keeper card + DEN interior</td><td>CF flux</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="fcell">~2 renders (free tier)</td></tr>
+      <tr><td>6</td><td>Barn + Coop/Pen + Sleep Den facades (barn &rarr; Higgsfield)</td><td>CF / Higgsfield</td><td><span class="tag" style="color:var(--p2)">P2</span></td><td class="pcell">free + ~1 cr</td></tr>
+      <tr><td>7</td><td>Watchtower + trap decals (2-3)</td><td>CF flux</td><td><span class="tag" style="color:var(--p2)">P2</span></td><td class="fcell">free</td></tr>
+      <tr><td>8</td><td>Building baseplate + soft-shadow (reuse bldShadow)</td><td>code only</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="fcell">FREE</td></tr>
+      <tr><td>9</td><td>Flagship PORTRAITS, 14 Mythic/Legendary &rarr; assets/portraits/NNNN.jpg</td><td>Higgsfield</td><td><span class="tag" style="color:var(--gold)">P1</span></td><td class="pcell">~14 cr</td></tr>
+      <tr><td>10</td><td>Faction-wave PORTRAITS, remaining 92 (batched)</td><td>CF flux bulk</td><td><span class="tag" style="color:var(--p2)">P2</span></td><td class="fcell">free</td></tr>
+      <tr><td>11</td><td>Class HIT + class IDLE motion clips (6 + 6)</td><td>Higgsfield</td><td><span class="tag" style="color:var(--p2)">P2</span></td><td class="pcell">~12 cr</td></tr>
+      <tr><td>12</td><td>(optional) 1-2 dedicated MOBA lane backdrops if arena reuse reads off</td><td>Higgsfield</td><td><span class="tag" style="color:var(--p2)">P2</span></td><td class="pcell">~2 cr</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="4">CORE paid spend (items 4,6,9,11)</td><td>~29 cr</td></tr>
+      <tr><td colspan="4">With optional MOBA backdrops (item 12)</td><td>~31 cr</td></tr>
+    </tfoot>
+  </table>
+  </div>
+  <p class="lead" style="margin-top:10px">Free-first: every P0/P1 <em>floor</em> fix is code or CF-free. Paid credits touch only the 14 flagship portraits, the one 2-zone establishing plate, the hero barn, and the class motion clips. Every DEN/minigame/base-graphics/story wire above is free.</p>
+
+  <!-- ============ NEXT 3 WAVES ============ -->
+  <h2><span class="n">7</span> Recommended Next 3 Waves</h2>
+  <div class="waves">
+    <div class="wave">
+      <div class="wn">Wave 1 &mdash; Close the Loop</div>
+      <div class="goal">Make what exists feel finished. Nearly all free, all code.</div>
+      <ul>
+        <li>Finish the P0 quick-fixes (post-raid comic route, REMATCH button, raid fire-rate).</li>
+        <li><b>Kill the black backdrops</b> &mdash; wire the on-disk arena plates + street_mode.png + arcade.png into MOBA/Streets/Arcade (biggest, cheapest win).</li>
+        <li>Draw district art behind every minigame's mechanics.</li>
+        <li>Route every mode win through <code>boostMorale('crewwin')</code> + the missions/quests/Alley-Pass rail.</li>
+      </ul>
+      <div class="foot">Cost: <span class="cost">FREE</span> (code + assets on disk)</div>
+    </div>
+    <div class="wave">
+      <div class="wn">Wave 2 &mdash; Sim Life + Emotion Wires</div>
+      <div class="goal">Give the needs a home and the story its teeth.</div>
+      <ul>
+        <li>Build <b>THE DEN</b> (feed / rest / yard / wash) &mdash; the ENERGY need finally gets agency via <code>AK_ECON.refillStamina()</code>.</li>
+        <li>Re-point the two dead ad wires (BARN&rarr;DEN, KENNEL&rarr;DEN) + gaunt banner copy.</li>
+        <li><b>Resurrect the starter rival</b> as a recurring nemesis (pure read-side wiring).</li>
+        <li>Add the <code>AK_MANGA.cliffhanger()</code> retention hook.</li>
+      </ul>
+      <div class="foot">Cost: <span class="cost">~2 CF renders</span> (DEN), rest free</div>
+    </div>
+    <div class="wave">
+      <div class="wn">Wave 3 &mdash; Clash Board + Saga Climax</div>
+      <div class="goal">Where paid credits land and the world becomes cohesive.</div>
+      <ul>
+        <li>Zone the home plot into HOMESTEAD vs GAUNTLET with the fortified GATE seam.</li>
+        <li>Clash base graphics: tiled plot, real cell grid, baseplate + shadow port, footprint highlight.</li>
+        <li><b>Make the Mongrel King a real boss</b> + heal the Regent canon fracture.</li>
+        <li>Ship the 14 flagship portraits (S12 CONTEXT LAW) + per-winner victory + class motion clips.</li>
+      </ul>
+      <div class="foot">Cost: <span class="cost paid">~29 cr Higgsfield</span> (portraits + zone plate + barn + class clips); CF tiles free</div>
+    </div>
+  </div>
+
+  <hr class="sep">
+  <p class="foot-note">Sources: AK_SIMLIFE_MINIGAME_PLAN.html &middot; AK_ART_WORLD_PLAN.html &middot; AK_BLOCK_CHRONICLES_BIBLE.md &middot; AK_ASSET_GAP.md &middot; AK_CORE_LOOP_CANON.md &nbsp;|&nbsp; Read-only audit synthesis &middot; Lucrex / Everlight Ventures</p>
+
+</div>
+</body>
+</html>

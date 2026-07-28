@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AK Higgsfield Prompt Console</title>
+<style>
+:root{--gold:#e8c55a;--ink:#0a0a0f;--panel:#14141c;--panel2:#1b1b25;--txt:#e8e8e8;--dim:#9a8f6a;
+--crowned:#00E0C0;--rusted:#C9772E;--holo:#7B5CFF;--unbound:#FF2E88;--neutral:#e8c55a;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--txt);font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding-bottom:60px}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#0a0a0f 70%,rgba(10,10,15,.92));
+border-bottom:1px solid rgba(232,197,90,.28);padding:14px 16px 12px}
+h1{margin:0;font:800 19px/1.2 Georgia,'Playfair Display',serif;color:var(--gold);letter-spacing:.02em}
+.sub{color:var(--dim);font-size:12px;margin-top:3px}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}
+.chip{background:var(--panel2);border:1px solid rgba(255,255,255,.11);color:var(--txt);border-radius:999px;
+padding:6px 13px;font-size:12.5px;cursor:pointer;font-weight:600;transition:.13s}
+.chip:hover{border-color:rgba(232,197,90,.5)}
+.chip.on{background:var(--gold);color:#0a0a0f;border-color:var(--gold)}
+.tog{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12.5px;color:var(--dim)}
+.tog input{width:17px;height:17px;accent-color:var(--gold)}
+main{padding:16px;max-width:920px;margin:0 auto}
+.sec{margin:26px 0 12px;font:800 14px/1 Georgia,serif;color:var(--gold);letter-spacing:.09em;text-transform:uppercase;
+border-bottom:1px solid rgba(232,197,90,.22);padding-bottom:7px}
+.card{background:var(--panel);border:1px solid rgba(255,255,255,.09);border-left:3px solid var(--dim);
+border-radius:10px;padding:13px 14px;margin-bottom:11px}
+.card.crowned{border-left-color:var(--crowned)} .card.rusted{border-left-color:var(--rusted)}
+.card.holo{border-left-color:var(--holo)} .card.unbound{border-left-color:var(--unbound)}
+.card.neutral{border-left-color:var(--neutral)}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ttl{font-weight:800;font-size:14.5px;letter-spacing:.02em}
+.meta{color:var(--dim);font-size:11px;margin-top:2px;font-weight:500}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.09em;padding:3px 7px;border-radius:4px;white-space:nowrap;text-transform:uppercase}
+.tag.mesh{background:rgba(0,224,192,.15);color:var(--crowned);border:1px solid rgba(0,224,192,.4)}
+.tag.cine{background:rgba(255,46,136,.13);color:var(--unbound);border:1px solid rgba(255,46,136,.36)}
+pre{background:#08080c;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:11px;margin:0;
+white-space:pre-wrap;word-break:break-word;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d6d0bd}
+.btn{margin-top:9px;width:100%;background:var(--gold);color:#0a0a0f;border:0;border-radius:7px;padding:10px;
+font-weight:800;font-size:13px;cursor:pointer;letter-spacing:.03em;transition:.13s}
+.btn:active{transform:scale(.985)}
+.btn.done{background:var(--crowned)}
+.note{background:rgba(255,46,136,.07);border:1px solid rgba(255,46,136,.3);border-radius:8px;padding:11px 13px;
+font-size:12.5px;color:#f0d8e4;margin-bottom:14px}
+.note b{color:var(--unbound)}
+.hide{display:none}
+footer{text-align:center;color:var(--dim);font-size:11px;padding:26px 16px;line-height:1.7}
+</style></head><body>
+<header>
+<h1>AK &middot; HIGGSFIELD PROMPT CONSOLE</h1>
+<div class="sub">Tap COPY on any prompt. Style lock auto-appends.</div>
+<div class="bar" id="filters">
+<button class="chip on" data-f="all">ALL</button>
+<button class="chip" data-f="mesh">BUILDINGS (3D)</button>
+<button class="chip" data-f="cine">DISTRICTS</button>
+<button class="chip" data-f="lock">STYLE LOCKS</button>
+</div>
+<label class="tog"><input type="checkbox" id="lockon" checked> Auto-append style lock + negative prompt on copy</label>
+</header>
+<main>
+
+<div class="note"><b>Do not cross the two style locks.</b> Building plates use the MESH lock (flat, even, sharp).
+District plates use the CINEMATIC lock (haze, grain, drama). Haze and grain bake into geometry as noise and wreck
+image-to-3D. The checkbox above appends the correct one per card automatically.</div>
+
+<div class="sec" data-s="lock">Style Locks</div>
+<div id="lck"></div>
+
+<div class="sec" data-s="mesh">Building Plates &middot; portrait, mesh-ready (19)</div>
+<div id="bld"></div>
+
+<div class="sec" data-s="cine">District Plates &middot; cinematic + atmospheric (18)</div>
+<div id="dis"></div>
+
+<div class="sec" data-s="cine">Master Shots (4)</div>
+<div id="mst"></div>
+
+</main>
+<footer>ecosystem/higgsfield_map_prompts/AK_PROMPT_CONSOLE.html<br>
+canon from karma.js &middot; ZONES &middot; Block Chronicles Bible<br>
+balance 231.52 cr &middot; seedream_v4_5 = 1 cr/plate &middot; 19 buildings &asymp; 19 cr</footer>
+
+<script>
+const MESH_PRE="Full-frame architectural portrait photograph, vertical 3:4, single isolated building centered and complete in frame, three-quarter front view showing two facades, entire structure visible from ground to roofline with clear headroom, even diffuse overcast daylight, no harsh shadows, sharp focus edge to edge, deep depth of field, photoreal, high detail, neutral flat background. ";
+const MESH_NEG="\n\nNegative prompt: no people, no vehicles, no foreground objects, no cropping, no tilt, no fisheye, no motion blur, no lens flare, no film grain, no fog, no haze, no bokeh, no dramatic lighting, no night scene, no neon glow, no text, no watermark, no cartoon, no illustration";
+const CINE_PRE="Gritty gold-cyberpunk dog-city aesthetic, cinematic, 35mm film, anamorphic, film grain, volumetric haze, practical light sources only, lived-in and weathered. ";
+const CINE_NEG="\n\nNegative prompt: no cartoon, no anime, no clean CGI, no bright cheerful colors, no glossy render, no stock-photo lighting, no humans, no text overlays, no watermarks";
+
+const L=[
+["MESH LOCK","for all 19 building plates · prefix + negative","neutral",MESH_PRE.trim()+"\n"+MESH_NEG.trim(),"mesh"],
+["CINEMATIC LOCK","for all district + master shots · prefix + negative","neutral",CINE_PRE.trim()+"\n"+CINE_NEG.trim(),"cine"]
+];
+
+const B=[
+["TOWN HALL","THE LOT · ARENA · seat of the block","neutral","A heavy brutalist civic arena building, 1960s municipal concrete construction, board-formed concrete with visible wood grain texture, deep-set recessed window slots, a broad shallow flight of concrete entry steps spanning the full facade, massive scarred double doors in oxidized bronze, a cantilevered slab canopy over the entrance, faded painted signage ghosted on the concrete, patched repairs in mismatched grey, low squat proportions built to intimidate, four stories, flat roof with exposed mechanical housing"],
+["TROPHY HALL","THE LOT · TROPHY · trophies / profile","neutral","A small neoclassical civic hall, weathered limestone ashlar, four fluted columns supporting a plain pediment, tall narrow arched windows with divided lights, a raised stone plinth base with worn steps, copper roof gone green with age, modest two-story scale, symmetrical and formal, soot staining in the carved recesses, dignified and slightly undersized, the architecture of a town that once had money"],
+["THE KENNEL","THE LOT · KENNEL · handlers, kept by Mama Bones","neutral","A converted American craftsman bungalow, deep covered front porch with tapered square columns on stone piers, low-pitched gabled roof with wide eaves and exposed rafter tails, weathered clapboard siding painted a faded green, brick chimney on the side elevation, a sagging screen door, mismatched added-on rear extension in different siding, single story with a dormer, domestic and worn and lived-in"],
+["INFIRMARY","THE LOT · INFIRMARY · rest and recover","neutral","A small mid-century clinic building, single story, clean horizontal lines, buff-colored brick with a continuous band of steel-framed windows, a flat roof with a thin projecting fascia, a simple recessed entry under a cantilevered concrete canopy, glass block panel beside the door, utilitarian and calm, institutional but not cold, minor water staining below the window band"],
+["THE DROP","DOWNTOWN · DROP · the SHOP","unbound","A converted brick loading-dock building turned retail storefront, ground floor opened up into a full-width glass shopfront with a heavy steel lintel above, original red brick upper floor with segmental-arched windows, a raised concrete loading dock lip still present along the base, a folded steel awning, roll-down security shutter housing above the glass, three stories, painted-over ghost signage on the brick, commercial retrofit over industrial bones"],
+["THE GARAGE","DOWNTOWN · GARAGE · deck builder","unbound","A brick automotive workshop building, two large corrugated steel roll-up doors across the front, a steel-sash industrial window band above them, painted brick in a faded utilitarian color, a flat parapet roof with a simple stepped cornice, a small pedestrian door to one side, exposed conduit and a wall-mounted extractor fan, two stories, functional and sturdy, oil-stained concrete apron at the base"],
+["THE WARDROBE","NEON HEIGHTS · WARD · Drip cosmetics","crowned","A flagship luxury boutique building, full-height glass curtain wall in a slim anodized frame, polished chrome mullions, a double-height ground floor with a frameless glass entry, an upper floor clad in fluted metal panels, a cantilevered canopy of brushed steel, immaculate stone paving at the base, four stories, sharp geometry with no visible fasteners, expensive and severe, nothing weathered"],
+["THE ARCHIVE","NEON HEIGHTS · ARCH · the Codex","crowned","A brutalist stone monolith library, near-windowless facade in massive precast panels with a deep vertical rib pattern, one narrow full-height slot window, a recessed shadowed entrance at the base reached by a low stone ramp, heavy cantilevered upper mass overhanging the entry, five stories, monumental and defensive, deliberately at odds with the glass district around it, knowledge as fortress"],
+["CREW YARD","THE YARDS · CLAN · crews / chat","rusted","A compound built from stacked shipping containers, three containers high in a staggered arrangement, welded steel catwalks and external stair runs connecting levels, cut window openings with salvaged frames, corrugated container ribbing in mismatched faded reds and blues and greens, rope bridge to an adjacent stack, improvised corrugated roof canopy over the top level, rust bleeding down every seam, ingenious and unpermitted"],
+["PASS HOUSE","THE YARDS · PASS · Alley Pass","rusted","A narrow brick rowhouse, single bay wide and three stories tall, dark soot-stained brick, tall narrow sash windows in a strict vertical stack, a stepped Dutch gable parapet at the roofline, a single recessed doorway with a worn stone threshold, iron tie plates visible on the facade, a downpipe running the full height, cramped and vertical, squeezed between missing neighbors"],
+["THE FIXER","THE YARDS · FIXER · Hit List / jobs","rusted","A lean-to shack of tar paper and salvaged corrugated steel, timber frame visible where the covering has torn, a mismatched salvaged door, one small window covered by a steel grate, a stovepipe chimney through the roof at an angle, the whole structure leaning slightly and propped by a diagonal timber brace, single story, low and mean, built to be overlooked"],
+["GEM MINE","FACTORY ROW · GEM · production: gems","rusted","A mine headframe pithead building, tall riveted steel lattice headframe tower rising above a squat brick engine house, large sheave wheels mounted at the top of the tower, a corrugated steel ore chute running down at an angle, industrial staircases bolted to the exterior, small grimy windows in the brick base, heavy riveted plate detailing throughout, five stories to the wheel, purposeful and skeletal"],
+["GOLD MINT","FACTORY ROW · MINT · production: gold","rusted","A fortress-like iron vault building, massive rusticated stone base course, heavy riveted iron plate cladding on the upper mass, tiny barred slit windows placed high and sparse, a single enormous vault door recessed in a stone surround, square corner guard turrets with crenellated tops, a flat roof with a heavy projecting cornice, three stories, squat and impenetrable, built to be unassailable"],
+["CARD FORGE","FACTORY ROW · FORGE · production: cards","rusted","A Victorian industrial factory with a sawtooth north-light roof, long brick facade with regular cast-iron-framed windows in segmental arches, a tall round brick chimney stack at one end, a projecting gabled entry bay with a hoist beam and pulley above the loading door, corbelled brick cornice detailing, external steel fire stair, two tall stories, soot-blackened and purpose-built"],
+["THE STREET","THE STRIP · STREET · street mode","unbound","A low commercial strip building in googie roadside style, an angled cantilevered roof plane projecting far past the facade, full-width plate glass storefront below, a tall freestanding pylon sign structure integrated at one end with empty sign panels, a boomerang-shaped canopy support, terrazzo base, mismatched later infill between original bays, single story with a tall parapet, architecture designed to be seen from a moving vehicle"],
+["THE ARCADE","THE STRIP · ARCADE · mini-games","unbound","A converted warehouse amusement arcade, plain concrete block box structure completely dominated by an enormous blank marquee sign frame across the entire facade, chase-light bulb sockets ringing the marquee, a deep recessed entry vestibule with angled glass ticket booth, glass block side panels, no windows on the main volume, two stories of blank wall behind the signage, the sign is the building"],
+["RESEARCH LAB","THE DOCKS · LAB · production: skill pts","holo","A converted port warehouse with a clinical laboratory insert, weathered corrugated steel shed structure with a shallow gabled roof and rusted flashing, one bay surgically replaced with a sealed white composite panel volume and a strip of mirrored glazing, external ducting and filtration housings bolted along the flank, a sealed airlock entry with a steel frame, contrast between rotting shell and sterile insert, two stories, wrong in a quiet way"],
+["THE GENERATOR","THE DOCKS · GEN · production: power","holo","A compact industrial power plant building, reinforced concrete mass wrapped in a dense exterior lattice of cooling pipework and insulated ducting, two tapered concrete cooling stacks rising from the roof, a bank of finned heat exchangers on the flank, external cable trays and heavy conduit runs, a small reinforced control room bay with narrow windows, warning placards on the plant, four stories, humming and overbuilt"],
+["THE FENCE","UNPLACED · no ZONES entry · trade and launder","neutral","A narrow corner pawnshop and trade building, ground floor storefront with heavy steel security grilles over every opening, dark brick upper floors with painted-over windows, an angled corner entrance door cut across the building corner, a projecting blade sign bracket with the sign removed, a roll-shutter housing above the grille, two stories, closed and watchful, a place that does not want to be looked at"]
+];
+
+const D=[
+["THE LOT · CINEMATIC","neutral · gold · WOOD · tax-free","neutral","A wide establishing shot of a scarred urban plaza at golden hour, cracked concrete and weathered wood scaffolding, rusted chain-link fences, a massive brutalist concrete arena with faded fight posters layered like geological strata, warm sodium street lamps flickering, a single dead tree wrapped in fairy lights at the center, graffiti tags layered twenty years deep with no single crew color dominant, overhead wires crisscrossed between buildings with old sneakers hanging, an old scarred Bullmastiff sitting on a concrete block watching the square, warm gold ambient light, volumetric fog, dolly shot slowly pushing in toward the arena doors"],
+["THE LOT · ATMOSPHERIC","10s loop","neutral","Slow static locked-off shot of a lived-in dog city plaza, patched asphalt over cobble over dirt, scattered debris of broken crates and torn tarps, warm dusk light cutting long shadows from the surrounding district walls, a low-slung building with smoke curling from a chimney, the only place on the block that smells like cooking, stray dogs watching from the shadows without colors on, nothing hostile, everything tired, handheld documentary feel, natural sodium light"],
+["DOWNTOWN · CINEMATIC","Unbound · magenta · PRODUCE · 6% tax","unbound","Tracking shot through a bustling commercial street at night, old brick warehouses converted to neon-fronted shops, magenta and acid-green Zoomie graffiti tagged over every surface, food carts steaming under mismatched umbrellas, pigeons scattering, a converted loading dock storefront with a glass facade and magenta neon, exposed brick and rusted roll-up doors behind it, aggressive commercial lighting built to sell rather than to warm, construction barriers everywhere, street hustlers working the crowd, dogs moving fast and never stopping, magenta ambient wash, volumetric haze, film grain"],
+["DOWNTOWN · ATMOSPHERIC","10s loop","unbound","Static locked-off shot of a narrow market alley at night, magenta neon signage reflecting in standing water, steam from a vent, crates being moved constantly in the background, someone counting money in a doorway, a deal happening just out of focus, everything for sale, restless energy that never settles, gritty documentary style, shallow depth of field"],
+["NEON HEIGHTS · CINEMATIC","Crowned CAPITAL · teal · STONE · 6% tax","crowned","Drone shot rising through a district of glass towers and chrome arches, holographic advertisements floating between buildings fifty stories up, reflective surfaces everywhere, puddles that never dry and glass that never fogs, a blood moon turning the sky arterial red while the neon shifts cold teal to match nothing, security drones subtle but always in frame, a chrome archway scanning every visitor who passes beneath it, cold teal and blue-white artificial perfection, the skyline opening to show the whole city below looking small and far away, elite cyberpunk, controlled and unsettling beauty, anamorphic"],
+["NEON HEIGHTS · ATMOSPHERIC","10s loop","crowned","Slow static locked-off shot of an empty immaculate plaza at night, cold teal light with no visible source, chrome and polished stone, not a single piece of litter, a security drone drifting through frame, one dog in expensive armor crossing alone, reflections doubling everything, beautiful and hostile, nobody belongs here, clinical cyberpunk, shallow depth of field"],
+["THE YARDS · CINEMATIC","Rusted · rust · SCRAP · 6% · stray turf","rusted","Low angle tracking shot through an industrial graveyard, idle rusting cranes frozen mid-gesture against the sky, piles of scrap metal and stripped vehicles, oil slicks throwing rainbow sheens under dim amber light, welding sparks flying at all hours from a dozen directions, a converted shipping container yard stacked three high with catwalks and rope bridges strung between, tattered skull-and-bone flags in rust orange, strays without colors watching from between the stacks, gritty industrial documentary, smoke and dust filtering the low sun, film grain"],
+["THE YARDS · ATMOSPHERIC","10s loop","rusted","Handheld shot following a scarred dog in welded scrap armor walking through the yards, stray dogs watching from the shadows on both sides, the constant sound of hammers and cutting torches, heavy industrial rhythm, resourceful and dangerous, nothing wasted and everything repurposed, warm exhausted amber light, rust ambient wash, raw and authentic, 35mm film grain"],
+["FACTORY ROW · CINEMATIC","Rusted · forge orange · METAL · 6% tax","rusted","Wide shot of an industrial cathedral district at night, old brick and iron buildings glowing orange from internal forges, fire-lit atmosphere with sharp shadows defined entirely by flame, conveyor belts running overhead between buildings moving raw material, cooling vats hissing steam as hot metal meets water, workers in heavy gear moving in shifts, rust-orange ambient wash, the industrial rhythm of creation and destruction running all night, dangerous beauty, volumetric smoke, anamorphic, film grain"],
+["FACTORY ROW · ATMOSPHERIC","10s loop","rusted","Static locked-off shot of a forge floor at night, hydraulic presses cycling, orange firelight pulsing on soot-black walls, steam venting in bursts, a worker dog silhouetted against the furnace mouth, the sound of metal on metal never stopping, heat distortion in the air, raw industrial power, heavy grain, practical fire light only"],
+["THE STRIP · CINEMATIC","Unbound · magenta · PRODUCE · 6% tax","unbound","Steadicam walk through a gaudy casino strip at night, cracked concrete plaza marked with painted fight circles and old bloodstains, rusted floodlight poles, chain-link boundary fence, excessive pulsing neon in hot magenta and acid green, flashing signs assaulting the senses from every angle, deep shadows between buildings where the real business happens, betting slips scattered like confetti underfoot, broken bottles, bouncers in magenta bandanas at every door, bosses watching from rooftop vantage points, Vegas-via-back-alley aesthetic, desperate carnival energy, vice dressed in neon, film grain"],
+["THE STRIP · ATMOSPHERIC","10s loop","unbound","Static locked-off shot of a fight circle at night under a rusted floodlight, painted ring worn down to concrete, a crowd pressed against chain-link on all sides, magenta neon bleeding in from the strip behind, money changing hands in the foreground out of focus, cheap and loud and alive, handheld documentary grit, heavy grain"],
+["THE DOCKS · CINEMATIC","Hologhosts · violet · METAL · 6% tax","holo","Slow push-in on a dead port district at night, black oil-slicked water reflecting cold violet LEDs, rotting piers reinforced with obviously new technology bolted over the rot, a converted shipping warehouse turned into a cathedral of glass and steel test chambers, observation windows with muffled sounds behind sealed doors, shipping containers repurposed as sealed labs, silent workers with hidden faces moving with purpose, the occasional glitch in reality, a shadow that does not match its object, sterile and sinister, a hospital built for machines, cold technological dread, violet ambient wash, volumetric haze"],
+["THE DOCKS · ATMOSPHERIC","10s loop","holo","Static locked-off shot of black water with cold violet lights reflecting on the surface, rotting piers, the smell of ozone and something organic preserved wrong, a dog that might not actually be there watching from between containers, silent purposeful movement in the background, the hum of power you cannot see the source of, unsettling and clinical, shallow depth of field, heavy grain"],
+["THE OVERLOOK · CINEMATIC","LOCKED · POLICE CHECKPOINT · Crowned","crowned","Low angle shot of a massive security checkpoint wall, concrete blocks and razor wire, scanning arches glowing cold teal and blue-white, armed dogs in chrome armor standing post, patrol drones tracking overhead, beyond the wall the towers of the elite glowing with a controlled warmth that never reaches this side, propaganda screens cycling imagery and slogans about order and progress, harsh security lighting designed to expose rather than illuminate, the contrast of a cold barrier against warm privilege, empty clean streets waiting on the far side, imposing and aspirational, police-state aesthetic, clean and terrifying, anamorphic"],
+["THE OVERLOOK · ATMOSPHERIC","10s loop · barrier plate","crowned","Slow static locked-off shot of the checkpoint barrier from the outside, a dog approaching and being scanned by the teal arch, the wall functioning as both visual and physical barrier, you can see over it and you cannot cross it, harsh blue-white light, chrome and concrete and razor wire, the promise and the threat in one frame, volumetric haze, heavy grain"],
+["THE UNDERCITY · CINEMATIC","LOCKED · COLLAPSED BRIDGE · Hologhosts","holo","Slow descent shot into a collapsed bridge chasm, twisted rebar and shattered concrete slabs, dropping into darkness, emergency light strips and bioluminescent fungus marking tunnel mouths below, some sealed and some inviting and all of them dangerous, rubble that has been deliberately organized showing someone has been working down here, distant machinery sounding closer than it should, water dripping and pooling and flowing where water should not be, a stripped subway tunnel turned into a highway for ghosts, deep violet and rubble grey cut with emergency red, claustrophobic and infinite, underground dread, volumetric haze"],
+["THE UNDERCITY · ATMOSPHERIC","10s loop · the Quiet Line","holo","Handheld shot moving slowly through a tunnel corridor, the Quiet Line stripped of its tracks, the sound of distant machinery with no visible source, water always present underfoot, a ghost dog flickering in and out of existence at the edge of frame, emergency red lighting alternating with dead dark, the Hologhosts playground, psychological unease, unsettling and endless, heavy grain, practical light only"]
+];
+
+const M=[
+["CITY ESTABLISHING","the money shot · full 3x3 grid","neutral","Epic drone shot pulling back from a scarred central plaza at dawn, revealing a full three-by-three grid of distinct city districts, each with its own color signature, warm gold home turf at the center, cold teal glass heights to the northeast, rust and forge orange industry to the east and west, magenta neon hustle to the north and south, cold violet tech at the southeast, a razor-wire checkpoint sealing the northwest, a collapsed bridge chasm sealing the southwest, surrounding walls holding it all in, a city of dogs built on hierarchy and scrap, golden hour light, massive scale, cinematic scope, 35mm anamorphic, film grain"],
+["FACTION CONFRONTATION","trailer beat · 4-way intercut","unbound","Rapid intercut sequence, four dogs each in their own district and their own light, a chrome-armored K9 in cold teal glass heights, a fast-moving Zoomie hustler in magenta neon commerce, a scrap-welded Boneguard in rust-orange forge light, a flickering Leashbreak phantom in cold violet dock haze, each shot holding just long enough to read the color, then cutting to a single empty gold-lit street in the neutral center where all four converge, tension building with no dialogue, pure visual storytelling, epic trailer energy, anamorphic, film grain"],
+["GRID TRANSITION","UI / map-screen plate","neutral","Slow overhead orthographic drift across a stylized city grid at night, nine distinct district tiles each glowing its own signature color, connecting streets lit between them, two tiles darkened and sealed, the neutral gold tile at the center brightest, clean readable top-down composition suitable for a game map interface, atmospheric haze between tiles, cinematic but legible, no text overlays"],
+["BLOOD MOON · NeonReach","season event key art","crowned","Wide shot of a glass-tower skyline under a blood moon, the sky turned arterial red, cold teal neon refusing to warm against it, reflections doubling the moon in every surface, a single dog silhouetted on a rooftop edge looking out, the district beautiful and wrong at once, seasonal event key art, dramatic and ominous, anamorphic, film grain"]
+];
+
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n}
+
+function card(t,m,c,body,kind,raw){
+  const d=el('div','card '+c); d.dataset.t=raw?'lock':kind; if(raw)d.dataset.raw='1';
+  const hd=el('div','hd'), left=el('div');
+  left.appendChild(el('div','ttl',t));
+  left.appendChild(el('div','meta',m));
+  hd.appendChild(left);
+  hd.appendChild(el('span','tag '+(kind==='mesh'?'mesh':'cine'),kind==='mesh'?'3D':'VIDEO'));
+  d.appendChild(hd);
+  d.appendChild(el('pre',null,body));
+  d.appendChild(el('button','btn','COPY'));
+  return d;
+}
+L.forEach(r=>document.getElementById('lck').appendChild(card(r[0],r[1],r[2],r[3],r[4],true)));
+B.forEach(r=>document.getElementById('bld').appendChild(card(r[0],r[1],r[2],r[3],'mesh')));
+D.forEach(r=>document.getElementById('dis').appendChild(card(r[0],r[1],r[2],r[3],'cine')));
+M.forEach(r=>document.getElementById('mst').appendChild(card(r[0],r[1],r[2],r[3],'cine')));
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.btn'); if(!b)return;
+  const c=b.closest('.card');
+  let txt=c.querySelector('pre').textContent;
+  if(document.getElementById('lockon').checked && !c.dataset.raw){
+    txt=(c.dataset.t==='mesh'?MESH_PRE:CINE_PRE)+txt+(c.dataset.t==='mesh'?MESH_NEG:CINE_NEG);
+  }
+  const done=()=>{b.textContent='COPIED';b.classList.add('done');
+    setTimeout(()=>{b.textContent='COPY';b.classList.remove('done')},1100)};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done).catch(()=>fb(txt,done))}
+  else fb(txt,done);
+});
+function fb(t,cb){const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(a);a.select();try{document.execCommand('copy');cb()}catch(_){}a.remove()}
+
+document.getElementById('filters').addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c)return;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));
+  const f=c.dataset.f;
+  document.querySelectorAll('.card').forEach(x=>x.classList.toggle('hide',f!=='all'&&x.dataset.t!==f));
+  document.querySelectorAll('.sec').forEach(x=>x.classList.toggle('hide',f!=='all'&&x.dataset.s!==f));
+});
+</script></body></html>

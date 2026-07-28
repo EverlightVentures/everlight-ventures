@@ -1,0 +1,248 @@
+<title>Alley Kingz: Migration Workflow</title>
+<style>
+  :root{
+    --asphalt:#0C0B0A; --oil:#16130F; --panel:#1E1A15; --line:#2E2822;
+    --gold:#D4AF37; --gold-dim:#8A7328; --hot:#E2481F; --emp:#49C5D6;
+    --bone:#E8E4DC; --muted:#8A8378; --good:#7BB661; --warn:#D19A2E;
+    --display:"Arial Black","Helvetica Neue",Impact,sans-serif;
+    --body:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--asphalt);color:var(--bone);font-family:var(--body);
+       line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+  header{border-bottom:2px solid var(--gold);padding:56px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+           color:var(--gold-dim);margin:0 0 14px}
+  h1{font-family:var(--display);font-size:clamp(34px,6vw,62px);line-height:.95;margin:0 0 16px;
+     text-transform:uppercase;letter-spacing:-.02em;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--gold)}
+  .dek{font-size:18px;color:var(--muted);max-width:64ch;margin:0}
+  h2{font-family:var(--display);font-size:25px;text-transform:uppercase;margin:60px 0 6px;text-wrap:balance}
+  h2 .n{font-family:var(--mono);font-size:12px;color:var(--gold-dim);letter-spacing:.15em;
+        display:block;margin-bottom:8px;font-weight:400}
+  h3{font-family:var(--display);font-size:14px;text-transform:uppercase;letter-spacing:.06em;
+     margin:28px 0 10px;color:var(--gold)}
+  p{max-width:68ch}
+  .sub{color:var(--muted);margin:0 0 20px;max-width:68ch}
+  strong{color:#fff}
+  code{font-family:var(--mono);font-size:.86em;background:var(--oil);padding:2px 6px;
+       border:1px solid var(--line);border-radius:3px;color:var(--gold)}
+  .scroll{overflow-x:auto;margin:18px 0;border:1px solid var(--line);background:var(--oil)}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+     color:var(--gold-dim);background:#120F0C;font-weight:400;white-space:nowrap}
+  td.num{font-variant-numeric:tabular-nums;font-family:var(--mono);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  .callout{border-left:3px solid var(--hot);background:#1A100C;padding:16px 20px;margin:22px 0}
+  .callout.gold{border-left-color:var(--gold);background:#171308}
+  .callout.good{border-left-color:var(--good);background:#0E1710}
+  .callout p{margin:0;max-width:64ch}
+  .callout .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+                color:var(--hot);display:block;margin-bottom:6px}
+  .callout.gold .tag{color:var(--gold)} .callout.good .tag{color:var(--good)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+        text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);border-radius:2px;color:var(--muted)}
+  .pill.now{color:var(--good);border-color:#2C4426}
+  .pill.later{color:var(--warn);border-color:#4A3A15}
+  .pill.no{color:var(--hot);border-color:#4A2015}
+  .gate{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);
+        padding:14px 18px;margin:10px 0}
+  .gate .g{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--gold);display:block;margin-bottom:5px}
+  .gate p{margin:0;font-size:14px;max-width:66ch}
+  ul,ol{max-width:68ch;padding-left:20px} li{margin-bottom:7px} li::marker{color:var(--gold-dim)}
+  .quote{font-family:var(--display);font-size:18px;text-transform:none;color:var(--gold);
+         border-left:2px solid var(--gold-dim);padding-left:18px;margin:22px 0;max-width:60ch;line-height:1.35}
+  footer{margin-top:80px;padding-top:24px;border-top:1px solid var(--line);
+         font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Alley Kingz &middot; Production Workflow &middot; 2026-07-17</p>
+  <h1>Generate Once.<br><em>Serve Everything.</em></h1>
+  <p class="dek">The migration only gets one clean pass. This is the contract every asset has to
+  satisfy the moment it is born, so a single credit feeds the skin economy, the mod slots, the FX,
+  the album, AR and Crown ranks instead of buying one static statue.</p>
+</header>
+
+<h2><span class="n">00 / The Law</span>Why a spec beats a budget</h2>
+<p>A 20-credit mesh and a 20-credit mesh that serves ten systems <strong>cost exactly the
+same</strong>. The difference is entirely in what you demanded at generation time. Skins are free
+if the coat and the gear are separate materials. Mods attach if sockets are named at birth. AR
+works if the file is under budget. Seasonal variants are free if color is material-driven instead
+of baked into the texture.</p>
+
+<div class="quote">Every opportunity you miss at generation time becomes a re-mesh at full price.</div>
+
+<div class="callout">
+  <span class="tag">The defect already in the build</span>
+  <p><strong>Our first $BCARDD mesh cannot be rigged.</strong> He is frozen mid-stride with his arms
+  against his body, so the mesh is fused at the armpits and no auto-rigger can find where the limb
+  ends. That model cannot animate, cannot take a victory pose, cannot be the idle-breathing loading
+  dog. It cost nothing to learn on one. It would have cost the entire batch on 106.
+  <strong>Fixed:</strong> all 106 prompts now demand a symmetrical A-pose, and the negative prompt
+  blocks <code>arms at sides</code>, <code>arms touching torso</code>, <code>mid-stride</code> and
+  <code>legs together</code>.</p>
+</div>
+
+<h2><span class="n">01 / The Asset Contract</span>Eight rules, no exceptions</h2>
+<p class="sub">Nothing gets meshed until the reference satisfies all eight. This is the gate that
+protects the credits.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Rule</th><th>Why it exists</th><th>What breaks without it</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1. A-pose</strong><br><span class="pill">arms and legs clear of the body</span></td>
+      <td>Auto-riggers need to find where limbs end.</td>
+      <td>Fused armpits. No animation, ever. <strong>Re-mesh all 106.</strong></td></tr>
+    <tr><td><strong>2. Separated materials</strong><br><span class="pill">coat / gear / metal / glass</span></td>
+      <td>A skin is a material swap, not a model.</td>
+      <td>Every skin becomes a new mesh. 120 SKUs go from free to 2,400 credits.</td></tr>
+    <tr><td><strong>3. Named sockets</strong><br><span class="pill">8 dog slots, 5 rig slots</span></td>
+      <td>Accessories and mods attach to anchors.</td>
+      <td>Nothing attaches. The whole Fortnite layer dies.</td></tr>
+    <tr><td><strong>4. FX attach points</strong><br><span class="pill">muzzle, paws, chest, exhaust</span></td>
+      <td>Per-dog VFX has to spawn somewhere real.</td>
+      <td>Particles fire from the model's center. FX DNA is impossible.</td></tr>
+    <tr><td><strong>5. Uniform scale and axis</strong><br><span class="pill">Y-up, faces +Z, 1 unit = 1m</span></td>
+      <td>Unity, Mixamo and the socket math all assume it.</td>
+      <td>106 models import at random sizes facing random directions.</td></tr>
+    <tr><td><strong>6. Quad topology, capped</strong><br><span class="pill">20k faces, UV, PBR baked</span></td>
+      <td>Riggable, animatable, mobile-safe.</td>
+      <td>Triangle soup. Hours of manual retopo per dog.</td></tr>
+    <tr><td><strong>7. Size budget</strong><br><span class="pill">under 5 MB per character</span></td>
+      <td>AR reveals and web load on a phone.</td>
+      <td>AR is dead. Cloudflare's 25 MiB per-file wall gets closer.</td></tr>
+    <tr><td><strong>8. Neutral lighting baked</strong><br><span class="pill">no shadows in the texture</span></td>
+      <td>The engine lights it. Twice-lit looks fake.</td>
+      <td>Every dog carries a painted-on shadow from the wrong angle.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2><span class="n">02 / The Opportunity Map</span>What each system needs from the art, at birth</h2>
+<p class="sub">Read this as: if you want the system on the left, the mesh has to carry the thing on
+the right <em>the day it is made</em>. Retrofitting costs full price.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>System</th><th>What the mesh must carry</th><th>Cost if captured now</th><th>Cost if retrofitted</th></tr></thead>
+  <tbody>
+    <tr><td>Skins: coat, collar, paint</td><td>Separated materials</td><td class="num">0</td><td class="num">2,400+</td></tr>
+    <tr><td>Cosmetic slots (8)</td><td>Named sockets</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+    <tr><td>Rig mods (3 slots)</td><td>Hood, roof, rims, rear, underglow anchors</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+    <tr><td>FX DNA per dog</td><td>Muzzle, paw, chest attach points</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+    <tr><td>Rig + animation + victory poses</td><td><strong>A-pose</strong></td><td class="num">0</td><td class="num"><strong>full batch</strong></td></tr>
+    <tr><td>Idle-breathing loading dog</td><td>A-pose + rig</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+    <tr><td>Album and portraits (25 slots + 106 gaps)</td><td>Uniform scale and camera</td><td class="num">0 (byproduct)</td><td class="num">manual per dog</td></tr>
+    <tr><td>Crown ranks (Iron to Diamond)</td><td>Head socket + material slots</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+    <tr><td>Seasonal variants (Corrupted, Neon, Rust)</td><td>Material-driven color</td><td class="num">0</td><td class="num">55 each</td></tr>
+    <tr><td>AR card reveal</td><td>Under 5 MB, clean quads</td><td class="num">0</td><td class="num">re-export</td></tr>
+    <tr><td>Boss multi-phase states</td><td>Material states + FX points</td><td class="num">0</td><td class="num">re-mesh</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout good">
+  <span class="tag">The whole point</span>
+  <p>Eleven systems. <strong>Zero extra credits</strong> if the contract holds. Every one of them
+  becomes a re-mesh at full price if it does not. This single table is why we spec before we spend.</p>
+</div>
+
+<h2><span class="n">03 / The Pipeline</span>Per asset, with gates</h2>
+
+<div class="gate"><span class="g">Step 1 &middot; Free</span>
+<p><strong>Prompt from the roster.</strong> <code>build_hero_prompts.py</code> derives all 106
+prompts from breed, faction, rarity and role. Nothing hand-written, so nothing drifts.</p></div>
+
+<div class="gate"><span class="g">Step 2 &middot; Free</span>
+<p><strong>Generate the ref</strong> on FLUX via Colab T4. Not anonymous Spaces: ZeroGPU allows
+roughly 3 to 4 images per 6 hours per IP, shared across every Space. Colab has no such tax.</p></div>
+
+<div class="gate"><span class="g">Step 3 &middot; GATE, free, do not skip</span>
+<p><strong>Contract check before a single credit.</strong> A-pose? Arms clear of torso? Both feet?
+White background? On-model gear? Reject and regenerate. Regeneration is free. Meshing is not.
+<strong>This gate is the entire budget protection.</strong></p></div>
+
+<div class="gate"><span class="g">Step 4 &middot; 20 to 55 credits</span>
+<p><strong>Mesh through Tripo</strong> with <code>quad: true</code>, <code>face_limit: 20000</code>,
+texture on. <code>tripo_batch.py</code> auto-tiers by rarity, is resume-safe, and refuses to start
+if the estimate exceeds the cap.</p></div>
+
+<div class="gate"><span class="g">Step 5 &middot; Free</span>
+<p><strong>Rig on Mixamo.</strong> All 106 are bipedal across 4 rig families, so the free humanoid
+path covers the entire roster. This step is why Step 3 exists.</p></div>
+
+<div class="gate"><span class="g">Step 6 &middot; Free</span>
+<p><strong>Author sockets and material slots</strong> once per rig family, not per dog. Four
+families cover 106 dogs.</p></div>
+
+<div class="gate"><span class="g">Step 7 &middot; Free, pure revenue</span>
+<p><strong>Author the skin catalog</strong> as material definitions. 106 dogs times 5 skins equals
+530 SKUs at zero credits, provided Rule 2 held.</p></div>
+
+<div class="gate"><span class="g">Step 8 &middot; Free byproduct</span>
+<p><strong>Render portraits</strong> from the finished rigs. Fills the 25 portrait slots and the
+106 in-battle portrait gap for nothing.</p></div>
+
+<h2><span class="n">04 / The Honest Sort</span>What of the expansion plan is real</h2>
+<p class="sub">The structure of that blueprint is largely sound. Some of it is not, and one part of
+it contradicts a decision you already made.</p>
+
+<h3><span class="pill now">Do now</span> Free or cheap, no new art</h3>
+<ul>
+  <li><strong>A-pose contract.</strong> Done today. Protects the batch.</li>
+  <li><strong>Per-tier chest FX and rarity-gated audio.</strong> Pure wiring. The staged reveal and the synth engine already exist and are not connected to chests.</li>
+  <li><strong>Pack Bond synergy tags.</strong> Data only. The relationship web is already written into all 106 books.</li>
+  <li><strong>Haptics.</strong> A real win and genuinely cheap. Ignore the "23% retention" figure, which has no source.</li>
+  <li><strong>Kennel Trees and Crown ranks.</strong> Design plus code. No art. Enormous depth per credit.</li>
+</ul>
+
+<h3><span class="pill later">Later</span> Real, but sequenced behind the ledger</h3>
+<ul>
+  <li>Rig mods, marketplace, crew wars, district control, seasons, Saga Mode, boss raids, spectator tools.</li>
+  <li><strong>AR card reveal</strong> is the best marketing idea in the document. It only works if Rule 7 holds, which is why it is in the contract now and built later.</li>
+</ul>
+
+<h3><span class="pill no">Flag</span> Wrong, unsourced, or already decided against</h3>
+<div class="callout">
+  <span class="tag">Web3 contradicts your own settled decision</span>
+  <p>The blueprint says mint a Genesis NFT collection. <strong>You already ruled the other way,</strong>
+  and for good reasons that have not changed: $KINGS stays a closed-loop non-exchangeable reward on
+  the V-Bucks model, because a second liquid token is the Axie and STEPN death spiral, and crypto
+  stays <strong>out of the Play Store binary</strong> or the app does not ship. $BCARDD remains the
+  only tradable coin, and the collector layer wraps the economy last, opt-in. Do not reopen this
+  because a blueprint listed it as a trend.</p>
+</div>
+<ul>
+  <li><strong>Unsourced numbers.</strong> "300% higher LTV", "23% longer retention", "haptic market to 102B", "50% dev time cut" all arrived with no citation. The ideas may still be right. Do not build a business case on invented figures.</li>
+  <li><strong>LLM-powered NPCs.</strong> Genuinely exciting, and a per-conversation cost forever. Needs a unit-economics model before a line of code.</li>
+  <li><strong>Location-based turf wars, haptic suits, cross-game interop.</strong> Pokemon GO money and hardware that is not in players' hands. Not 2026 work.</li>
+</ul>
+
+<h2><span class="n">05 / Order of Operations</span>What actually goes first</h2>
+<ol>
+  <li><strong>Fix the ledger.</strong> Charge for cosmetics, bind identity to the JWT, kill the zombie endpoint. Until this lands, every skin the migration produces is given away free.</li>
+  <li><strong>Lock the contract.</strong> Done. A-pose plus the eight rules.</li>
+  <li><strong>Author the words.</strong> 8 crews, 20 rigs, the synergy matrix, Pack Bond tags. Free, and it decides what the art has to be.</li>
+  <li><strong>Run the free ref batch.</strong> 106 dogs on Colab. Gate every one against the contract.</li>
+  <li><strong>Then, and only then, subscribe and mesh.</strong> The credit clock starts when the refs are already sitting on disk.</li>
+  <li><strong>Wire the juice</strong> while the meshes bake. Chests, audio, reveals. None of it needs 3D.</li>
+</ol>
+
+<div class="callout gold">
+  <span class="tag">The sequencing rule</span>
+  <p>Writing and wiring are free and they decide what the art must be. Art is paid and it cannot
+  decide anything. <strong>So the free work always goes first.</strong> Every time that order gets
+  reversed, you pay twice.</p>
+</div>
+
+<footer>Alley Kingz &middot; Migration Workflow &middot; contract locked 2026-07-17 &middot;
+106 prompts regenerated A-pose &middot; tripo_batch.py resume-safe, cap-guarded &middot;
+Everlight Ventures</footer>
+</div>

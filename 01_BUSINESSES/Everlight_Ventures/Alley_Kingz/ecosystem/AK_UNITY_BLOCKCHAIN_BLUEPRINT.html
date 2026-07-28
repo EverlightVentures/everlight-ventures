@@ -1,0 +1,471 @@
+<title>Alley Kingz · The 3D Migration Blueprint</title>
+<style>
+  :root{
+    --ground:#0c0b08; --surface:#15120b; --surface-2:#1d1810; --raise:#231d12;
+    --line:#2c2517; --line-soft:#211b11;
+    --gold:#e8c55a; --gold-hi:#f6dc80; --gold-deep:#b8922e;
+    --ink:#ece7d8; --muted:#aca083; --faint:#6f664e;
+    --free:#86d99a; --paid:#e8a94a; --risk:#db6a4c; --ask:#82b6e0;
+    --maxw:1080px;
+    --mono:ui-monospace,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --disp:"Helvetica Neue","Arial Black",Arial,sans-serif;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.62;letter-spacing:.005em;
+    background-image:radial-gradient(1200px 600px at 78% -8%,rgba(232,197,90,.09),transparent 60%),radial-gradient(900px 500px at 8% 4%,rgba(184,146,46,.06),transparent 55%);
+    background-attachment:fixed;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  a{color:var(--gold);text-decoration:none}
+  a:hover{color:var(--gold-hi)}
+  ::selection{background:rgba(232,197,90,.28);color:#fff}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
+
+  /* ---- type scale ---- */
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold-deep);font-weight:600}
+  h1{font-family:var(--disp);font-weight:900;text-transform:uppercase;line-height:.95;
+    letter-spacing:-.01em;font-size:clamp(38px,8.5vw,82px);margin:.12em 0 .1em;text-wrap:balance;
+    background:linear-gradient(178deg,#fff 4%,var(--gold-hi) 42%,var(--gold) 70%,var(--gold-deep) 118%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 3px 20px rgba(232,197,90,.14))}
+  h2{font-family:var(--disp);font-weight:800;text-transform:uppercase;letter-spacing:.01em;
+    font-size:clamp(21px,3.6vw,30px);color:#fff;margin:0;line-height:1.05;text-wrap:balance}
+  h3{font-family:var(--disp);font-weight:800;text-transform:uppercase;letter-spacing:.02em;
+    font-size:17px;color:var(--gold);margin:0 0 6px}
+  p{margin:0 0 14px}
+  strong{color:#fff;font-weight:700}
+  .lead{font-size:clamp(17px,2.5vw,20px);line-height:1.6;color:var(--ink)}
+  .muted{color:var(--muted)}
+
+  /* ---- hero ---- */
+  header.hero{padding:64px 0 30px;border-bottom:1px solid var(--line)}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:20px 0 4px;
+    font-family:var(--mono);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+  .flow b{color:#fff;font-weight:700}
+  .flow .arw{color:var(--gold-deep)}
+  .flow .step{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 11px}
+  .thesis{margin-top:26px;border-left:3px solid var(--gold);padding:2px 0 2px 20px;max-width:74ch}
+  .thesis .lead strong{color:var(--gold-hi)}
+
+  /* ---- state of play ---- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:34px 0 8px}
+  .stat{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);
+    border-radius:14px;padding:18px 18px 16px}
+  .stat .n{font-family:var(--mono);font-size:clamp(28px,5vw,40px);font-weight:700;color:var(--gold-hi);
+    line-height:1;font-variant-numeric:tabular-nums}
+  .stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:9px}
+  .stat .d{font-size:13.5px;color:var(--muted);margin-top:7px;line-height:1.5}
+
+  section{padding:46px 0;border-bottom:1px solid var(--line-soft)}
+  .sechead{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sechead .idx{font-family:var(--mono);font-size:12px;color:var(--gold-deep);letter-spacing:.2em}
+  .sub{color:var(--muted);max-width:72ch;margin:6px 0 26px}
+
+  /* ---- phase timeline ---- */
+  .phase{position:relative;padding:0 0 26px 0}
+  .pcard{background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--line);
+    border-radius:16px;padding:22px 22px 8px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+  .pcard:hover{transform:translateY(-2px);border-color:rgba(232,197,90,.4);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .ptop{display:flex;gap:16px;align-items:flex-start}
+  .pnum{font-family:var(--mono);font-weight:700;font-size:clamp(30px,6vw,44px);line-height:.8;
+    color:var(--gold);flex:0 0 auto;min-width:1.6em;font-variant-numeric:tabular-nums;
+    text-shadow:0 2px 14px rgba(232,197,90,.25)}
+  .pttl{flex:1}
+  .goal{color:var(--muted);font-size:14.5px;margin-top:7px}
+  .goal b{color:var(--ink)}
+  ul.steps{margin:16px 0 4px;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+  ul.steps li{position:relative;padding-left:22px;font-size:14.5px;line-height:1.55;color:var(--ink)}
+  ul.steps li::before{content:"";position:absolute;left:3px;top:.62em;width:7px;height:7px;border-radius:2px;
+    background:var(--gold-deep);transform:rotate(45deg)}
+  ul.steps li b{color:#fff}
+
+  .dgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:18px 0 16px}
+  .cell{background:var(--surface);padding:11px 12px;min-height:64px}
+  .cell .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  .cell .val{font-size:12.5px;line-height:1.4;color:var(--ink)}
+  .cell.free .val{color:var(--free)} .cell.paid .val{color:var(--paid)}
+  .cell.risk .val{color:var(--risk)} .cell.time .val{font-family:var(--mono);color:var(--gold-hi);font-variant-numeric:tabular-nums}
+
+  /* ---- reuse map ---- */
+  .maptbl{width:100%;border-collapse:collapse;font-size:14px}
+  .maptbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  .maptbl th,.maptbl td{text-align:left;padding:13px 16px;vertical-align:top;border-bottom:1px solid var(--line-soft)}
+  .maptbl thead th{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+  .maptbl tbody tr:last-child td{border-bottom:none}
+  .maptbl td.have{color:var(--muted);width:44%}
+  .maptbl td.have code{color:var(--gold);font-family:var(--mono);font-size:12.5px;background:rgba(232,197,90,.07);padding:1px 5px;border-radius:4px}
+  .maptbl td.arrow{color:var(--gold-deep);text-align:center;width:34px;font-family:var(--mono)}
+  .maptbl td.becomes{color:var(--ink)}
+  .maptbl tbody tr:hover td{background:rgba(232,197,90,.03)}
+
+  /* ---- generic cards / prose blocks ---- */
+  .block{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:16px}
+  .block p:last-child{margin-bottom:0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:20px;border:1px solid var(--line)}
+  .pill.free{color:var(--free);border-color:rgba(134,217,154,.4)}
+  .pill.risk{color:var(--risk);border-color:rgba(219,106,76,.4)}
+  .pill.paid{color:var(--paid);border-color:rgba(232,169,74,.4)}
+
+  ol.numsteps{counter-reset:s;list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:14px}
+  ol.numsteps li{counter-increment:s;position:relative;padding-left:44px;font-size:14.5px;line-height:1.55}
+  ol.numsteps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;
+    display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--ground);
+    background:var(--gold);border-radius:8px}
+  ol.numsteps li b{color:#fff}
+  ol.numsteps li .tag{color:var(--gold)}
+
+  /* ---- clash grid ---- */
+  .gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .gapc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px 16px;display:flex;gap:12px}
+  .gapc .mk{font-family:var(--mono);color:var(--gold);font-weight:700;font-size:12px;flex:0 0 auto;margin-top:2px}
+  .gapc .t{font-size:14px;line-height:1.5}
+  .gapc .t b{color:#fff;display:block;margin-bottom:2px;font-size:14px}
+
+  /* ---- first move callout ---- */
+  .callout{background:
+      radial-gradient(600px 200px at 20% 0%,rgba(232,197,90,.16),transparent 70%),
+      linear-gradient(180deg,var(--raise),var(--surface));
+    border:1.5px solid var(--gold);border-radius:18px;padding:28px 28px 24px;
+    box-shadow:0 0 0 1px rgba(232,197,90,.08),0 20px 50px rgba(0,0,0,.35)}
+  .callout h2{color:var(--gold-hi)}
+  .callout .lead{margin-top:12px}
+
+  /* ---- decisions ---- */
+  .qgrid{display:flex;flex-direction:column;gap:12px}
+  .qc{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ask);
+    border-radius:0 12px 12px 0;padding:15px 18px}
+  .qc .qn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ask);margin-bottom:5px}
+  .qc p{font-size:14px;margin:0;color:var(--ink)}
+  .qc p b{color:#fff}
+
+  /* ---- footer ---- */
+  footer{padding:40px 0 60px}
+  .src{font-size:12.5px;color:var(--faint);line-height:1.7}
+  .src b{color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .sig{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep);margin-top:26px}
+
+  @media(max-width:760px){
+    .stats{grid-template-columns:1fr}
+    .dgrid{grid-template-columns:repeat(2,1fr)}
+    .cols,.gap-grid{grid-template-columns:1fr}
+    .ptop{gap:12px}
+    section{padding:38px 0}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Alley Kingz · Everlight Ventures · Migration Blueprint</div>
+    <h1>Kings of the Alley,<br>Now in Three Dimensions</h1>
+    <div class="flow">
+      <span class="step"><b>2.5D web</b> today</span><span class="arw">&rarr;</span>
+      <span class="step">true-3D <b>Unity</b></span><span class="arw">&rarr;</span>
+      <span class="step"><b>Google Play</b></span><span class="arw">&rarr;</span>
+      <span class="step"><b>Solana</b> NFT cards</span>
+    </div>
+    <div class="thesis">
+      <p class="lead">Alley Kingz is <strong>roughly 80% already migrated.</strong> The code is a rare "API-contract" build: <code style="font-family:var(--mono);color:var(--gold);font-size:.85em">engine.js</code> is 254KB of pure simulation with <strong>zero</strong> draw calls, and the economy, trading, defense, needs, story and live Supabase backend are all engine-agnostic. Your instinct is right &mdash; the logic carries over, only the rendering and art get rebuilt to 3D. The one real cost the optimistic read hides is <strong>3D character art</strong>: a card face is concept reference, not geometry.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="n">~80%</div>
+        <div class="k">Logic already portable</div>
+        <div class="d">Sim, economy, backend, cosmetics-to-sockets all reuse. The port is a translation, not a rebuild.</div>
+      </div>
+      <div class="stat">
+        <div class="n">$0 &rarr; $25</div>
+        <div class="k">To a playable 3D slice</div>
+        <div class="d">Unity Personal is free; the only hard spend to Play Store is the one-time $25 dev account.</div>
+      </div>
+      <div class="stat">
+        <div class="n">1 dog</div>
+        <div class="k">The whole bet, proven fast</div>
+        <div class="d">Run $BCARDD 0001 art&rarr;mesh&rarr;rig&rarr;animate&rarr;in-scene this week. That thread de-risks everything.</div>
+      </div>
+    </div>
+  </header>
+
+  <section id="clash">
+    <div class="sechead"><span class="idx">01</span><h2>The bar is Clash Royale 2026 &mdash; and it is beatable</h2></div>
+    <p class="sub">Their "wow" is not a proprietary engine we could never match. It is three things, all approximable in Unity with free tools: <strong>real-time animation</strong> (no unit is ever static), <strong>reward-juice pipelines</strong>, and a <strong>live-ops cadence</strong>. The June 2026 VFX refresh raised the visual bar; the July 2026 Choice Chest is directly cloneable. Our edge they lack: mouse+keyboard, a dev mode, and a far bigger world.</p>
+    <div class="block">
+      <p style="margin:0;color:var(--muted);font-size:14.5px"><strong style="color:var(--gold)">The real gap in one line:</strong> our units are stagnant JPEGs and repeat MP4s; theirs breathe. The asset audit shows portrait / idle / hit / victory clips at <strong>0 of 106</strong> cards &mdash; only $BCARDD 0001 has signature motion. Close the <strong>animation floor</strong> first and Alley Kingz jumps from "primitive 2D" to "alive" in a single move.</p>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="sechead"><span class="idx">02</span><h2>The Road: seven phases, slice-first</h2></div>
+    <p class="sub">Ordered so you get a <strong>beautiful playable 3D vertical slice fast</strong>, then Play Store, then blockchain last &mdash; nothing risky touches the store build. Free cost and paid cost are called out per phase. Green is $0 / reuse, amber is real spend, clay-red is the risk to watch.</p>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">0</div><div class="pttl">
+        <h3>Keystone · Unity scaffold + JSON importer + Supabase reuse</h3>
+        <div class="goal"><b>Goal:</b> make the existing balance data canonical across web and Unity so nothing forks, and lock the render/camera foundation. Highest-leverage task in the whole plan.</div>
+      </div></div>
+      <ul class="steps">
+        <li>Unity <b>6.3 LTS</b> project on <b>URP</b> Mobile 3D; pin the LTS line for the whole port to avoid mid-project churn.</li>
+        <li>Fixed high-angle <b>perspective camera</b> (~50-60&deg; pitch) over a real 3D lane board &mdash; reads as the familiar tilted "diorama" but is fully 3D with depth and real VFX. Not orthographic (flattens), not free-orbit (breaks the left-is-left law).</li>
+        <li>Editor <b>importer</b> that turns <code style="font-family:var(--mono);color:var(--gold)">canon.js</code> / cards.json into ScriptableObjects mirroring every stat plus the pre-authored <code style="font-family:var(--mono);color:var(--gold)">rig</code> block. Designers keep editing the same JSON; balance never forks.</li>
+        <li>Wire Supabase via REST/Postgrest; verify TLS + token-refresh on-device Android <b>early</b>. Gems stay server-only. Do not rebuild the backend.</li>
+        <li>Register the $25 Google Play account and <b>start recruiting 12 closed-test testers now</b> &mdash; the 14-continuous-day gate is calendar-hard and money cannot shortcut it.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">canon.js, cards/decks JSON, economy tables, the full live Supabase backend</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">C# importer, project scaffold, camera rig, Supabase auth check</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">Unity Personal $0, Blender $0</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">$25 Play acct (one-time)</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">2 wks</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Supabase C# under il2cpp/Android &mdash; verify on-device early</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">1</div><div class="pttl">
+        <h3>Vertical slice · combat parity + 3-5 hero rigs</h3>
+        <div class="goal"><b>Goal:</b> a beautiful playable 3D battle &mdash; one arena, one deck, 3-5 fully rigged animated dogs &mdash; proving both the combat port and the full art pipeline end-to-end.</div>
+      </div></div>
+      <ul class="steps">
+        <li>Port the deterministic tick loop + targeting/splash/ability/tower logic from <b>engine.js</b> to unit-tested C#. Treat it as translation of known-good logic, not a redesign.</li>
+        <li>Run the existing <b>tests/ harness as a golden oracle</b>: diff Unity outputs against the web engine on identical inputs to catch any balance drift (tick order, float rounding, splash math).</li>
+        <li>Pilot the art loop on 0001 / 0002 / 0003: card art &rarr; <b>Tripo</b> free mesh &rarr; Unity <b>Humanoid</b> avatar &rarr; <b>Mixamo</b> shared clips (idle/walk/run/attack/hit/death/victory) &rarr; playing in URP.</li>
+        <li>Give every unit the <b>animation floor</b> with squash and stretch &mdash; this alone moves Alley Kingz from "primitive" to "alive".</li>
+        <li>Rebuild the game-feel: camera push-ins, hit-stop, screen shake, synergy tags. The 272 hand-tuned juice calls in the web build become 3D VFX &mdash; this is where "just rendering" hides most of its hours.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">engine.js sim 1:1, tests/ as parity oracle, canon.rig mapping</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">C# combat services, 3-5 models + Blender retopo, VFX juice</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">Tripo free, Mixamo, Blender, Cascadeur indie</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">$0 (optional ~$20 Pro only if batching early)</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">6 wks</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Combat drift (use the oracle); AI mesh deforms ugly &mdash; heroes need 1-4h Blender retopo</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">2</div><div class="pttl">
+        <h3>Near-term wins · reward juice + The Sims layer + dev mode</h3>
+        <div class="goal"><b>Goal:</b> bank the highest perceived-quality-per-dollar upgrades and two zero-art logic ports that add depth cheaply while art scales in parallel.</div>
+      </div></div>
+      <ul class="steps">
+        <li><b>Reward-open sequence as a first-class feature:</b> anticipation (shake/glow) &rarr; burst &rarr; escalating rarity reveal (common quiet; legendary = flash + light rays + fanfare + slow-mo) &rarr; items physically fly out. Add an anticipation timer on one tier for return visits.</li>
+        <li>Add <b>reward agency</b> (Choice Chest: pick 1 of N) and rarity-scaled audio. Chest satisfaction is half sound, and we under-invest there.</li>
+        <li>Port <b>needs.js</b> (hunger/energy/morale/honor) + flywheel.js to a pure C# mood service &mdash; and finally make the dog actually <b>eat, use the bathroom, and go play</b> as needs&rarr;actions&rarr;world with animation states. Deterministic, headless, zero art.</li>
+        <li>Re-implement <b>vimmode.js + keyboard.js</b> as a desktop-only C# input interpreter that dispatches to the existing action API. Additive; touch players never see it. This is our PC-crossover wedge &mdash; expand it.</li>
+        <li>Standardize one material system + a <b>color-coded particle vocabulary</b> (one color per damage type), mirroring Clash's June 2026 VFX refresh.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">needs.js, flywheel.js, loops.js suspense, drip.js, ~160 audio files (100%)</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">Juice sequencer, Choice-Chest UI, C# input layer, particle language</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">DOTween, Unity audio, Lottie &mdash; $0</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">$0</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">4-6 wks</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Scope creep &mdash; keep juice tight; do NOT copy Clash's paywall pressure (off-brand)</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">3</div><div class="pttl">
+        <h3>Systems port · 3D base-build + first real backend</h3>
+        <div class="goal"><b>Goal:</b> port the ~45 gameplay systems as C# services one lane at a time and build the 3D drag-place base, closing the core loop.</div>
+      </div></div>
+      <ul class="steps">
+        <li>Port economy / deck-builder / <b>The Fence</b> (marketplace) / <b>The Watch</b> (defense) / karma / ladder / pass / quests / seasons as C# services. Data and formulas port directly &mdash; pure logic.</li>
+        <li>Rebuild <b>buildmode.js</b> (the heaviest single port, a DOM placement UI) as a 3D drag-place base UX. Layout logic ports; the UI is a rebuild. The 400 map tiles are per-tier decoration reference.</li>
+        <li>Build <b>ak-raid</b> &mdash; the one backend piece that is spec-only today. Real persisted publish/target/resolve/revenge is the first Unity-era server task and the true MMO depth.</li>
+        <li>Rebuild viral.js clip-capture as a <b>3D&rarr;video recorder</b> with the <code style="font-family:var(--mono);color:var(--gold)">?ref=</code> overlay; wire big plays to auto-trigger a shareable clip. The referral loop is server-side and stays.</li>
+        <li>Port the Crown Bloodline story graph verbatim; rebuild boss fights as 3D encounters. <b>Keep chronicles/manga 2D</b> &mdash; converting that art destroys its value.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">economy/trading/defense/story/seasons/ladder logic verbatim; population bots</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">3D base UX, ak-raid backend, clip recorder, 3D boss encounters</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">$0 (Supabase free tier)</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">$0</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">8 wks</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">buildmode is the heaviest rebuild; persisted PvP raiding is a BUILD, not a port</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">4</div><div class="pttl">
+        <h3>Art scale-out · batch the roster, free-first</h3>
+        <div class="goal"><b>Goal:</b> convert the roster to 3D at controlled cost &mdash; model the top ~24 cards for v1, not all 106 &mdash; with locked style consistency.</div>
+      </div></div>
+      <ul class="steps">
+        <li><b>Triage all 425 cards</b> into bipedal-humanoid (the majority &mdash; armored upright warriors) vs true quadruped. This one call decides 90% of the pipeline.</li>
+        <li>Mesh free-first: if the AceMagician PC has an <b>NVIDIA GPU</b>, self-host <b>TRELLIS 2</b> (Microsoft) or <b>Hunyuan3D 2.1</b> (Tencent) &mdash; the only top-tier options that are both open-source and commercial-clean &mdash; at zero marginal cost. No GPU: one month of Tripo/Meshy Pro (~$20) or fal.ai (~$0.40/model, ~$170 for all 425).</li>
+        <li>Rig bipeds as Unity Humanoid via Mixamo: <b>one canonical clip set retargets across all dogs</b> via Mecanim &mdash; 425 rigging jobs become 425 mesh jobs + 1 animation job. Exactly how Clash ships hundreds of units.</li>
+        <li><b>Tier the labor:</b> heroes get a 1-4h Blender retopo + custom attack; common units ship auto-mesh &rarr; decimate &rarr; shared clips. Do not hand-retopo 425 units.</li>
+        <li>Buildings = <b>modular kitbash</b> (Sloyd parametric pieces + Tripo landmarks on a grid), not 400 unique meshes. Cosmetics author to the Bible socket names so drip.js ports 1:1; render each finished rig to a headshot to close the 0/106 portrait gap for free.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">425 card arts as concept refs, 400 map tiles, canon.rig, socket schema</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">~24 hero models for v1, building kit, cosmetic socket prefabs</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">$0 if AceMagician has NVIDIA (self-host) + Mixamo + Blender</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">~$20 Pro OR ~$170 fal.ai if no GPU; ~$50/mo only if quadrupeds exist</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">6-8 wks</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Free SaaS tiers are NOT shippable (Meshy free = CC-BY public). Lock params or style drifts</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">5</div><div class="pttl">
+        <h3>Google Play v1 · soft-currency game only, crypto OUT of the binary</h3>
+        <div class="goal"><b>Goal:</b> ship a Play-Store v1 of the core loop &mdash; beautiful, playable, compliant &mdash; with no crypto in the app.</div>
+      </div></div>
+      <ul class="steps">
+        <li>Signed <b>.aab</b> via Play App Signing; target <b>API 36</b> (Android 16) from day one &mdash; mandatory for new apps from Aug 31 2026, right when v1 lands.</li>
+        <li>Data Safety form, IARC rating, ads/IAP declarations, privacy URL. We already have gems/Stripe IAP + an age gate, so declarations map to existing systems.</li>
+        <li>Run the mandatory <b>closed test</b>: 12+ opted-in testers for 14 continuous days before Production. Recruit from Phase 0.</li>
+        <li>Keep all crypto/NFT <b>out of the binary</b>. Randomized chests stay soft-currency with <b>published odds shown before purchase</b> &mdash; this cures the FTC HoYoverse $20M loot-box template.</li>
+        <li>Enforce a low-end perf budget: 60fps on a cheap phone beats fancy effects that stutter. Keep the web build live as the viral top-of-funnel.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">Gems/Stripe IAP, age gate, CA compliance tracking, published-odds chest data</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">AAB config, store listing, Data Safety/IARC, closed test, perf pass</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">$0 (registration paid in Phase 0)</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">$0 additional</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">wks 16-24</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Closed-test clock resets if testers drop &mdash; recruit early. v1 = core loop only</div></div>
+      </div>
+    </div></div>
+
+    <div class="phase"><div class="pcard">
+      <div class="ptop"><div class="pnum">6</div><div class="pttl">
+        <h3>Blockchain LAST · opt-in Solana collector layer</h3>
+        <div class="goal"><b>Goal:</b> add real "own + trade" value without breaking the base game or touching the store builds. Testnet-first, $0 mainnet until the full loop is proven.</div>
+      </div></div>
+      <ul class="steps">
+        <li><b>Stay Solana-native</b> &mdash; reuse the already-locked Metaplex decision and the already-live <b>$BCARDD</b> coin. Use MagicBlock's Solana.Unity-SDK for wallet + minting; keep Immutable zkEVM as a documented hedge.</li>
+        <li>Three tiers: <b>Tier 0</b> free play, off-chain cards, no wallet, lose nothing ever; <b>Tier 1</b> optional Metaplex Core mint (~$0.70) to own a card with on-chain stats + trade; <b>Tier 2</b> 10k Genesis cosmetic dogs as cNFTs (~$0.001 each).</li>
+        <li><b>Firewall:</b> soft currency never converts to token; token never buys power the soft economy can't. A player can go their whole life without a wallet.</li>
+        <li>All buy/trade stays <b>web-only via external Phantom wallet</b> (exactly like Gods Unchained mobile). Prove login&rarr;mint&rarr;list&rarr;trade&rarr;royalty on testnet for $0 first. List on Tensor/Magic Eden (free), don't build a marketplace.</li>
+        <li>Guardrails: OFAC screening + geofence + 18+ wallet gate + no cash-out + free-entry tournaments. One ~1-2h crypto/securities attorney sign-off before any primary sale.</li>
+      </ul>
+      <div class="dgrid">
+        <div class="cell"><div class="lab">Reuses</div><div class="val">5-rarity ladder, cards/economy stats, the LIVE $BCARDD, Metaplex decision</div></div>
+        <div class="cell"><div class="lab">New work</div><div class="val">Solana SDK integration, mint/orderbook, tokenize-on-claim, OFAC/geo gate</div></div>
+        <div class="cell free"><div class="lab">Free</div><div class="val">Mint infra + pump.fun + testnet + Tensor listing effectively free</div></div>
+        <div class="cell paid"><div class="lab">Paid</div><div class="val">~$10-100 to mint 10k cNFTs; ~1-2h attorney (the one worthwhile spend)</div></div>
+        <div class="cell time"><div class="lab">Time</div><div class="val">wks 24+</div></div>
+        <div class="cell risk"><div class="lab">Watch</div><div class="val">Loot-box ban = #1 kill risk: NEVER sell randomized NFT packs for real money</div></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section id="reuse">
+    <div class="sechead"><span class="idx">03</span><h2>The Reuse Map · what we have &rarr; what it becomes</h2></div>
+    <p class="sub">This is the proof behind the 80%. Everything on the left already exists and keeps working; the right column is the only thing that changes. The data and logic never fork.</p>
+    <div class="maptbl-wrap"><table class="maptbl">
+      <thead><tr><th>What we have</th><th></th><th>What it becomes</th></tr></thead>
+      <tbody>
+        <tr><td class="have"><code>engine.js</code> &mdash; 254KB pure sim, 0 draw calls, already engine-agnostic</td><td class="arrow">&rarr;</td><td class="becomes">C# combat services, translated 1:1 with the tests/ harness as a golden parity oracle</td></tr>
+        <tr><td class="have"><code>canon.js</code> &mdash; 106 cards + 6 handlers, byte-faithful stats + a pre-authored <code>rig</code> block</td><td class="arrow">&rarr;</td><td class="becomes">Unity ScriptableObjects via a one-time importer; the rig block maps each dog to 1 of 4 families &mdash; zero design work</td></tr>
+        <tr><td class="have"><code>economy.js</code> &mdash; 9 currencies, builder caps, chest/crate tables, key forging, streaks</td><td class="arrow">&rarr;</td><td class="becomes">C# economy config, ported verbatim &mdash; pure logic, zero rendering</td></tr>
+        <tr><td class="have"><code>drip.js</code> paper-doll &mdash; head/eyes/neck/muzzle/torso/hand slots</td><td class="arrow">&rarr;</td><td class="becomes">3D rig sockets (Head/Eyes/Neck/Jaw/Spine/Hand) &mdash; same rig-once-swap-parts; catalog + ledger port 1:1</td></tr>
+        <tr><td class="have">Supabase edge fns &mdash; crew/chat/pass/quests/cosmetics/gems, LIVE</td><td class="arrow">&rarr;</td><td class="becomes">Called verbatim from Unity via REST. Backend works day one; only ak-raid is new</td></tr>
+        <tr><td class="have">425 card renders + 48 battle sprites</td><td class="arrow">&rarr;</td><td class="becomes">2D card-collection UI (stays 2D) + the best concept-reference sheets for AI mesh generation</td></tr>
+        <tr><td class="have">400 map tiles (10 themes &times; 4 structures &times; 10 tiers)</td><td class="arrow">&rarr;</td><td class="becomes">Modular building-kitbash reference &mdash; ~4 base meshes + tier passes, not 400 unique models</td></tr>
+        <tr><td class="have"><code>needs.js</code> + <code>flywheel.js</code> &mdash; hunger/energy/morale/honor + "what next" brain</td><td class="arrow">&rarr;</td><td class="becomes">C# Sims mood service, deterministic + headless &mdash; a zero-art depth win</td></tr>
+        <tr><td class="have"><code>vimmode.js</code> + <code>keyboard.js</code> &mdash; keydown interpreter dispatching to game actions</td><td class="arrow">&rarr;</td><td class="becomes">Desktop-only C# input interpreter calling the same API; additive, invisible to touch players</td></tr>
+        <tr><td class="have"><code>chronicles.js</code> + manga panels + 1.3MB of story content</td><td class="arrow">&rarr;</td><td class="becomes">STAYS 2D &mdash; a reader overlay in the 3D build. Converting to 3D destroys value</td></tr>
+        <tr><td class="have">~160 audio files + ~66 cinematic MP4s</td><td class="arrow">&rarr;</td><td class="becomes">Audio ports 100% verbatim; MP4s carry over via a video player</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="art">
+    <div class="sechead"><span class="idx">04</span><h2>The Art Pipeline · turning 425 flat cards into living 3D</h2></div>
+    <p class="sub">The pipeline splits in two: generate the <strong>mesh</strong>, then <strong>rig and animate</strong> separately (no single tool does both well). The lucky break: our dogs are overwhelmingly <strong>bipedal</strong> upright warriors &mdash; so every humanoid auto-rigger works and we get the Clash trick for free.</p>
+    <ol class="numsteps">
+      <li><b>Triage</b> all 425 into <span class="tag">bipedal-humanoid</span> vs <span class="tag">true quadruped</span>. This one decision determines 90% of the pipeline and a hidden cost line.</li>
+      <li><b>Mesh, free-first.</b> If the AceMagician PC has an NVIDIA GPU, self-host <b>TRELLIS 2</b> or <b>Hunyuan3D 2.1</b> &mdash; open-source and commercial-clean &mdash; at zero cost. No GPU: one month of Tripo/Meshy Pro (~$20) or fal.ai (~$170 for all 425). Never ship on free SaaS tiers &mdash; their licenses forbid it.</li>
+      <li><b>Rig.</b> Bipeds &rarr; Mixamo (free, Unity Humanoid). One canonical clip set retargets across every dog via Mecanim. Quadrupeds &rarr; Anything World (~$50/mo) &mdash; Mixamo refuses non-humanoids.</li>
+      <li><b>Tier the labor.</b> Heroes get a 1-4h Blender retopo + weight-paint + a Cascadeur custom attack. Common units ship auto-mesh &rarr; decimate &rarr; auto-rig &rarr; shared clips, no cleanup. Use canon.rig's 4 families so it's ~4 modular rigs, not 106 from scratch.</li>
+      <li><b>Buildings &amp; cosmetics.</b> Modular kitbash for structures (static props barely need topology). Author rigs to the Bible socket names so cosmetics port 1:1, and render each finished rig to a headshot &mdash; the 0/106 portrait gap closes for free.</li>
+    </ol>
+    <div class="block" style="margin-top:18px">
+      <p style="margin:0;font-size:14px;color:var(--muted)"><span class="pill free">Style lock</span> &nbsp; One tool, one settings preset, one poly budget, one texture res, one rig template, one Unity import preset, batched via API. For v1, model only the <strong>top ~24 cards</strong>. Avoid Unity Muse (deprecated 2026) and Kaedim (enterprise-priced). Traditional baseline: a from-scratch character is 20-40h of artist time; AI compresses generation to minutes and hero polish to 1-4h. That compression <strong>is</strong> the whole value prop.</p>
+    </div>
+  </section>
+
+  <section id="chain">
+    <div class="sechead"><span class="idx">05</span><h2>The Coin Question · settled</h2></div>
+    <p class="sub">Two hard calls the research resolved, both in favor of <strong>reuse over fragmentation</strong>.</p>
+    <div class="cols">
+      <div class="block">
+        <h3>Chain: stay Solana</h3>
+        <p style="font-size:14.5px">Immutable zkEVM has the better first-party Unity SDK, but our chain decision is <strong>already locked to Solana</strong> (Metaplex Core for stat-cards, Bubblegum cNFTs for cosmetics), and <strong>$BCARDD is already fair-launched and live</strong> on pump.fun. Splitting to Immutable would abandon a live coin and a working economy. Stay native; keep Immutable documented as the hedge if the MagicBlock SDK stalls.</p>
+      </div>
+      <div class="block">
+        <h3>$KINGS: do NOT launch a second liquid coin</h3>
+        <p style="font-size:14.5px">A two-token model is the exact Axie (AXS+SLP) / STEPN death-spiral trap &mdash; SLP hyperinflated and collapsed; GST did &minus;98% in two months. Make <strong>$KINGS a closed-loop, non-exchangeable reward</strong> (the Fortnite V-Bucks model &mdash; never listed, no cash-out) that the SEC/FTC treat as non-financial utility. <strong>$BCARDD stays the one real tradable coin.</strong> They coexist cleanly.</p>
+      </div>
+    </div>
+    <div class="block">
+      <h3 style="color:var(--risk)">The legal firewall (this is what keeps us clean)</h3>
+      <p style="font-size:14.5px;margin-bottom:0">Utility = <strong>consumption, not yield</strong> (spend to forge/mint/cosmetics; no stake-to-earn, no play-to-earn emissions that draw Howey + gambling scrutiny). <strong>Sinks &ge; faucets</strong> as a hard release rule. <strong>Fair-launch only</strong> &mdash; no presale (a presale is the cleanest security); raise real capital as equity at the Everlight level. Zero profit/return marketing on every channel &mdash; <strong>market as fun, never investment.</strong> No wagering for prizes, no cash-out. One attorney sign-off before any primary sale.</p>
+    </div>
+  </section>
+
+  <section id="gaps">
+    <div class="sechead"><span class="idx">06</span><h2>Closing the Clash gap · ten moves, mostly free</h2></div>
+    <p class="sub">None of these need new engine tech. They need craft and a content calendar.</p>
+    <div class="gap-grid">
+      <div class="gapc"><span class="mk">01</span><div class="t"><b>Animation floor</b>The #1 gap. Every unit gets idle+deploy+attack+hurt+death with squash and stretch. Unity Humanoid + one shared Mixamo set does it free.</div></div>
+      <div class="gapc"><span class="mk">02</span><div class="t"><b>Reward-juice pipeline</b>Anticipation &rarr; burst &rarr; escalating reveal &rarr; items fly out. Highest perceived-quality-per-dollar upgrade available.</div></div>
+      <div class="gapc"><span class="mk">03</span><div class="t"><b>Reward agency</b>Choice Chest: pick 1 of N. Turns passive RNG into a decision. Directly cloneable from Clash's July 2026 drop.</div></div>
+      <div class="gapc"><span class="mk">04</span><div class="t"><b>Shareable transformation moments</b>Evolution / ultimate beats auto-trigger a recordable clip with the ?ref= overlay &mdash; big moment &rarr; clip &rarr; viral acquisition.</div></div>
+      <div class="gapc"><span class="mk">05</span><div class="t"><b>Unified particle language</b>One color per damage type so effects read as authored, not random. Mirrors Clash's June 2026 VFX refresh.</div></div>
+      <div class="gapc"><span class="mk">06</span><div class="t"><b>Single-number progression</b>One legible account-power number rolling up all progress, with milestone chests and a trophy road.</div></div>
+      <div class="gapc"><span class="mk">07</span><div class="t"><b>Live-ops cadence</b>Monthly named season + pass + a rotating limited mode + one narrative event. A content calendar, not new tech.</div></div>
+      <div class="gapc"><span class="mk">08</span><div class="t"><b>Sound as a shipping feature</b>Rarity-scaled deploy/hit/death/reward audio. Chest satisfaction is half sound and we under-invest.</div></div>
+      <div class="gapc"><span class="mk">09</span><div class="t"><b>Low-end perf budget</b>60fps on the cheapest phone beats effects that stutter. Jank kills premium feel harder than flat 2D would.</div></div>
+      <div class="gapc"><span class="mk">10</span><div class="t"><b>Mid-match "wow"</b>Telegraphed, screenshot-worthy transformation beats &mdash; our own evolution moments that read as share-worthy.</div></div>
+    </div>
+  </section>
+
+  <section id="firstmove" style="border-bottom:none">
+    <div class="sechead"><span class="idx">07</span><h2>The First Move &mdash; this week</h2></div>
+    <div class="callout">
+      <h2>Prove the whole bet on one dog.</h2>
+      <p class="lead" style="margin-bottom:16px">Everything &mdash; the "80% already migrated" thesis and the one real cost (3D art) &mdash; gets validated by a single vertical thread before any batch spend:</p>
+      <ol class="numsteps">
+        <li>Stand up the <b>Unity 6.3 LTS + URP</b> project with the fixed high-angle "diorama" camera.</li>
+        <li>Write the <b>JSON&rarr;ScriptableObject importer</b> so canon.js becomes canonical CardDefs in Unity &mdash; balance never forks.</li>
+        <li>Run <b>$BCARDD 0001</b> through the full loop: card art &rarr; Tripo free mesh &rarr; Unity Humanoid &rarr; Mixamo walk+attack &rarr; playing in the URP scene with a hit reaction.</li>
+        <li><b>In parallel</b> (the 14-day / 12-tester clock can't be shortcut): register the $25 Play account and start recruiting testers today.</li>
+        <li><b>5-minute check that swings Phase 4 between $0 and ~$170:</b> does the AceMagician PC have an NVIDIA GPU? If yes, the entire 425-model mesh pipeline is free via self-hosted TRELLIS 2 / Hunyuan3D.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="decisions">
+    <div class="sechead"><span class="idx">08</span><h2>Decisions you owe the build</h2></div>
+    <p class="sub">Six open questions. The first two are the cheapest to answer and unlock the most.</p>
+    <div class="qgrid">
+      <div class="qc"><div class="qn">Q1 · Hardware &mdash; answer first</div><p>Does the <b>AceMagician PC have an NVIDIA/CUDA GPU?</b> If yes, self-hosted TRELLIS 2 / Hunyuan3D makes the entire 425-model mesh pipeline commercial-clean at $0 and removes the licensing trap. e5-mother is ARM (no CUDA) so it can't host these. This one fact swings Phase 4 between $0 and ~$170.</p></div>
+      <div class="qc"><div class="qn">Q2 · Roster shape</div><p>How many of the 425 are <b>true quadrupeds vs bipedal?</b> Bipeds ride the free Mixamo path; quadrupeds fall to Anything World (~$50/mo). A quick triage before any batch run &mdash; it determines 90% of the pipeline.</p></div>
+      <div class="qc"><div class="qn">Q3 · Chain continuity</div><p>Confirm you want <b>Solana ecosystem continuity</b> (reuse live $BCARDD + locked Metaplex) over Immutable's superior first-party Unity SDK &mdash; or greenlight the documented Immutable hedge.</p></div>
+      <div class="qc"><div class="qn">Q4 · $KINGS role</div><p>Confirm <b>$KINGS = closed-loop, non-exchangeable reward</b> (V-Bucks model) with $BCARDD as the sole tradable coin &mdash; vs any desire to make $KINGS on-chain, which this blueprint advises against as a dual-token risk.</p></div>
+      <div class="qc"><div class="qn">Q5 · Parity oracle</div><p>Does the existing <b>tests/ harness</b> cover enough combat cases to be a reliable golden oracle for the C# port, or does it need expansion first to catch balance drift?</p></div>
+      <div class="qc"><div class="qn">Q6 · Backend on-device</div><p>Verify <b>Supabase C# access under Unity il2cpp on Android early</b> (Phase 0): community SDK vs raw REST, and on-device TLS/token-refresh behavior &mdash; before it becomes a late surprise.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap" style="padding:0">
+      <p class="src"><b>SOURCES &mdash;</b> Codebase reuse map + asset audit + AK Design Bible (canon.js, engine.js, systems/*, assets/*). Clash: Supercell Titan engine notes, GDC 2023 "Modernizing Rendering at Supercell," Clash Royale June + July 2026 release notes. Pipeline: Tripo3D, Meshy-6, TRELLIS 2 (Microsoft), Hunyuan3D 2.1 (Tencent), Mixamo, AccuRIG, Anything World, Sloyd. Unity: Runtime-Fee cancellation, Unity 6.3 LTS + URP, Google Play target-SDK + 12-tester closed-test policy. Chains: Immutable zkEVM Unity SDK, Gods Unchained zkEVM + mobile, MagicBlock Solana.Unity-SDK, Google Play blockchain policy. Tokenomics/legal: Howey/Skadden 2025, SEC "Project Crypto" March 2026, Metaplex Core + Bubblegum, FTC HoYoverse $20M loot-box settlement, Axie/STEPN dual-token post-mortems.</p>
+      <div class="sig">Everlight Ventures · Alley Kingz · The Hive · 2026-07-14</div>
+    </div>
+  </footer>
+
+</div>

@@ -1,0 +1,112 @@
+<title>AK Art + World Plan -- Backdrops, Clash-Grade Base, District Zoning</title>
+<style>
+  :root{--gold:#D4AF37;--gold2:#e8c55a;--ink:#0A0A0A;--paper:#12100c;--txt:#E8E8E8;--dim:#b9a76a;--green:#7CFFB0;--red:#ff6b6b;--line:rgba(201,168,76,.28);}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--txt);font:15px/1.55 Inter,system-ui,sans-serif;padding:26px 18px 90px;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  h1{font:800 26px/1.2 Georgia,'Playfair Display',serif;color:var(--gold2);letter-spacing:.01em;margin:0 0 4px;}
+  h2{font:800 19px Georgia,serif;color:var(--gold2);margin:34px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  h3{font:800 15px Inter,sans-serif;color:var(--gold);margin:20px 0 6px;letter-spacing:.02em;text-transform:uppercase;}
+  .sub{color:var(--dim);font-size:13px;margin:0 0 18px;}
+  code{background:rgba(232,197,90,.10);border:1px solid var(--line);border-radius:5px;padding:.5px 5px;font:12.5px ui-monospace,Menlo,monospace;color:#f0dfa0;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  .card{background:linear-gradient(168deg,rgba(20,17,11,.9),rgba(10,10,14,.9));border:1px solid var(--line);border-radius:12px;padding:14px 15px;}
+  .zone{border-radius:12px;padding:15px;border:1px solid var(--line);}
+  .home{background:linear-gradient(150deg,rgba(60,42,20,.55),rgba(30,22,12,.5));border-color:#8a6a2e;}
+  .fort{background:linear-gradient(150deg,rgba(24,30,40,.6),rgba(12,16,22,.6));border-color:#4a6a86;}
+  .tag{display:inline-block;font:800 10px Inter;letter-spacing:.06em;padding:2px 8px;border-radius:20px;text-transform:uppercase;}
+  .free{background:rgba(124,255,176,.16);color:var(--green);border:1px solid rgba(124,255,176,.4);}
+  .paid{background:rgba(232,197,90,.14);color:var(--gold2);border:1px solid var(--line);}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid rgba(201,168,76,.16);vertical-align:top;}
+  th{color:var(--gold);font:800 11px Inter;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line);}
+  .scroll{overflow-x:auto;}
+  .p0{color:var(--red);font-weight:800;} .p1{color:var(--gold2);font-weight:800;} .p2{color:var(--dim);font-weight:700;}
+  ul{margin:6px 0 6px 0;padding-left:20px;} li{margin:3px 0;}
+  .lede{background:rgba(232,197,90,.06);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 14px;margin:10px 0;font-size:13.5px;}
+  .win{color:var(--green);font-weight:800;}
+  @media(prefers-color-scheme:light){body{background:#faf7ef;color:#241f10;}.card,.zone{background:#fff;}h1,h2,h3{color:#7a5f13;}}
+  :root[data-theme="light"] body{background:#faf7ef;color:#241f10;}
+  :root[data-theme="dark"] body{background:var(--ink);color:var(--txt);}
+</style>
+<div class="wrap">
+<h1>Alley Kingz -- Art + World Build Plan</h1>
+<p class="sub">Read-only audit -> execution plan. Backdrop wiring, Clash-grade base graphics, sim/defense district zoning, and the bible S12 render manifest. Paths are <code>file:line</code> where load-bearing.</p>
+
+<div class="lede"><b>Headline:</b> The single biggest finding is that the "black-backdrop modes" are mostly a <span class="win">WIRING gap, not a missing-art gap</span>. The arena plates, the street interior, and the arcade interior already sit on disk -- the mode renderers just paint a flat near-black fill instead of blitting them. Those are same-day, zero-render fixes.</div>
+
+<h2>1 &nbsp; Black-backdrop modes -- the art already exists</h2>
+<div class="grid">
+  <div class="card"><h3>WORLD MOBA <span class="tag free">FREE</span></h3>
+  <code>systems/modes.js:820</code> draws only <code>g.fillStyle='#0a0c12'</code> -- a flat charcoal fill. The ASSAULT (base-raid) branch tiles <code>midtown_ground.png</code>, but the plain "Streets -> WORLD MOBA" duel gets nothing.<br><br>
+  <b>On disk unused:</b> <code>assets/arena/{the_lot,arena_a_neon_night,arena_b_golden_industrial,arena_c_rain_docks}.png</code> (4 plates) + 8 tower plates. <code>game.html</code> already renders these; <code>modes.js</code> ignores them.<br><br>
+  <b>Fix:</b> cover-fit an arena plate into the lane plot (same pattern as the ASSAULT branch), pick by district, add a top skyline band + turn on <code>drawGrit()</code> vignette (currently ASSAULT-only). <b>Note:</b> plates are 1.3-1.5MB each -- downscale to ~1280px WEBP before wiring.</div>
+
+  <div class="card"><h3>THE STREET picker <span class="tag free">FREE</span></h3>
+  <code>systems/modes.js:1754</code> sets <code>interiorArt:'assets/interiors/merchant.png'</code> -- the generic merchant room -- for the mode picker. <br><br>
+  <code>assets/interiors/street_mode.png</code> (1.2MB, the CORRECT backdrop) exists on disk and is unused here.<br><br>
+  <b>Fix:</b> one-token swap to <code>street_mode.png</code>.</div>
+
+  <div class="card"><h3>THE ARCADE <span class="tag free">FREE</span></h3>
+  <code>systems/arcade.js</code> <code>buildBg()</code> (~L242-291) synthesizes a procedural gold-gradient board backdrop every viewport resize.<br><br>
+  <code>assets/interiors/arcade.png</code> (1.2MB, a real neon arcade room) exists and is unused by the overlay.<br><br>
+  <b>Fix:</b> blit <code>arcade.png</code> cover-fit as the board plate, dim ~34% for tile contrast, keep the procedural vignette on top.</div>
+
+  <div class="card"><h3>Depth pass (all modes) <span class="tag free">FREE</span></h3>
+  Even with a floor plate, top-down canvas modes read flat. Reuse the existing <code>drawGrit()</code> radial vignette + grain (already in modes.js, gated to ASSAULT) across every mode, and stamp a horizon/skyline strip cropped from a district <code>*_bg.png</code>. No new renders.</div>
+</div>
+
+<h2>2 &nbsp; Why our base doesn't feel like Clash -- and the fix</h2>
+<p class="sub">Clash reads as a fixed camera on a <b>discrete tiled plot</b>: every building sits on a shadowed baseplate, every free cell is a visible grid square, and the ghost lights up the exact tiles it will occupy in green/red. Ours is a top-down photo with a faint dot field.</p>
+<div class="scroll"><table>
+<tr><th>Clash cue</th><th>Ours today (file:line)</th><th>The upgrade</th></tr>
+<tr><td><b>Tiled terrain plot</b> with a hard base boundary</td><td>ONE district photo stretched over the whole world at 0.80 alpha, non-tiled -- <code>index.html:2129</code>. No plot edge.</td><td>Draw a bounded <b>buildable plot</b> with a crisp seamless terrain tile + a wall/fence ring; outer street stays the photo.</td></tr>
+<tr><td><b>Visible cell grid</b></td><td>2px dot field inside a circular build radius -- <code>buildmode.js:1291</code>; plus a 5%-alpha 80px screen grid -- <code>index.html:2138</code>.</td><td>Stroke real <code>GRID</code>(64) cell lines on the ground plane inside range; alternating-cell checker for the isometric "board" read.</td></tr>
+<tr><td><b>Baseplate + drop shadow</b> under every building</td><td>Placed structs draw sprite/rect with NO contact shadow -- <code>buildmode.js drawStruct</code>. (Hub buildings DO get a 2.5D shadow+extrude at <code>index.html:2148-2155</code> -- technique already in-repo, just not ported.)</td><td>Port <code>bldShadow</code> + <code>BLD_DEPTH</code> extrude into <code>drawStruct</code>: ellipse contact shadow + a 1-tile footprint baseplate under every piece.</td></tr>
+<tr><td><b>Footprint tile highlight</b> on placement</td><td>Ghost is one translucent green/red rect -- <code>buildmode.js:1301</code>. No per-cell tell, no snap pulse.</td><td>Shade each grid cell the footprint covers (green all-clear / red per blocked cell) + a snap pulse on drop.</td></tr>
+<tr><td><b>Isometric camera</b></td><td>Flat top-down.</td><td>Keep top-down (cheaper on mobile) but SELL depth via baseplates + shadows + a slight ground-plane vignette. True iso is a Wave-later Unity item, not needed now.</td></tr>
+</table></div>
+
+<h2>3 &nbsp; District zoning -- one plot, two worlds</h2>
+<p class="sub">Sim-life (gardens/needs/produce -- <code>buildmode.js</code> GARDEN beds, <code>needs.js</code> hunger/BARN/energy) and defense (FORTIFY, WALL/STONE/METAL/BARRICADE, raid waves -- <code>defense.js</code>) both exist but share ONE undifferentiated ground. Split the home plot down a seam so the two halves read at a glance.</p>
+<div class="grid">
+  <div class="zone home"><h3 style="color:#e0b45a">The Homestead (Sim-Life)</h3>
+  <b>Reads:</b> warm dusk light, tilled soil + grass, string lights, wooden fences, cozy.<br>
+  <b>Holds:</b> Sunflower beds, the Barn (produce store), a Coop/Pen (animals -> morale), a Sleep Den (energy/rest). Runner's hunger/rest loop lives here.<br>
+  <b>Art:</b> warm soil/grass ground tile set + 3 homestead facades (barn, coop, den).</div>
+
+  <div class="zone fort"><h3 style="color:#8fb8e0">The Gauntlet (Dungeon-Defense)</h3>
+  <b>Reads:</b> cold blue floodlight, cracked concrete + rubble, torch-lit, spiked barricades, hard edges, dangerous.<br>
+  <b>Holds:</b> walls (wood/stone/metal), barricades, watchtowers, traps, the fortify sink. This is the lane raiders breach.<br>
+  <b>Art:</b> cold concrete/rubble ground tile set + a watchtower + trap decals + a breach approach.</div>
+</div>
+<div class="lede"><b>The seam:</b> a fortified GATE/fence line runs between the two halves -- warm homestead behind it, cold kill-zone in front. Raiders spawn on the Gauntlet edge and must break the gate to reach the Homestead. This makes the CoC "defense matters" fantasy legible AND gives the farm sim its own safe, warm home. The seam is the single most important new establishing render.</div>
+
+<h2>4 &nbsp; Bible S12 consistency -- the biggest visible gaps</h2>
+<ul>
+<li><b class="p1">PORTRAITS 0/106.</b> The hero picker ("who runs the streets", <code>index.html:1293</code>) falls back to STAT CARDS -- a direct violation of S12.1 CONTEXT LAW. Highest-impact gap. Flagship 14 first, then faction waves.</li>
+<li><b class="p1">VICTORY always $BCARDD.</b> <code>win.mp4</code> is hard-wired to one dog; wrong whenever another dog wins. Interim: victory page reads the winner's card art (free). Later: per-winner clips.</li>
+<li><b class="p2">IDLE / HIT / VICTORY have no class fallback</b> at all (WALK + ACTION do). Generate 6 class HIT + 6 class IDLE clips as the fallback layer.</li>
+<li><b class="p2">Backdrop house-style drift.</b> Hub facades (Leonardo), district bgs (CF set), arena plates, stretched ground photos, war_ground (CF aerial), interiors were made in different waves. Home uses stretched photos; MOBA uses none; districts use crisp <code>*_bg.png</code>. One style-lock re-render pass unifies the city floors.</li>
+</ul>
+
+<h2>RENDER MANIFEST</h2>
+<p class="sub">Chain of command per bible 12.4: CF flux (free) for bulk tiles/panels; Higgsfield for hero plates + motion. Credit figures are rough Higgsfield estimates.</p>
+<div class="scroll"><table>
+<tr><th>#</th><th>Asset</th><th>For</th><th>Tool</th><th>Cost</th><th>Pri</th></tr>
+<tr><td>--</td><td>(wire existing) arena plates, street_mode.png, arcade.png into MOBA/Streets/Arcade</td><td>Concern 1</td><td>code only</td><td><span class="free">FREE</span></td><td class="p0">P0</td></tr>
+<tr><td>1</td><td>Homestead ground tile set (warm soil + grass, 2-3 seamless 512px)</td><td>Zoning sim side</td><td>CF flux</td><td><span class="free">free</span></td><td class="p1">P1</td></tr>
+<tr><td>2</td><td>Gauntlet ground tile set (cold concrete + rubble, 2-3 seamless 512px)</td><td>Zoning defense side</td><td>CF flux</td><td><span class="free">free</span></td><td class="p1">P1</td></tr>
+<tr><td>3</td><td>Seam GATE + fence line (the homestead/gauntlet divider)</td><td>Zoning seam</td><td>CF flux</td><td><span class="free">free</span></td><td class="p1">P1</td></tr>
+<tr><td>4</td><td>Home-district establishing plate (2-zone, warm-behind / cold-front)</td><td>Zoning hero read</td><td>Higgsfield</td><td><span class="paid">~2cr</span></td><td class="p1">P1</td></tr>
+<tr><td>5</td><td>Barn + Coop/Pen + Sleep Den facades (3)</td><td>Sim buildings</td><td>CF flux (barn -> Higgsfield)</td><td><span class="paid">free +~1cr</span></td><td class="p2">P2</td></tr>
+<tr><td>6</td><td>Watchtower + trap decals (defense clutter, 2-3)</td><td>Gauntlet clutter</td><td>CF flux</td><td><span class="free">free</span></td><td class="p2">P2</td></tr>
+<tr><td>7</td><td>Building baseplate + soft-shadow sprite sheet (reuse bldShadow, code)</td><td>Clash base feel</td><td>code only</td><td><span class="free">FREE</span></td><td class="p1">P1</td></tr>
+<tr><td>8</td><td>Flagship PORTRAITS -- 14 Mythic/Legendary (<code>assets/portraits/NNNN.jpg</code>)</td><td>S12 picker</td><td>Higgsfield</td><td><span class="paid">~14cr</span></td><td class="p1">P1</td></tr>
+<tr><td>9</td><td>Faction-wave PORTRAITS -- remaining 92 (batched)</td><td>S12 picker</td><td>CF flux bulk</td><td><span class="free">free</span></td><td class="p2">P2</td></tr>
+<tr><td>10</td><td>Class HIT + class IDLE motion clips (6 + 6)</td><td>S12 fallback</td><td>Higgsfield</td><td><span class="paid">~12cr</span></td><td class="p2">P2</td></tr>
+<tr><td>11</td><td>(optional) 1-2 dedicated MOBA lane backdrops if arena reuse reads off</td><td>Concern 1 polish</td><td>Higgsfield</td><td><span class="paid">~2cr</span></td><td class="p2">P2</td></tr>
+</table></div>
+<p class="sub">Free-first: every P0/P1 floor fix is code or CF-free. Paid credits concentrate on the 14 flagship portraits and the one 2-zone establishing plate -- the pieces a player actually stares at.</p>
+</div>
