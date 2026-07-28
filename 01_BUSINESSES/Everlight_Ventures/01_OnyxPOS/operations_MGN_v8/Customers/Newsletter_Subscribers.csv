@@ -1,0 +1,2 @@
+Subscriber_ID,Customer_ID,Email,Name,Subscribed_At,Status,Last_Email_Sent,Unsubscribe_Date
+SUB-20260626105617EFF,CUST-1001,jane.loyalty@example.com,Jane Test,2026-06-26T10:56:17,ACTIVE,,

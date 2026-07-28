@@ -1,0 +1,902 @@
+
+═══════════════════════════════════════════════════════════════════════════════
+                    ALLEY KINGZ — WAR RIG CAR UPDATE
+              MASTER IMPLEMENTATION DOCUMENT (July 17, 2026)
+═══════════════════════════════════════════════════════════════════════════════
+
+DOCUMENT PURPOSE:
+This is the single source of truth for implementing the War Rig Car Update,
+including all 3D asset generation via Tripo3D, dual-view architecture (RPG/FPS),
+weapon systems, garage mechanics, economy flow, and sensory packages.
+
+STATUS: Pre-production — awaiting Tripo3D Max plan purchase (25,000 credits @ $44)
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 1: TRIPO3D CREDIT ALLOCATION (25,000 CREDITS)
+═══════════════════════════════════════════════════════════════════════════════
+
+CREDIT BUDGET BREAKDOWN:
+
+┌─────────────────────────────┬──────────┬─────────┬─────────────┬──────────┐
+│ ASSET CATEGORY              │ COUNT    │ MODEL   │ CREDITS/EA  │ TOTAL    │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 1. HERO DOGS (Combat View)  │ 106      │ H3.1    │ 55          │ 5,830    │
+│    — Full-body 3D for FPS   │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 2. WAR RIG CHASSIS          │ 20       │ P1.0    │ 20          │ 400      │
+│    — 8 archetype + 12 sig   │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 3. WEAPONS (Combat Held)    │ 54       │ P1.0    │ 20          │ 1,080    │
+│    — 7 categories × 6 ea    │          │         │             │          │
+│    — RPG mounted versions   │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 4. ATTACHMENTS              │ 40       │ P1.0    │ 20          │ 800      │
+│    — 5 slots × 8 types      │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 5. ACCESSORIES / GEAR       │ 200      │ P1.0    │ 20          │ 4,000    │
+│    — Collars, armor, mods   │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 6. CHEST / CROWN VARIANTS   │ 11       │ P1.0    │ 20          │ 220      │
+│    — 5 chests + 6 crowns    │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 7. BUILDINGS / BASES        │ 12       │ P1.0    │ 20          │ 240      │
+│    — 3 per faction × 4      │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 8. DOCKS LANDMARKS          │ 30       │ P1.0    │ 20          │ 600      │
+│    — Environmental props    │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 9. BOSSES + HANDLERS        │ 18       │ P1.0    │ 20          │ 360      │
+│    — 12 bosses + 6 handlers │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 10. PROPS / ENVIRONMENT     │ 100      │ P1.0    │ 20          │ 2,000    │
+│    — Cover, debris, clutter │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 11. RE-GENERATION BUFFER    │ —        │ —       │ —           │ 2,000    │
+│    — 10% redo margin        │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│ 12. UI / VFX SPRITES        │ Batch    │ Image   │ 0           │ 0        │
+│    — Generated via FLUX     │          │         │             │          │
+├─────────────────────────────┼──────────┼─────────┼─────────────┼──────────┤
+│                             │          │         │ GRAND TOTAL │ 17,530   │
+│                             │          │         │ REMAINING   │ 7,470    │
+└─────────────────────────────┴──────────┴─────────┴─────────────┴──────────┘
+
+NOTE: Max plan (25,000 credits) provides 7,470 extra credits for:
+  • Re-dos and quality passes
+  • Additional seasonal content
+  • Ultra-rare variant generation
+  • Backup generation pipeline
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 2: THE 4-LAYER BATTLE SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+LAYER 1: DOG CARDS (Hero Characters)
+├─ Leveling: Card copies + Gold
+├─ Max Level: Determined by Town Hall (1-10)
+├─ Controls: Skill trees, abilities, base stats
+├─ 106 dogs, 43 breeds, 5 rarities, 4 combat roles
+├─ Each dog has: HP, Damage, Attack Speed, Move Speed, Range, Cost,
+│   Splash, Splash Radius, Targets, Domain, Queen Target
+├─ Named ability per card with cooldown
+├─ Tagline + bio (106/106 complete)
+├─ Voice lines recorded (114 voices)
+└─ Tripo3D: H3.1 full-body 3D models (55 credits each)
+
+LAYER 2: TOWN HALL (Base Headquarters)
+├─ Leveling: Upgrades + successful raid defense
+├─ Max Level: 10
+├─ Controls: Max card level cap, resource generation rate
+├─ RAID MECHANIC: If Town Hall is raided and destroyed, ALL cards drop
+│   to the new Town Hall level (e.g., TH 10 → 9 = all cards → Lv 9)
+├─ Must re-upgrade cards with copies + gold
+├─ Insurance available (gold cost, 7-day duration)
+└─ Tripo3D: Building models (12 total, 20 credits each)
+
+LAYER 3: WAR RIGS (Vehicle Chassis)
+├─ Leveling: Blueprints + Parts + Gold
+├─ Controls: Speed, Armor, Handling, Weapon Mount Capacity
+├─ 3 Chassis Classes:
+│   ├─ LIGHT (Porsche-style): 3 mount points, fast, low armor
+│   ├─ MEDIUM (Muscle car): 4 mount points, balanced
+│   └─ HEAVY (Tank/APC): 5 mount points, slow, high armor
+├─ 8 Archetype Rigs (one per crew) + 12 Signature Rigs (Legendary/Mythic)
+├─ Component Slots (7-8 total):
+│   ├─ Engine (power, top speed)
+│   ├─ Turbo/Boost (acceleration)
+│   ├─ Armor Plating (HP, ramming damage)
+│   ├─ Weapon Mount (determines special weapon)
+│   ├─ Tires/Suspension (grip, terrain handling)
+│   ├─ Transmission (shift speed)
+│   ├─ Exhaust (stealth, flame damage)
+│   └─ Utility (gadget: oil slick, smoke, mines, repair drone)
+├─ Visual Customization:
+│   ├─ Paint jobs (matte, metallic, pearlescent, chameleon, faction)
+│   ├─ Decals/Liveries (custom upload or presets)
+│   ├─ Wheels (20+ rim styles, tire smoke, glow)
+│   ├─ Body kits (3-4 variants per rig, changes silhouette + hitbox)
+│   ├─ Exhaust tips (single, dual, quad, side-exit, flame-belching)
+│   ├─ Underglow/Neon (faction-colored)
+│   └─ Window tint (transparent, dark, reflective, holographic)
+├─ Economy:
+│   ├─ Blueprints from packs (like cards)
+│   ├─ Parts purchased with gold or earned from battles/raids
+│   ├─ Stage 4-5 parts: Time-gated deliveries (or gold rush)
+│   ├─ Scrap system: Break down duplicates for "Scrap Metal" currency
+│   └─ Legendary Parts: Strip duplicate Legendary rigs or win events
+└─ Tripo3D: P1.0 chassis models (20 total, 20 credits each)
+
+LAYER 4: MOUNTED WEAPONS (Interchangeable Armaments)
+├─ Leveling: Weapon XP + Attachments + Blueprints
+├─ 20 levels per weapon
+├─ Controls: Damage, Fire Rate, Range, Accuracy, Reload Speed
+├─ 7 Weapon Categories:
+│   ├─ SMGs (1 mount point): Close-range, high fire rate
+│   ├─ Assault Rifles (1-2 points): Mid-range versatile
+│   ├─ LMGs (2 points): Sustained fire, suppression
+│   ├─ Shotguns (1 point): Point-blank devastation
+│   ├─ Sniper Rifles (1-2 points): Long-range precision
+│   ├─ Launchers (2 points): Anti-armor, area denial
+│   └─ Specials (1-3 points): Unique mechanics (flamethrower, tesla, etc.)
+├─ 7 Rarity Tiers:
+│   ├─ Common (Grey): 100% stats, 2 attachment slots
+│   ├─ Uncommon (Green): 110% stats, 2 slots, 1 minor perk
+│   ├─ Rare (Blue): 125% stats, 3 slots, 1 standard perk
+│   ├─ Epic (Purple): 145% stats, 4 slots, 1 major perk + skin
+│   ├─ Legendary (Gold): 170% stats, 5 slots, 2 major perks + kill anim
+│   ├─ Mythic (Red): 200% stats, 5 slots + tuning, 3 perks + evolving skin
+│   └─ Ultra (Shiny Gold): 250% stats, 6 slots, 4 perks + unique mechanic
+├─ 5 Attachment Slots per Weapon:
+│   ├─ Barrel: Damage range, bullet velocity, recoil
+│   ├─ Muzzle: Suppression, recoil control, flash
+│   ├─ Underbarrel: Stability, recoil, special function
+│   ├─ Magazine: Capacity, reload speed, ammo type
+│   └─ Optic: Zoom level, ADS speed
+├─ Attachment Trade-offs: Every attachment has pros/cons
+│   Example: Short Barrel = +20% ADS speed, -15% range
+├─ Weapon Tuning (Mythic/Ultra only):
+│   └─ Fine-tune sliders: Range ↔ Handling, Damage ↔ Fire Rate, etc.
+├─ Economy:
+│   ├─ Base Weapon Cost: 500G (Common) → 150,000G (Mythic)
+│   ├─ Upgrade Cost per Level: Scales with rarity
+│   ├─ Attachment Unlock/Swap: Gold cost
+│   ├─ Insurance (7 days): Protects against raid downgrade
+│   ├─ Scrap Value: 50G (Common) → 250,000G (Ultra)
+│   └─ Secret Cache: Earn Weapon Shards through gameplay (F2P path)
+├─ Weapon Degradation on Raid Loss:
+│   ├─ Town Hall 10 → 9: Weapons above Lv 18 locked
+│   ├─ Insurance prevents degradation
+│   └─ Must re-upgrade with copies + gold
+└─ Tripo3D: P1.0 weapon models (54 total, 20 credits each)
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 3: DUAL-VIEW ARCHITECTURE (RPG ↔ FPS/TPS)
+═══════════════════════════════════════════════════════════════════════════════
+
+VIEW A: TOP-DOWN RPG (MMO Hub)
+├─ Camera: Isometric / 45° angle
+├─ Activities:
+│   ├─ Dogs walking around map
+│   ├─ War Rigs driving between bases
+│   ├─ Tower defense / raid defense
+│   ├─ Resource gathering, trading, social
+│   └─ Garage access, card management
+├─ Controls:
+│   ├─ WASD / Left Stick: Move character / drive rig
+│   ├─ Mouse / Right Stick: Camera pan / rotate
+│   ├─ Click / A: Interact, auto-target attack
+│   ├─ Space / B: Ability 1
+│   ├─ Shift / X: Sprint / boost
+│   └─ Tab / Y: Open garage / inventory
+├─ Asset Requirements (Low-Poly, Top-Down Readable):
+│   ├─ Dogs: ~2,000 tris, bold silhouettes, clear team colors
+│   ├─ Rigs: ~3,000 tris, exaggerated proportions
+│   ├─ Weapons (mounted): ~1,000 tris, iconic silhouettes
+│   ├─ Bases: ~5,000 tris, upgrade states visible
+│   └─ Props: ~200-500 tris, simple blockout
+└─ Tripo3D: P1.0 models (simplified versions)
+
+VIEW B: FPS/TPS COMBAT (Call of Duty Style)
+├─ Camera: Behind-character (TPS) or eyes (FPS)
+├─ Activities:
+│   ├─ 1v1 Gulag battles
+│   ├─ Team deathmatch, objective modes
+│   ├─ Cover system, aim-down-sights, recoil patterns
+│   └─ Weapon attachments active, dog abilities as operator skills
+├─ Controls:
+│   ├─ WASD / Left Stick: Move
+│   ├─ Mouse / Right Stick: Aim
+│   ├─ Left Click / RT: Fire
+│   ├─ Right Click / LT: ADS
+│   ├─ R / X: Reload
+│   ├─ 1-4 / D-pad: Switch weapon / ability
+│   ├─ Space / A: Jump / vault
+│   ├─ C / B: Crouch / slide
+│   ├─ Shift / L3: Sprint
+│   ├─ Q / LB: Tactical equipment
+│   ├─ E / RB: Lethal equipment
+│   └─ F / Y: Melee / dog ultimate
+├─ Asset Requirements (Mid-Poly, First-Person Readable):
+│   ├─ Dogs: ~15,000 tris, detailed fur, tactical gear
+│   ├─ Rig Interiors: ~10,000 tris, dashboard, controls
+│   ├─ Weapons (held): ~8,000 tris, detailed receiver, animated parts
+│   ├─ Weapons (world/dropped): ~4,000 tris
+│   ├─ TPS Character: ~12,000 tris, full body visible
+│   └─ Cover/Props: ~1,000-3,000 tris, FPS detail
+└─ Tripo3D: H3.1 (heroes) + P1.0 (weapons/props) models
+
+TRANSITION SYSTEM: "THE DROP"
+├─ Trigger Types:
+│   ├─ Open World PvP: Drive near hostile player (both flag)
+│   ├─ PvP Zone Entry: Cross border into contested territory
+│   ├─ Raid Defense: Enemy raids your base
+│   ├─ Arena Queue: Accept match from anywhere
+│   └─ Bounty Hunt: Accept bounty on map
+├─ Transition Sequence (3 seconds):
+│   1. Screen glitch + chromatic aberration
+│   2. Audio: Radio static + engine rev + warp sound
+│   3. Visual: Camera pulls back from top-down, dives INTO rig
+│   4. Loading: Seamless — same map geometry, different camera
+│   5. Spawn: Cover positions, 50m apart
+│   6. HUD: Crossfade RPG → CoD-style (ammo, minimap, kill feed)
+│   7. Weapons: Mounted weapons become handheld (same stats)
+├─ Combat Duration: 2-5 minutes
+├─ Post-Match:
+│   ├─ Winner: Loot drop, reputation, possible rig part capture
+│   ├─ Loser: Respawn at friendly base, repair costs
+│   └─ Return: Reverse warp (3 sec), back to exact world position
+├─ State Persistence:
+│   ├─ Rig damage: Applied to RPG rig (visual + mechanical)
+│   ├─ Ammo used: Deducted from RPG inventory
+│   ├─ Abilities: Cooldowns continue in RPG time
+│   └─ Position: Exact world coordinates restored
+└─ Technical: Same physics engine, same netcode, asset swap only
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 4: THE GARAGE SHOP SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+GARAGE SCREEN LAYOUT:
+┌─────────────────────────────────────────────────────────────┐
+│  [Dog Card] → [Town Hall Lv.X] → [War Rig] → [WEAPON]     │
+│                                                             │
+│  ┌─────────────┐  ┌─────────────────────────────────────┐  │
+│  │             │  │                                     │  │
+│  │   WEAPON    │  │      ATTACHMENT SLOTS (5)           │  │
+│  │   PREVIEW   │  │  [1] [2] [3] [4] [5]                │  │
+│  │   (3D Model)│  │   ↓   ↓   ↓   ↓   ↓                 │  │
+│  │             │  │  [Barrel] [Muzzle] [Under] [Mag] [Opt]│ │
+│  │  [FIRE TEST]│  │                                     │  │
+│  │  [DAMAGE #s]│  │  TUNING SLIDERS (Mythic+)           │  │
+│  │             │  │  Range ↔ Handling                   │  │
+│  └─────────────┘  │  Damage ↔ Fire Rate                 │  │
+│                   │  Recoil ↔ Accuracy                  │  │
+│  [WEAPON LIST]    │                                     │  │
+│  ┌─────────┐      └─────────────────────────────────────┘  │
+│  │ SMGs ▼  │                                               │
+│  │ ARs     │      STATS PANEL                              │
+│  │ LMGs    │      Damage: 85 | Fire Rate: 72 | Range: 60  │
+│  │ Shotguns│      Accuracy: 55 | Reload: 68 | DPS: 6,120   │
+│  │ Snipers │                                               │
+│  │ Launch  │      [EQUIP] [UPGRADE] [SCRAP] [INSURE]       │
+│  │ Specials│                                               │
+│  └─────────┘                                               │
+└─────────────────────────────────────────────────────────────┘
+
+UPGRADE FLOW:
+Weapon Selected
+    ↓
+[Check Level Cap] ← Town Hall Level determines max weapon level
+    ↓
+[Check XP] ← Have enough Weapon XP?
+    ↓
+YES → [Pay Gold] → Level Up → Unlock attachment slot/perk
+    ↓
+NO → [Use Weapon XP Card] or [Grind Battles]
+    ↓
+[Max Level Reached?] → YES → Unlock Tuning (Epic+) → Fine-tune sliders
+
+ECONOMY PRICING (PER RARITY):
+┌────────────────────────┬─────────┬──────────┬─────────┬─────────┬───────────┬─────────┬─────────┐
+│ ACTION                 │ COMMON  │ UNCOMMON │ RARE    │ EPIC    │ LEGENDARY │ MYTHIC  │ ULTRA   │
+├────────────────────────┼─────────┼──────────┼─────────┼─────────┼───────────┼─────────┼─────────┤
+│ Base Weapon Cost       │ 500G    │ 1,500G   │ 5,000G  │ 15,000G │ 50,000G   │ 150,000G│ N/A     │
+│ Upgrade (per level)    │ 100G    │ 300G     │ 1,000G  │ 3,000G  │ 10,000G   │ 30,000G │ 100,000G│
+│ Attachment Unlock      │ Free    │ 200G     │ 800G    │ 2,500G  │ 8,000G    │ 25,000G │ 75,000G │
+│ Attachment Swap        │ Free    │ Free     │ 100G    │ 500G    │ 2,000G    │ 10,000G │ 50,000G │
+│ Insurance (7 days)     │ N/A     │ N/A      │ 500G    │ 2,000G  │ 10,000G   │ 50,000G │ 200,000G│
+│ Scrap Value            │ 50G     │ 150G     │ 500G    │ 2,000G  │ 10,000G   │ 50,000G │ 250,000G│
+└────────────────────────┴─────────┴──────────┴─────────┴─────────┴───────────┴─────────┴─────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 5: SYNERGY SYSTEM (Dog + Rig + Weapon + Faction)
+═══════════════════════════════════════════════════════════════════════════════
+
+BUILD TRIANGLE (Rock-Paper-Scissors):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SPEED BUILD (Light Rig + SMG/Shotgun + Speed Dog)                        │
+│       ↓ beats ↓                                                            │
+│  TANK BUILD (Heavy Rig + LMG/Launcher + Tank Dog)                         │
+│       ↓ beats ↓                                                           │
+│  GLASS CANNON (Medium Rig + Sniper/Special + Tech Dog)                    │
+│       ↓ beats ↓                                                           │
+│  SPEED BUILD                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SYNERGY EXAMPLES:
+┌─────────────────────────────┬─────────────────────────────┬─────────────────┐
+│ DOG                         │ RIG                         │ SYNERGY BONUS   │
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ Pyro Breed + Fire Tree      │ Flamethrower War Rig        │ +25% fire dmg   │
+│                             │                             │ Fire immunity   │
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ Speed Dog                   │ Lightweight Porsche-style   │ +15% nitrous    │
+│                             │                             │ Drift damage    │
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ Tank Dog                    │ Heavy Armored Rig           │ +20% ramming    │
+│                             │                             │ Shield overcharge│
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ Tech Dog                    │ Weapon-heavy Rig            │ +10% special    │
+│                             │                             │ weapon dmg      │
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ BONEGUARD faction           │ Any rig on THE LOT district │ +10% defense    │
+├─────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ NIGHTSHIFT faction          │ Any rig in NEON HEIGHTS     │ +15% speed      │
+│                             │                             │ at night        │
+└─────────────────────────────┴─────────────────────────────┴─────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 6: SENSORY PACKAGE (VFX + AUDIO + HAPTICS)
+═══════════════════════════════════════════════════════════════════════════════
+
+VFX DNA SYSTEM (Per-Dog Signature):
+Every dog gets unique particle signature based on breed + role + faction.
+
+Example — Stonejaw (Dogo Argentino · Bruiser · BONEGUARD):
+  Primary: Dust/Concrete particles
+  Ability (Armor Pulse): Radial shockwave + debris spray
+  Crit: Jaw snap with bone-crunch sprite
+  Death: Collapse into rubble pile
+
+Example — Neon Runner (Whippet · Sprinter · NIGHTSHIFT):
+  Primary: Neon trail (light streaks)
+  Ability (Afterburn): Speed blur + spark shower
+  Crit: Sonic boom ring
+  Death: Dissolve into static/light particles
+
+5-TIER IMPACT SYSTEM:
+┌──────┬─────────────┬────────────────────┬─────────────┬─────────────┐
+│ TIER │ DMG RANGE   │ VISUAL             │ AUDIO       │ HAPTIC      │
+├──────┼─────────────┼────────────────────┼─────────────┼─────────────┤
+│ 1    │ 1-20        │ Small flash        │ Thud        │ Light tap   │
+│ 2    │ 21-50       │ Medium flash       │ Crack       │ Med pulse   │
+│ 3    │ 51-100      │ Large flash        │ Smash       │ Heavy rumble│
+│ 4    │ 101-200     │ Screen shake       │ Crunch      │ Double pulse│
+│ 5    │ 200+        │ Slow-mo + fullscreen│ Cinematic  │ Sustained   │
+└──────┴─────────────┴────────────────────┴─────────────┴─────────────┘
+
+AUDIO STACK:
+┌──────────┬─────────────────────────────┬─────────────────────────────────────┐
+│ LAYER    │ PURPOSE                     │ EXAMPLE                             │
+├──────────┼─────────────────────────────┼─────────────────────────────────────┤
+│ Ambient  │ World believability         │ Docks = foghorns, creaking wood     │
+│ Combat   │ Feedback clarity            │ Bruiser = low thuds, Sprinter = whoosh│
+│ UI       │ Psychological reward          │ Chest open = escalating tension     │
+│ Music    │ Emotional pacing              │ District themes shift by activity   │
+│ Voice    │ Character personality         │ Combat barks, death lines, taunts   │
+└──────────┴─────────────────────────────┴─────────────────────────────────────┘
+
+CHEST REVEAL AUDIO (Rarity-Gated):
+  Common: Standard chime
+  Rare: Brighter chime + light tap haptic
+  Epic: Orchestra hit + medium pulse haptic + screen flash
+  Legendary: Choir + bass drop + heavy rumble + chromatic aberration
+  Mythic: Custom theme music + sustained vibration + lens flare + slow-mo
+
+HAPTIC LANGUAGE (Mobile):
+┌───────────────────────────┬────────────────────┬───────────┐
+│ EVENT                     │ HAPTIC TYPE        │ DURATION  │
+├───────────────────────────┼────────────────────┼───────────┤
+│ Card draw                 │ Light impact       │ 0.3s      │
+│ Critical hit              │ Heavy impact       │ 0.5s      │
+│ Ability cast              │ Rumble             │ 0.8s      │
+│ Chest open (rare+)        │ Success notification│ 1.0s     │
+│ Defeat                    │ Failure notification│ 0.5s     │
+│ Crew message received     │ Light tap          │ 0.1s      │
+│ Combo trigger             │ Pattern (3 pulses) │ 0.6s      │
+└───────────────────────────┴────────────────────┴───────────┘
+
+ENVIRONMENTAL VFX (Per District):
+  THE DOCKS: Fog, rain, water reflections, seagull shadows, crane spotlights
+  NEON HEIGHTS: Holographic ads, traffic below, flickering neons, rain on glass
+  THE STRIP: Casino lights, confetti bursts, crowd silhouettes behind glass
+  THE YARDS: Dust devils, rust particles, steam from vents, flickering work lights
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 7: TRIPO3D PROMPT TEMPLATES (COPY-PASTE READY)
+═══════════════════════════════════════════════════════════════════════════════
+
+=== HERO DOGS (H3.1 — 55 CREDITS EACH) ===
+[HERO_FULLBODY] "A [BREED] upright gangster dog hero, muscular build, 
+  [FACTION] tactical gear, [RARITY] material finish, detailed fur, 
+  expressive face, A-pose, game-ready 3D character model, H3.1 high fidelity, 
+  up to 2M faces, dense triangles"
+
+=== WAR RIG CHASSIS (P1.0 — 20 CREDITS EACH) ===
+[RIG_LIGHT] "A compact cyberpunk dune buggy war rig, light armor plating, 
+  3 visible weapon hardpoints, neon underglow, exaggerated proportions, 
+  large off-road wheels, exhaust stacks, [FACTION] color accents, 
+  game-ready 3D vehicle model, P1.0 smart mesh, clean quads, 20k faces"
+
+[RIG_MEDIUM] "A muscle car war rig, reinforced steel plating, 
+  4 visible weapon hardpoints, hood scoop, side exhaust pipes, 
+  roll cage, [FACTION] livery decals, game-ready 3D vehicle model, 
+  P1.0 smart mesh, clean quads, 20k faces"
+
+[RIG_HEAVY] "A heavy APC war rig, reactive armor, treads instead of wheels, 
+  5 visible weapon hardpoints, mounted turret base, reinforced bumper, 
+  [FACTION] insignia, game-ready 3D vehicle model, P1.0 smart mesh, 
+  clean quads, 20k faces"
+
+=== WEAPONS — COMBAT VIEW (P1.0 — 20 CREDITS EACH) ===
+[WEAPON_SMG_HELD] "A [RARITY] SMG first-person shooter weapon, 
+  [MATERIAL] finish, detailed receiver, magazine well, trigger guard, 
+  animated charging handle, wear and tear marks, game-ready 3D weapon model, 
+  P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_AR_HELD] "A [RARITY] assault rifle first-person shooter weapon, 
+  [MATERIAL] finish, picatinny rail system, detachable magazine, 
+  vertical grip attachment point, shell ejection port, game-ready 3D weapon, 
+  P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_LMG_HELD] "A [RARITY] LMG first-person shooter weapon, 
+  [MATERIAL] finish, belt-fed ammo system, bipod legs, heat shield, 
+  carrying handle, game-ready 3D weapon, P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_SNIPER_HELD] "A [RARITY] sniper rifle first-person shooter weapon, 
+  [MATERIAL] finish, bolt-action mechanism, scope rail, fluted barrel, 
+  adjustable stock, game-ready 3D weapon, P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_LAUNCHER_HELD] "A [RARITY] rocket launcher first-person shooter weapon, 
+  [MATERIAL] finish, tubular design, trigger grip, sight mount, 
+  exhaust vents, game-ready 3D weapon, P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_SHOTGUN_HELD] "A [RARITY] shotgun first-person shooter weapon, 
+  [MATERIAL] finish, pump-action mechanism, shell tube, bead sight, 
+  rubber grip, game-ready 3D weapon, P1.0 smart mesh, clean quads, 8k faces"
+
+[WEAPON_SPECIAL_HELD] "A [RARITY] [TYPE] special weapon, [MATERIAL] finish, 
+  [UNIQUE FEATURE], game-ready 3D weapon, P1.0 smart mesh, clean quads, 8k faces"
+  — TYPE: flamethrower, tesla coil, chainsaw, gravity hammer, oil slick cannon
+
+=== WEAPONS — RPG VIEW (P1.0 — 20 CREDITS EACH) ===
+[WEAPON_MOUNTED] "A [RARITY] [WEAPON TYPE] mounted on vehicle roof turret, 
+  simplified detail, readable from above, [MATERIAL] finish, 
+  game-ready 3D model, P1.0 smart mesh, low-poly, 1k faces"
+
+=== ATTACHMENTS (P1.0 — 20 CREDITS EACH) ===
+[ATTACH_BARREL_SHORT] "A short barrel weapon attachment, matte steel, 
+  ported muzzle brake, compact form, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_BARREL_LONG] "A long barrel weapon attachment, matte steel, 
+  fluted design, extended length, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_MUZZLE_SUPPRESSOR] "A suppressor weapon attachment, cylindrical, 
+  baffle stack visible, matte black finish, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_MUZZLE_BRAKE] "A muzzle brake weapon attachment, ported sides, 
+  compensator design, matte steel, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_GRIP_VERTICAL] "A vertical foregrip attachment, polymer, 
+  ribbed texture, quick-detach mount, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_GRIP_ANGLED] "An angled foregrip attachment, polymer, 
+  ergonomic curve, rail mount, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_MAG_EXTENDED] "An extended magazine attachment, curved, 
+  double-stack design, round count window, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_MAG_DRUM] "A drum magazine attachment, circular, 
+  high-capacity, winding mechanism, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_OPTIC_REDDOT] "A red dot sight attachment, tubular, 
+  lens glow, elevation adjustment dial, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_OPTIC_ACOG] "An ACOG scope attachment, magnified, 
+  fiber optic illumination, bullet drop compensation, game-ready 3D model"
+
+[ATTACH_OPTIC_SNIPER] "A sniper scope attachment, long tube, 
+  adjustable zoom, sunshade, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_BIPOD] "A bipod attachment, foldable legs, 
+  spring-loaded deployment, rail mount, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_LASER] "A laser sight attachment, compact, 
+  red beam emitter, pressure switch, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_BAYONET] "A bayonet attachment, serrated blade, 
+  quick-attach lug, matte steel, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_UNDERBARREL_GL] "An underbarrel grenade launcher attachment, 
+  single-shot, trigger guard mount, game-ready 3D model, P1.0 smart mesh"
+
+[ATTACH_CHAINSAW] "A chainsaw underbarrel attachment, motorized, 
+  chain blade, fuel tank, game-ready 3D model, P1.0 smart mesh"
+
+=== ACCESSORIES / GEAR (P1.0 — 20 CREDITS EACH) ===
+[GEAR_COLLAR_SPIKED] "A spiked dog collar accessory, leather, 
+  metal studs, [FACTION] insignia tag, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_COLLAR_CHAIN] "A chain dog collar accessory, heavy links, 
+  padlock clasp, [FACTION] pendant, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_ARMOR_LIGHT] "Light dog body armor, Kevlar plates, 
+  tactical harness, ammo pouches, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_ARMOR_HEAVY] "Heavy dog body armor, ballistic plates, 
+  reinforced shoulders, utility belt, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_MASK_GAS] "A gas mask accessory, dual filters, 
+  tinted lenses, breathing tubes, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_MASK_SKULL] "A skull-painted mask accessory, 
+  weathered metal, glowing eye slits, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_BACKPACK] "A tactical backpack accessory, 
+  multiple compartments, bedroll, canteen, game-ready 3D model, P1.0 smart mesh"
+
+[GEAR_CAPE_TATTERED] "A tattered cape accessory, 
+  [FACTION] colors, battle damage, cloth physics ready, game-ready 3D model"
+
+=== CHESTS + CROWNS (P1.0 — 20 CREDITS EACH) ===
+[CHEST_COMMON] "A rusty metal chest, weathered, 
+  padlock, dents, game-ready 3D prop, P1.0 smart mesh"
+
+[CHEST_RARE] "A reinforced steel chest, blue trim, 
+  holographic lock, game-ready 3D prop, P1.0 smart mesh"
+
+[CHEST_EPIC] "An ornate purple chest, glowing runes, 
+  crystal lock, particle-ready, game-ready 3D prop, P1.0 smart mesh"
+
+[CHEST_LEGENDARY] "A golden sovereign's vault, 
+  intricate engravings, aura glow, game-ready 3D prop, P1.0 smart mesh"
+
+[CHEST_MYTHIC] "A reality-warping chest, shifting form, 
+  blood-red energy, game-ready 3D prop, P1.0 smart mesh"
+
+[CROWN_IRON] "An iron crown, rough forged, 
+  simple bands, game-ready 3D accessory, P1.0 smart mesh"
+
+[CROWN_BRONZE] "A bronze crown, detailed, 
+  embossed patterns, game-ready 3D accessory, P1.0 smart mesh"
+
+[CROWN_SILVER] "A silver crown, polished, 
+  gem settings, game-ready 3D accessory, P1.0 smart mesh"
+
+[CROWN_GOLD] "A gold crown, ornate, 
+  jewel-encrusted, game-ready 3D accessory, P1.0 smart mesh"
+
+[CROWN_PLATINUM] "A platinum crown, radiant, 
+  diamond accents, game-ready 3D accessory, P1.0 smart mesh"
+
+[CROWN_DIAMOND] "A diamond crown, prismatic, 
+  unique design, game-ready 3D accessory, P1.0 smart mesh"
+
+=== BUILDINGS / BASES (P1.0 — 20 CREDITS EACH) ===
+[BASE_L1] "A basic tower defense base, concrete blocks, 
+  wooden barricades, sandbags, game-ready 3D building, P1.0 smart mesh"
+
+[BASE_L5] "An upgraded tower defense base, reinforced walls, 
+  watchtower, metal gates, game-ready 3D building, P1.0 smart mesh"
+
+[BASE_L10] "A maxed fortress base, armored walls, 
+  automated turrets, command center, game-ready 3D building, P1.0 smart mesh"
+
+=== DOCKS LANDMARKS (P1.0 — 20 CREDITS EACH) ===
+[DOCK_CRANE] "A dockside cargo crane, rusted metal, 
+  operator cabin, cable system, game-ready 3D prop, P1.0 smart mesh"
+
+[DOCK_CONTAINER] "A shipping container, weathered paint, 
+  rust patches, corrugated metal, game-ready 3D prop, P1.0 smart mesh"
+
+[DOCK_WAREHOUSE] "A dock warehouse, brick walls, 
+  loading bay, broken windows, game-ready 3D building, P1.0 smart mesh"
+
+[DOCK_PIER] "A wooden pier, weathered planks, 
+  barnacles, mooring posts, game-ready 3D environment, P1.0 smart mesh"
+
+[DOCK_SHIPWRECK] "A half-sunken ship, rusted hull, 
+  broken mast, seaweed, game-ready 3D prop, P1.0 smart mesh"
+
+=== BOSSES (P1.0 — 20 CREDITS EACH) ===
+[BOSS_DOCK_SOVEREIGN] "THE DOCK SOVEREIGN boss character, 
+  massive dog in captain's coat, hook hand, eyepatch, 
+  weathered sea captain aesthetic, game-ready 3D character, P1.0 smart mesh"
+
+[BOSS_IRON_HANDLER] "THE IRON HANDLER boss character, 
+  cybernetic dog, mechanical arm, industrial gear, 
+  steam vents, game-ready 3D character, P1.0 smart mesh"
+
+[BOSS_COLD_SAINT] "THE COLD SAINT boss character, 
+  frost-covered dog, ice armor, glowing blue eyes, 
+  snow particle aura, game-ready 3D character, P1.0 smart mesh"
+
+=== PROPS / COVER (P1.0 — 20 CREDITS EACH) ===
+[PROP_CAR_WRECK] "An abandoned car wreck, bullet holes, 
+  rust, flat tires, game-ready 3D prop, P1.0 smart mesh"
+
+[PROP_CONCRETE_WALL] "A concrete barrier wall, rebar exposed, 
+  bullet impacts, game-ready 3D prop, P1.0 smart mesh"
+
+[PROP_AMMO_CRATE] "A military ammo crate, weathered wood, 
+  stencil markings, game-ready 3D prop, P1.0 smart mesh"
+
+[PROP_OIL_DRUM] "An industrial oil drum, rusted, 
+  warning labels, dented, game-ready 3D prop, P1.0 smart mesh"
+
+[PROP_SANDBAG_WALL] "A sandbag defensive wall, 
+  stacked bags, canvas texture, game-ready 3D prop, P1.0 smart mesh"
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 8: UI / UX SPECIFICATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+GARAGE SCREEN STATES:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STATE 1: GARAGE HUB                                                         │
+│  — 3D War Rig centered, rotatable                                           │
+│  — Bottom nav: [CHASSIS] [WEAPONS] [ATTACHMENTS] [PAINT] [TEST DRIVE]      │
+│  — Top bar: Gold | Scrap | Weapon XP | Dog Level | Town Hall Level        │
+│  — Right panel: Active loadout summary                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STATE 2: WEAPON SELECT                                                      │
+│  — Left: Weapon category list (SMG, AR, LMG, etc.)                        │
+│  — Center: 3D weapon preview with attachment slots highlighted            │
+│  — Right: Stats comparison (current vs. selected)                         │
+│  — Bottom: [EQUIP] [UPGRADE] [SCRAP] [INSURE] buttons                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STATE 3: ATTACHMENT TUNING                                                  │
+│  — 3D weapon with attachment slots 1-5                                      │
+│  — Click slot → attachment picker opens                                   │
+│  — Selected attachment shows stat change preview                          │
+│  — Mythic+: Tuning sliders appear (Range ↔ Handling, etc.)              │
+│  — [APPLY] [CANCEL] buttons                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STATE 4: PAINT / CUSTOMIZE                                                  │
+│  — Color picker wheel                                                     │
+│  — Material selector (matte, metallic, pearlescent, chameleon)          │
+│  — Decal placement tool (drag & rotate)                                   │
+│  — Wheel style picker                                                     │
+│  — Underglow color + intensity                                            │
+│  — [SAVE PRESET] [RANDOMIZE] [RESET]                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STATE 5: TEST DRIVE                                                       │
+│  — Load dummy arena (combat view)                                         │
+│  — Fire test: Damage numbers, recoil pattern, DPS meter                   │
+│  — Mobility test: Speed, handling, drift radius                           │
+│  — [RETURN TO GARAGE]                                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CHEST OPENING SEQUENCE (Per Rarity):
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: CHEST APPEARS                                                       │
+│  — Chest model drops from above, bounces, settles                           │
+│  — Rarity glow pulses (Common = none, Mythic = reality distortion)        │
+│  — Haptic: Light tap (Common) → Heavy rumble (Mythic)                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 2: TAP TO OPEN                                                         │
+│  — Player taps chest                                                        │
+│  — Chest shakes with escalating intensity                                   │
+│  — Audio: Tick-tick-tick (slot machine tension)                             │
+│  — Haptic: Escalating pulse pattern                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 3: REVEAL                                                              │
+│  — Chest bursts open with rarity-specific VFX                             │
+│  — Card(s) fly out, slow-mo rotation                                        │
+│  — Audio: Resolution sting (Common = deflating, Mythic = choir)           │
+│  — Haptic: Success notification (rare+) / Light tap (common)              │
+│  — Screen effect: Chromatic aberration (Epic+), lens flare (Legendary+)  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 4: CARD LANDING                                                        │
+│  — Card lands in center screen                                              │
+│  — Tap to flip: Back → Front reveal                                       │
+│  — Front shows: Dog art, name, stats, ability, rarity border              │
+│  — Audio: Card flip sound + rarity chime                                  │
+│  — Haptic: Light impact                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 5: COLLECTION                                                          │
+│  — "NEW!" badge if first copy                                             │
+│  — "DUPLICATE — +[SCRAP VALUE]" if already owned                          │
+│  — [ADD TO DECK] [SCRAP] [SHARE] buttons                                  │
+│  — Auto-save to collection                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 9: ECONOMY FLOW INTEGRATION
+═══════════════════════════════════════════════════════════════════════════════
+
+CURRENCY TYPES:
+┌──────────────┬─────────────────────────┬─────────────────────────────────────┐
+│ CURRENCY     │ SOURCE                  │ SINK                                │
+├──────────────┼─────────────────────────┼─────────────────────────────────────┤
+│ Bones        │ PvE, daily quests       │ Upgrades, repairs, base building    │
+│ Crowns       │ PvP wins, ranked        │ Premium chests, cosmetics, respecs  │
+│ Gold Crowns  │ Real money only         │ Exclusive skins, battle pass, insta │
+│ Scrap Metal  │ Break down duplicates   │ Craft specific weapons/parts        │
+│ Crew Tokens  │ Crew activities         │ Crew tech tree, crew cosmetics      │
+│ Weapon XP    │ Using weapons in battle │ Weapon leveling                     │
+└──────────────┴─────────────────────────┴─────────────────────────────────────┘
+
+ECONOMY LOOPS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DAILY LOOP                                                                  │
+│  Login → Daily quest → Complete → Bones + Weapon XP → Upgrade → Battle    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ WEEKLY LOOP                                                                 │
+│  Crew activities → Turf war registration → Weekend war → District control │
+│  → Crew buffs → Better drops → Stronger deck                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SEASONAL LOOP                                                               │
+│  Battle pass → Grind tiers → Exclusive rewards → New content drop        │
+│  → Meta shift → New builds → New purchases                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ RAID LOOP                                                                   │
+│  Build strong deck → Get raided → Defend or lose TH level               │
+│  → Rebuild or revenge raid → Risk/reward tension                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 10: DEVELOPMENT SPRINT PLAN
+═══════════════════════════════════════════════════════════════════════════════
+
+SPRINT 1: FOUNDATION (Weeks 1-2)
+├─ Fix cash register (JWT, receipt validation, kill zombie endpoint)
+├─ Implement haptic feedback system
+├─ Implement tiered chest VFX/audio
+├─ Tripo3D: Generate 10 hero dogs (H3.1) for pipeline test
+└─ Deliverable: Working shop + sensory package v1
+
+SPRINT 2: RIGS + WEAPONS (Weeks 3-4)
+├─ Build 3 archetype rig chassis (Light/Medium/Heavy)
+├─ Implement weapon mount system (3/4/5 points)
+├─ Implement attachment slot system (5 slots per weapon)
+├─ Tripo3D: Generate 20 rig chassis + 21 weapons (P1.0)
+└─ Deliverable: Garage hub functional, can equip/unequip
+
+SPRINT 3: COMBAT VIEW (Weeks 5-6)
+├─ Implement FPS/TPS camera system
+├─ Implement "The Drop" transition (3-second warp)
+├─ Implement combat controls (ADS, recoil, cover)
+├─ Tripo3D: Generate 10 combat-view dogs + rig interiors
+└─ Deliverable: Can trigger combat from RPG world, return after
+
+SPRINT 4: ECONOMY + PROGRESSION (Weeks 7-8)
+├─ Implement weapon leveling (1-20)
+├─ Implement attachment unlock/swap economy
+├─ Implement insurance system
+├─ Implement scrap crafting
+├─ Tripo3D: Generate 40 attachments + accessories
+└─ Deliverable: Full upgrade loop, F2P path viable
+
+SPRINT 5: SYNERGY + BALANCE (Weeks 9-10)
+├─ Implement Dog + Rig + Weapon synergy bonuses
+├─ Implement Build Triangle balance (Speed/Tank/Glass)
+├─ Implement ban phase for ranked
+├─ Implement test drive mode
+├─ Tripo3D: Generate remaining dogs + bosses + props
+└─ Deliverable: Competitive PvP, meta emerges
+
+SPRINT 6: POLISH + LAUNCH (Weeks 11-12)
+├─ Full VFX DNA implementation (all 106 dogs)
+├─ Full audio stack implementation
+├─ UI/UX polish (garage, chests, HUD)
+├─ Performance optimization (LOD, draw calls)
+├─ Bug fixes, balance passes
+└─ Deliverable: War Rig Car Update LIVE
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 11: QUALITY ASSURANCE CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+□ ALL 106 DOGS have:
+  □ Full-body 3D model (H3.1)
+  □ RPG-view low-poly version (P1.0)
+  □ Combat-view mid-poly version (P1.0)
+  □ VFX DNA (unique particles per dog)
+  □ Audio signature (combat barks, death lines)
+  □ Haptic pattern (ability cast, crit, death)
+
+□ ALL 20 RIGS have:
+  □ Chassis 3D model (P1.0)
+  □ Interior cockpit model (P1.0)
+  □ Mount point sockets defined (3/4/5)
+  □ Visual customization options (paint, decals, wheels, etc.)
+  □ Component slot system (7-8 slots)
+  □ Upgrade path (Stage 1-5 + Legendary)
+
+□ ALL 54 WEAPONS have:
+  □ Combat-held 3D model (P1.0)
+  □ RPG-mounted 3D model (P1.0)
+  □ 5 attachment sockets defined
+  □ 20-level progression path
+  □ Rarity skin variants (7 tiers)
+  □ Stat block (Damage, Fire Rate, Range, Accuracy, Reload)
+
+□ ALL 40 ATTACHMENTS have:
+  □ 3D model (P1.0)
+  □ Stat trade-off matrix
+  □ Rarity variants
+  □ Socket compatibility list
+
+□ ECONOMY is:
+  □ Shop charges real money (JWT secured)
+  □ Receipt validation working
+  □ No zombie endpoints
+  □ Insurance system functional
+  □ Scrap crafting functional
+  □ F2P path viable (Secret Cache)
+
+□ DUAL-VIEW is:
+  □ RPG view renders at 60fps
+  □ Combat view renders at 60fps
+  □ Transition < 3 seconds
+  □ State persists (damage, ammo, cooldowns)
+  □ Controls context-switch seamlessly
+  □ Netcode handles both views
+
+□ SENSORY PACKAGE is:
+  □ VFX DNA implemented for all dogs
+  □ 5-tier impact system active
+  □ Audio stack layered correctly
+  □ Haptic language mapped
+  □ Chest reveal sequence per rarity
+  □ Environmental VFX per district
+
+═══════════════════════════════════════════════════════════════════════════════
+PART 12: KNOWN GAPS + DECISIONS NEEDED
+═══════════════════════════════════════════════════════════════════════════════
+
+[DECISION 1] CREW / DISTRICT MATH
+  Current: 8 districts, 5 cannot field 11-card mono-crew deck
+  Option A: Rebalance roster to ~13 dogs per district
+  Option B: Faction as culture (crews operate across turf)
+  RECOMMENDATION: Option B — less work, bigger world feel
+
+[DECISION 2] VIEW PREFERENCE
+  Current: FPS or TPS combat view
+  Question: Player-selectable per match, or locked per mode?
+  RECOMMENDATION: Player-selectable, with mode restrictions
+  (e.g., Arena = either, Gulag = FPS only for intensity)
+
+[DECISION 3] RAID SEVERITY
+  Current: Town Hall downgrade = ALL cards drop level
+  Question: Is this too punishing for casual players?
+  Alternative: Only cards in active deck drop, collection stays
+  RECOMMENDATION: Keep current for competitive, add "Casual Mode"
+  where only active deck is at risk
+
+[DECISION 4] TRIPO3D PRIORITY
+  Current budget: 17,530 credits used, 7,470 remaining
+  Question: Spend buffer on more heroes (H3.1) or more props/accessories?
+  RECOMMENDATION: Reserve 2,000 for re-dos, spend 5,470 on:
+  — 50 additional accessories/gear pieces (1,000 credits)
+  — 20 additional environmental props (400 credits)
+  — 10 additional weapon variants (200 credits)
+  — 3,870 credits saved for Season 1 content
+
+[DECISION 5] PLATFORM PRIORITY
+  Current: Mobile-first
+  Question: PC/console companion app in Year 1?
+  RECOMMENDATION: Mobile-only for launch, PC companion for Year 1
+  (shared account, view-only base management + market)
+
+═══════════════════════════════════════════════════════════════════════════════
+END OF DOCUMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+VERSION: 1.0
+DATE: July 17, 2026
+AUTHOR: Game Design AI
+STATUS: Ready for agent handoff
+NEXT ACTION: Purchase Tripo3D Max plan (25,000 credits @ $44)
+  → Execute Sprint 1 immediately after subscription

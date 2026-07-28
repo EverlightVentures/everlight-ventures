@@ -17,7 +17,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:14.638491+00:00",
-    "last_seen": "2026-06-08T23:07:20.175949+00:00",
+    "last_seen": "2026-07-27T23:00:23.684290+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1368 MONROE, MEMPHIS, TN",
@@ -28,7 +28,7 @@
     },
     "email_confidence": 0,
     "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:00:22.293064+00:00"
+    "email_checked_at": "2026-07-27T23:00:09.033300+00:00"
   },
   "025070  00021": {
     "parcel_id": "025070  00021",
@@ -38,7 +38,7 @@
     "year_built": 1914,
     "total_appraisal_usd": 45000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=025070%20%2000021",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -57,9 +57,15 @@
       "year_built": 1914,
       "total_appraisal_usd": 45000
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:00:59.695843+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "portstatus@att.com",
+        "name": "Z AHRIYA OSBORNE",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:31:28.257380+00:00"
   },
   "026032 00030": {
     "parcel_id": "026032 00030",
@@ -69,18 +75,20 @@
     "year_built": 1912,
     "total_appraisal_usd": 38400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026032%20%2000030",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "vaughnrayreedjr5@gmail.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:34:46.480195+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.161595+00:00",
     "last_seen": "2026-05-28T23:30:53.969978+00:00",
-    "notes": [],
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "1298 ENGLEWOOD ST",
       "owner_name": "VAUGHN RAY",
@@ -88,9 +96,70 @@
       "year_built": 1912,
       "total_appraisal_usd": 38400
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:01:22.639874+00:00"
+    "email_confidence": 0.85,
+    "email_candidates": [
+      {
+        "email": "vaughnray2803@gmail.com",
+        "name": "Vaughn Ray Sandoval",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnrayreedjr5@gmail.com",
+        "name": "Vaughn Ray Reed Jr",
+        "owner_match": true
+      },
+      {
+        "email": "vaughn.ray@apollocc.org",
+        "name": "Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "lackray404@gmail.com",
+        "name": "Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "goblins_net@yahoo.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnsems_stuff@gmail.com",
+        "name": "Jacobs Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "ray-vaughn@prodigy.net",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vray@auglaizeesc.org",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnray@amerisafe-css.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughn@amerisafeinc.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vray@amerisafe-css.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "babsferguson@yahoo.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:05:44.785548+00:00"
   },
   "026032  00030": {
     "parcel_id": "026032  00030",
@@ -100,8 +169,8 @@
     "year_built": 1912,
     "total_appraisal_usd": 38400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026032%20%2000030",
-    "status": "email_needed",
-    "email": "",
+    "status": "email_found",
+    "email": "vaughnrayreedjr5@gmail.com",
     "email_lookup_url": "",
     "outreach_count": 0,
     "last_contact": null,
@@ -119,9 +188,70 @@
       "year_built": 1912,
       "total_appraisal_usd": 38400
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:02:33.704001+00:00"
+    "email_confidence": 0.85,
+    "email_candidates": [
+      {
+        "email": "vaughnray2803@gmail.com",
+        "name": "Vaughn Ray Sandoval",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnrayreedjr5@gmail.com",
+        "name": "Vaughn Ray Reed Jr",
+        "owner_match": true
+      },
+      {
+        "email": "vaughn.ray@apollocc.org",
+        "name": "Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "lackray404@gmail.com",
+        "name": "Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "goblins_net@yahoo.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnsems_stuff@gmail.com",
+        "name": "Jacobs Vaughn Ray",
+        "owner_match": true
+      },
+      {
+        "email": "ray-vaughn@prodigy.net",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vray@auglaizeesc.org",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughnray@amerisafe-css.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vaughn@amerisafeinc.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "vray@amerisafe-css.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      },
+      {
+        "email": "babsferguson@yahoo.com",
+        "name": "VAUGHN RAY",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:31:36.633841+00:00"
   },
   "026056 00056": {
     "parcel_id": "026056 00056",
@@ -131,7 +261,7 @@
     "year_built": 1951,
     "total_appraisal_usd": 40000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026056%20%2000056",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -141,7 +271,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.161699+00:00",
-    "last_seen": "2026-06-08T23:07:20.176100+00:00",
+    "last_seen": "2026-07-27T23:00:23.684370+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1250 DUNNAVANT ST",
@@ -150,9 +280,30 @@
       "year_built": 1951,
       "total_appraisal_usd": 40000
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:03:04.477431+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "annettegriffin30@gmail.com",
+        "name": "Annette Griffin",
+        "owner_match": false
+      },
+      {
+        "email": "robinsonsummer45@gmail.com",
+        "name": "Summer Summer Robinson",
+        "owner_match": false
+      },
+      {
+        "email": "shirondab@gmail.com",
+        "name": "Shironda Berry",
+        "owner_match": false
+      },
+      {
+        "email": "enricob@hotmail.com",
+        "name": "Enrico Berry",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:31:48.616340+00:00"
   },
   "026056  00056": {
     "parcel_id": "026056  00056",
@@ -172,7 +323,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.161744+00:00",
-    "last_seen": "2026-06-08T23:07:20.176117+00:00",
+    "last_seen": "2026-07-27T23:00:23.684378+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1250  DUNNAVANT ST",
@@ -183,7 +334,7 @@
     },
     "email_confidence": 25,
     "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:03:37.146027+00:00"
+    "email_checked_at": "2026-07-27T23:00:12.344075+00:00"
   },
   "029037  00001": {
     "parcel_id": "029037  00001",
@@ -193,7 +344,7 @@
     "year_built": 1900,
     "total_appraisal_usd": 117000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=029037%20%2000001",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -212,9 +363,15 @@
       "year_built": 1900,
       "total_appraisal_usd": 117000
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:03:57.517445+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "dbrann.brown@wmconnect.com",
+        "name": "Dbrann Brown",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:31:55.762402+00:00"
   },
   "037018  00027C": {
     "parcel_id": "037018  00027C",
@@ -224,7 +381,7 @@
     "year_built": 1964,
     "total_appraisal_usd": 86300,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=037018%20%2000027C",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -234,7 +391,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.161989+00:00",
-    "last_seen": "2026-06-08T23:07:20.176303+00:00",
+    "last_seen": "2026-07-27T23:00:23.684462+00:00",
     "notes": [],
     "assessor": {
       "property_address": "2852  NATHAN AVE",
@@ -243,9 +400,20 @@
       "year_built": 1964,
       "total_appraisal_usd": 86300
     },
-    "email_confidence": 0,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:04:08.680415+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "mareca.cooper7@gmail.com",
+        "name": "Mareca Cooper",
+        "owner_match": false
+      },
+      {
+        "email": "h.sanders@aol.com",
+        "name": "H Sanders",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:00.157958+00:00"
   },
   "047069  00015": {
     "parcel_id": "047069  00015",
@@ -255,7 +423,7 @@
     "year_built": 1947,
     "total_appraisal_usd": 64700,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=047069%20%2000015",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -265,7 +433,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162028+00:00",
-    "last_seen": "2026-06-08T23:07:20.176316+00:00",
+    "last_seen": "2026-07-27T23:00:23.684467+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1567  PENDLETON ST",
@@ -274,9 +442,15 @@
       "year_built": 1947,
       "total_appraisal_usd": 64700
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:05:06.660460+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "lachell1000@yahoo.com",
+        "name": "LISTERINE WILSON",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:08.315744+00:00"
   },
   "049029  00022": {
     "parcel_id": "049029  00022",
@@ -286,18 +460,21 @@
     "year_built": 1946,
     "total_appraisal_usd": 102500,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=049029%20%2000022",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "vpeoples@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:34:55.518203+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162093+00:00",
-    "last_seen": "2026-06-08T23:07:20.176364+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684489+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "458  SHAWNEE AVE",
       "owner_name": "PEOPLES VIRGINIA",
@@ -305,9 +482,60 @@
       "year_built": 1946,
       "total_appraisal_usd": 102500
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:05:43.220406+00:00"
+    "email_confidence": 0.85,
+    "email_candidates": [
+      {
+        "email": "theronlaceysr19@yahoo.com",
+        "name": "theron lacey",
+        "owner_match": false
+      },
+      {
+        "email": "theronlaceysr19@yahooo.com",
+        "name": "Theron Lacey",
+        "owner_match": false
+      },
+      {
+        "email": "vpeoples@yahoo.com",
+        "name": "VIRGINIA PEOPLES",
+        "owner_match": true
+      },
+      {
+        "email": "marcus.gillham@live.com",
+        "name": "MARCUS A GILLHAM",
+        "owner_match": false
+      },
+      {
+        "email": "heanncampbell@hotmail.com",
+        "name": "Heather Morris",
+        "owner_match": false
+      },
+      {
+        "email": "jmsscharklet@yahoo.com",
+        "name": "James Scharklet",
+        "owner_match": false
+      },
+      {
+        "email": "reagancraft11@yahoo.com",
+        "name": "reagan craft",
+        "owner_match": false
+      },
+      {
+        "email": "soares_tifu@hotmail.com",
+        "name": "Lucas Craft",
+        "owner_match": false
+      },
+      {
+        "email": "bttabshr@aol.com",
+        "name": "MILDRED MCMICHAEL",
+        "owner_match": false
+      },
+      {
+        "email": "ryan.andreasen@bancwise.com",
+        "name": "Heidi Allison",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:06:13.002605+00:00"
   },
   "049037  00005": {
     "parcel_id": "049037  00005",
@@ -317,7 +545,7 @@
     "year_built": 1948,
     "total_appraisal_usd": 67300,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=049037%20%2000005",
-    "status": "email_needed",
+    "status": "email_not_found",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -327,7 +555,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162129+00:00",
-    "last_seen": "2026-06-08T23:07:20.176375+00:00",
+    "last_seen": "2026-07-27T23:00:23.684493+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1811  MCMILLAN ST",
@@ -336,9 +564,9 @@
       "year_built": 1948,
       "total_appraisal_usd": 67300
     },
-    "email_confidence": 25,
+    "email_confidence": 0.0,
     "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:05:55.250447+00:00"
+    "email_checked_at": "2026-06-11T18:32:17.758272+00:00"
   },
   "054033  00042": {
     "parcel_id": "054033  00042",
@@ -348,18 +576,21 @@
     "year_built": 1951,
     "total_appraisal_usd": 80000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=054033%20%2000042",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "hulljerry@bellsouth.net",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:34:59.535759+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162168+00:00",
-    "last_seen": "2026-06-08T23:07:20.176385+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684499+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "4372  FERNDALE RD",
       "owner_name": "HULL JERRY P",
@@ -367,9 +598,15 @@
       "year_built": 1951,
       "total_appraisal_usd": 80000
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:06:15.863624+00:00"
+    "email_confidence": 0.85,
+    "email_candidates": [
+      {
+        "email": "hulljerry@bellsouth.net",
+        "name": "JERRY HULL",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:06:22.642139+00:00"
   },
   "058005  00048": {
     "parcel_id": "058005  00048",
@@ -379,18 +616,20 @@
     "year_built": 1947,
     "total_appraisal_usd": 69700,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=058005%20%2000048",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "tim.hortonx2@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:07.970594+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162202+00:00",
-    "last_seen": "2026-06-08T23:07:20.176395+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684504+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "1055 S HIGHLAND ST",
       "owner_name": "HORTON TIMOTHY L",
@@ -398,9 +637,25 @@
       "year_built": 1947,
       "total_appraisal_usd": 69700
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:06:26.573651+00:00"
+    "email_confidence": 0.85,
+    "email_candidates": [
+      {
+        "email": "etont7@yahoo.com",
+        "name": "BILLIE A TRUSTY",
+        "owner_match": false
+      },
+      {
+        "email": "tim.hortonx2@yahoo.com",
+        "name": "TIMOTHY HORTON",
+        "owner_match": true
+      },
+      {
+        "email": "jeffllewis@aol.com",
+        "name": "JEFFREY L LEWIS",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:06:26.726702+00:00"
   },
   "058017  00018": {
     "parcel_id": "058017  00018",
@@ -410,7 +665,7 @@
     "year_built": 1952,
     "total_appraisal_usd": 80600,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=058017%20%2000018",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -420,7 +675,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162265+00:00",
-    "last_seen": "2026-06-08T23:07:20.176406+00:00",
+    "last_seen": "2026-07-27T23:00:23.684509+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1595  HOPE ST",
@@ -429,9 +684,25 @@
       "year_built": 1952,
       "total_appraisal_usd": 80600
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:06:44.635142+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "pepenpenelope85@yahoo.com",
+        "name": "JACQUELYN WALKER",
+        "owner_match": false
+      },
+      {
+        "email": "pepenpenelope@yahoo.com",
+        "name": "jerrell walker",
+        "owner_match": false
+      },
+      {
+        "email": "pepenpenelope72@yahoo.com",
+        "name": "jerrell walker",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:26.942122+00:00"
   },
   "060039  00028": {
     "parcel_id": "060039  00028",
@@ -441,7 +712,7 @@
     "year_built": 1958,
     "total_appraisal_usd": 75400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060039%20%2000028",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -451,7 +722,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162303+00:00",
-    "last_seen": "2026-06-08T23:07:20.176416+00:00",
+    "last_seen": "2026-07-27T23:00:23.684513+00:00",
     "notes": [],
     "assessor": {
       "property_address": "2339  SPARKS ST",
@@ -460,9 +731,25 @@
       "year_built": 1958,
       "total_appraisal_usd": 75400
     },
-    "email_confidence": 25,
-    "email_candidates": [],
-    "email_checked_at": "2026-06-08T23:07:19.834333+00:00"
+    "email_confidence": 0.4,
+    "email_candidates": [
+      {
+        "email": "socratesc@aol.com",
+        "name": "SOCRATES COX",
+        "owner_match": false
+      },
+      {
+        "email": "achlfe@hotmail.com",
+        "name": "MARY A COX",
+        "owner_match": false
+      },
+      {
+        "email": "bachlfe@hotmail.com",
+        "name": "MARY COX",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:35.920435+00:00"
   },
   "060155  00013": {
     "parcel_id": "060155  00013",
@@ -472,7 +759,7 @@
     "year_built": 1963,
     "total_appraisal_usd": 82700,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060155%20%2000013",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -482,7 +769,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162358+00:00",
-    "last_seen": "2026-06-08T23:07:20.176446+00:00",
+    "last_seen": "2026-07-27T23:00:23.684528+00:00",
     "notes": [],
     "assessor": {
       "property_address": "2533  KEEN RD",
@@ -490,7 +777,21 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1963,
       "total_appraisal_usd": 82700
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "emmabatchlor47@gmail.com",
+        "name": "EMMA BATCHLOR",
+        "owner_match": false
+      },
+      {
+        "email": "ebatchlor@ameritrade.com",
+        "name": "EMMA L BATCHLOR",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:44.686897+00:00",
+    "email_confidence": 0.4
   },
   "062024  00011": {
     "parcel_id": "062024  00011",
@@ -500,25 +801,51 @@
     "year_built": 1950,
     "total_appraisal_usd": 77400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=062024%20%2000011",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "frekyla@gmail.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:14.093366+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162409+00:00",
-    "last_seen": "2026-06-08T23:07:20.176489+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684549+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "2009  BRIGHTON RD",
       "owner_name": "JANNETTE PERKINS",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1950,
       "total_appraisal_usd": 77400
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "bluedown_1@hotmail.com",
+        "name": "MARIA CENTENO",
+        "owner_match": false
+      },
+      {
+        "email": "frekyla@gmail.com",
+        "name": "JANNETTE PERKINS",
+        "owner_match": true
+      },
+      {
+        "email": "jannetteperkins@yahoo.com",
+        "name": "Jannette Perkins",
+        "owner_match": true
+      },
+      {
+        "email": "snikrepj@gmail.com",
+        "name": "Jannette Perkins",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:06:57.420758+00:00",
+    "email_confidence": 0.85
   },
   "070035  00026": {
     "parcel_id": "070035  00026",
@@ -528,25 +855,66 @@
     "year_built": 1959,
     "total_appraisal_usd": 56200,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=070035%20%2000026",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "bradwalter@ymail.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:19.195112+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162441+00:00",
-    "last_seen": "2026-06-08T23:07:20.176500+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684554+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "1652  VICKY LN",
       "owner_name": "BRADFORD WALTER",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1959,
       "total_appraisal_usd": 56200
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "charleschillie123@gmail.com",
+        "name": "CHARLES CHILLIE",
+        "owner_match": false
+      },
+      {
+        "email": "willie.johnson@att.net",
+        "name": "Willie Johnson",
+        "owner_match": false
+      },
+      {
+        "email": "walter@electroswitch.com",
+        "name": "BRADFORD WALTER",
+        "owner_match": true
+      },
+      {
+        "email": "radford.walter@electroswitch.com",
+        "name": "BRADFORD WALTER",
+        "owner_match": true
+      },
+      {
+        "email": "walterb@dlshs.org",
+        "name": "BRADFORD WALTER",
+        "owner_match": true
+      },
+      {
+        "email": "bradwalter@ymail.com",
+        "name": "Bradford Walter",
+        "owner_match": true
+      },
+      {
+        "email": "ebwalter@hotmail.com",
+        "name": "ERIC BRADFORD WALTER",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:07:06.612141+00:00",
+    "email_confidence": 0.85
   },
   "070041  00009": {
     "parcel_id": "070041  00009",
@@ -556,25 +924,41 @@
     "year_built": 1950,
     "total_appraisal_usd": 82100,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=070041%20%2000009",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "echocme40@prodigy.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:22.989032+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162493+00:00",
-    "last_seen": "2026-06-08T23:07:20.176510+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684559+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "2998  LECONTE CIR",
       "owner_name": "ECHOLS CARL M &amp; KATHY G",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1950,
       "total_appraisal_usd": 82100
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "echcme42@earthlink.net",
+        "name": "Timothy A Echols",
+        "owner_match": false
+      },
+      {
+        "email": "echocme40@prodigy.com",
+        "name": "Carl M Echols",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:07:15.562468+00:00",
+    "email_confidence": 0.85
   },
   "071063  00016": {
     "parcel_id": "071063  00016",
@@ -584,7 +968,7 @@
     "year_built": 1960,
     "total_appraisal_usd": 57200,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=071063%20%2000016",
-    "status": "email_needed",
+    "status": "email_not_found",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -594,7 +978,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162527+00:00",
-    "last_seen": "2026-06-08T23:07:20.176520+00:00",
+    "last_seen": "2026-07-27T23:00:23.684564+00:00",
     "notes": [],
     "assessor": {
       "property_address": "4410  RANGE LINE RD",
@@ -602,7 +986,10 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1960,
       "total_appraisal_usd": 57200
-    }
+    },
+    "email_candidates": [],
+    "email_checked_at": "2026-06-11T18:32:53.947107+00:00",
+    "email_confidence": 0.0
   },
   "072010  00051": {
     "parcel_id": "072010  00051",
@@ -612,7 +999,7 @@
     "year_built": 1950,
     "total_appraisal_usd": 86300,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=072010%20%2000051",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -622,7 +1009,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162562+00:00",
-    "last_seen": "2026-06-08T23:07:20.176530+00:00",
+    "last_seen": "2026-07-27T23:00:23.684568+00:00",
     "notes": [],
     "assessor": {
       "property_address": "3470  DENVER ST",
@@ -630,7 +1017,26 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1950,
       "total_appraisal_usd": 86300
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "ivoryjones2314@yahoo.com",
+        "name": "IVORY JONES",
+        "owner_match": false
+      },
+      {
+        "email": "mrsuntedbear1@aol.com",
+        "name": "sara kube",
+        "owner_match": false
+      },
+      {
+        "email": "jpbrittany@yahoo.com",
+        "name": "John Parks",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:32:58.078790+00:00",
+    "email_confidence": 0.4
   },
   "075108  00025": {
     "parcel_id": "075108  00025",
@@ -640,25 +1046,91 @@
     "year_built": 1951,
     "total_appraisal_usd": 65800,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=075108%20%2000025",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "catmbarry@gmail.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:30.169128+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162622+00:00",
-    "last_seen": "2026-06-08T23:07:20.176570+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684586+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "3939  MAYNARD DR",
       "owner_name": "MOORE BARRY",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1951,
       "total_appraisal_usd": 65800
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "moore.barry@polytechnic.wa.edu.au",
+        "name": "Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "bsmoore80@att.net",
+        "name": "MOORE BARRY",
+        "owner_match": true
+      },
+      {
+        "email": "catmbarry@gmail.com",
+        "name": "Catherine Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "jmbarry@wbhsi.net",
+        "name": "Jeanne Barry",
+        "owner_match": false
+      },
+      {
+        "email": "moorebarry1@aol.com",
+        "name": "MOORE BARRY",
+        "owner_match": true
+      },
+      {
+        "email": "sarah.moore-barry@aon.com",
+        "name": "moore-barry@gmail.com sarah",
+        "owner_match": true
+      },
+      {
+        "email": "kmoore1954@gmail.com",
+        "name": "MOORE BARRY",
+        "owner_match": true
+      },
+      {
+        "email": "arrysmoore@comcast.net",
+        "name": "Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "barrymoore193@yahoo.com",
+        "name": "Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "tresemerose@gmail.com",
+        "name": "Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "arry_moore@capebretonu.ca",
+        "name": "Moore Barry",
+        "owner_match": true
+      },
+      {
+        "email": "arry.moore@dal.ca",
+        "name": "Moore Barry",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:08:07.086898+00:00",
+    "email_confidence": 0.85
   },
   "076089  00019": {
     "parcel_id": "076089  00019",
@@ -668,7 +1140,7 @@
     "year_built": 1970,
     "total_appraisal_usd": 107200,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=076089%20%2000019",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -678,7 +1150,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162656+00:00",
-    "last_seen": "2026-06-08T23:07:20.176580+00:00",
+    "last_seen": "2026-07-27T23:00:23.684589+00:00",
     "notes": [],
     "assessor": {
       "property_address": "170  BURWOOD DR",
@@ -686,7 +1158,21 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1970,
       "total_appraisal_usd": 107200
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "landerson0320@hotmail.com",
+        "name": "Latosha Anderson",
+        "owner_match": false
+      },
+      {
+        "email": "latoshaa@qwest.net",
+        "name": "Latosha Anderson",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:33:10.322516+00:00",
+    "email_confidence": 0.4
   },
   "096523 A00030": {
     "parcel_id": "096523 A00030",
@@ -696,7 +1182,7 @@
     "year_built": 1974,
     "total_appraisal_usd": 86900,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=096523%20A00030",
-    "status": "email_needed",
+    "status": "email_not_found",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -706,7 +1192,7 @@
     "buyer_match": "Chris @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-25T02:32:18.162699+00:00",
-    "last_seen": "2026-06-08T23:07:20.176595+00:00",
+    "last_seen": "2026-07-27T23:00:23.684595+00:00",
     "notes": [],
     "assessor": {
       "property_address": "8172  HARLEY SQ",
@@ -714,7 +1200,10 @@
       "land_use": "- CONDO UNIT",
       "year_built": 1974,
       "total_appraisal_usd": 86900
-    }
+    },
+    "email_candidates": [],
+    "email_checked_at": "2026-06-11T18:33:17.117760+00:00",
+    "email_confidence": 0.0
   },
   "015011  00013": {
     "parcel_id": "015011  00013",
@@ -724,7 +1213,7 @@
     "year_built": 1960,
     "total_appraisal_usd": 118400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=015011%20%2000013",
-    "status": "email_needed",
+    "status": "email_not_found",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -734,7 +1223,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198711+00:00",
-    "last_seen": "2026-06-08T23:07:20.175865+00:00",
+    "last_seen": "2026-07-27T23:00:23.684253+00:00",
     "notes": [],
     "assessor": {
       "property_address": "725  SNOWDEN CLB",
@@ -742,7 +1231,10 @@
       "land_use": "- RELIGIOUS",
       "year_built": 1960,
       "total_appraisal_usd": 118400
-    }
+    },
+    "email_candidates": [],
+    "email_checked_at": "2026-06-11T18:33:27.123686+00:00",
+    "email_confidence": 0.0
   },
   "015025 00024": {
     "parcel_id": "015025 00024",
@@ -752,7 +1244,7 @@
     "year_built": null,
     "total_appraisal_usd": 25000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=015025%20%2000024",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -762,7 +1254,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198782+00:00",
-    "last_seen": "2026-06-08T23:07:20.175913+00:00",
+    "last_seen": "2026-07-27T23:00:23.684274+00:00",
     "notes": [],
     "assessor": {
       "property_address": "942 MELROSE",
@@ -770,7 +1262,51 @@
       "land_use": "- VACANT LAND",
       "year_built": null,
       "total_appraisal_usd": 25000
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "steve.childress@peoplepc.com",
+        "name": "Steve Childress",
+        "owner_match": false
+      },
+      {
+        "email": "mztaetae1987@yahoo.com",
+        "name": "IVAN GRANT",
+        "owner_match": false
+      },
+      {
+        "email": "tavieof05@yahoo.com",
+        "name": "Octavia Grant",
+        "owner_match": false
+      },
+      {
+        "email": "richardcubano1222@gmail.com",
+        "name": "Richard Martinez",
+        "owner_match": false
+      },
+      {
+        "email": "laynebrown964@gmail.com",
+        "name": "OCTAVIA S GRANT",
+        "owner_match": false
+      },
+      {
+        "email": "jammarrogers@gmail.com",
+        "name": "PATSY ROGERS",
+        "owner_match": false
+      },
+      {
+        "email": "mzchubb1961@yahoo.com",
+        "name": "ROSALIND GRANT",
+        "owner_match": false
+      },
+      {
+        "email": "igrant@flotechinc.com",
+        "name": "IVAN GRANT",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:33:39.179992+00:00",
+    "email_confidence": 0.4
   },
   "015025  00024": {
     "parcel_id": "015025  00024",
@@ -790,7 +1326,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198807+00:00",
-    "last_seen": "2026-06-08T23:07:20.175927+00:00",
+    "last_seen": "2026-07-27T23:00:23.684280+00:00",
     "notes": [],
     "assessor": {
       "property_address": "942  MELROSE",
@@ -798,7 +1334,10 @@
       "land_use": "- VACANT LAND",
       "year_built": null,
       "total_appraisal_usd": 25000
-    }
+    },
+    "email_confidence": 25,
+    "email_candidates": [],
+    "email_checked_at": "2026-07-27T23:00:14.569606+00:00"
   },
   "021115  00017": {
     "parcel_id": "021115  00017",
@@ -808,25 +1347,97 @@
     "year_built": 1992,
     "total_appraisal_usd": 35800,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=021115%20%2000017",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "evanstimothy@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:39.253425+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198844+00:00",
-    "last_seen": "2026-06-08T23:07:20.175962+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684296+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "892 N CLAYBROOK ST",
       "owner_name": "EVANS TIMOTHY",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1992,
       "total_appraisal_usd": 35800
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "evanstimothy@yahoo.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "tim@ontechcorp.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "evansting@yahoo.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "etimothy@ccac.edu",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "evanstj@gmail.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "evanstrp@gmail.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "e.timothy@rbht.nhs.uk",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "etimothy@brinderson.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "timlevans@hotmail.com",
+        "name": "EVANS TIMOTHY",
+        "owner_match": true
+      },
+      {
+        "email": "evanlicetimo@gmail.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "evanlicetimo@yahoo.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      },
+      {
+        "email": "tjevans07@yahoo.com",
+        "name": "EVANS TIMOTHY J",
+        "owner_match": true
+      },
+      {
+        "email": "evans.timothy@masscomedia.com",
+        "name": "Evans Timothy",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:08:47.923200+00:00",
+    "email_confidence": 0.85
   },
   "024047 00022": {
     "parcel_id": "024047 00022",
@@ -836,25 +1447,52 @@
     "year_built": null,
     "total_appraisal_usd": 13900,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024047%20%2000022",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "kizuwandashowers@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:43.469167+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198866+00:00",
-    "last_seen": "2026-06-08T23:07:20.175978+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684306+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "1382 FLORIDA ST",
       "owner_name": "SHOWERS PETER JR AND LOLITA R SHOWERS",
       "land_use": "- ACCESSRY IMP",
       "year_built": null,
       "total_appraisal_usd": 13900
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "snow1382@gmail.com",
+        "name": "ZAKIYA SHOWERS",
+        "owner_match": false
+      },
+      {
+        "email": "kizuwandashowers@yahoo.com",
+        "name": "ZAKIYA S SHOWERS JR",
+        "owner_match": true
+      },
+      {
+        "email": "showersfadil16@yahoo.com",
+        "name": "Fadil Showers",
+        "owner_match": false
+      },
+      {
+        "email": "peers2100@att.net",
+        "name": "SNOW FUNERAL HOME",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:33:48.188127+00:00",
+    "email_confidence": 0.85
   },
   "024047  00022": {
     "parcel_id": "024047  00022",
@@ -874,7 +1512,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198885+00:00",
-    "last_seen": "2026-06-08T23:07:20.175989+00:00",
+    "last_seen": "2026-07-27T23:00:23.684312+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1382  FLORIDA ST",
@@ -882,7 +1520,10 @@
       "land_use": "- ACCESSRY IMP",
       "year_built": null,
       "total_appraisal_usd": 13900
-    }
+    },
+    "email_confidence": 25,
+    "email_candidates": [],
+    "email_checked_at": "2026-07-27T23:00:16.818777+00:00"
   },
   "032028  00006": {
     "parcel_id": "032028  00006",
@@ -892,7 +1533,7 @@
     "year_built": null,
     "total_appraisal_usd": 30000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=032028%20%2000006",
-    "status": "email_needed",
+    "status": "email_not_found",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -902,7 +1543,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.198994+00:00",
-    "last_seen": "2026-06-08T23:07:20.176152+00:00",
+    "last_seen": "2026-07-27T23:00:23.684394+00:00",
     "notes": [],
     "assessor": {
       "property_address": "0  DOROTHY",
@@ -910,7 +1551,10 @@
       "land_use": "- VACANT LAND",
       "year_built": null,
       "total_appraisal_usd": 30000
-    }
+    },
+    "email_candidates": [],
+    "email_checked_at": "2026-06-11T18:33:57.822665+00:00",
+    "email_confidence": 0.0
   },
   "034026 00014": {
     "parcel_id": "034026 00014",
@@ -920,7 +1564,7 @@
     "year_built": 1992,
     "total_appraisal_usd": 56000,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034026%20%2000014",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -930,7 +1574,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199019+00:00",
-    "last_seen": "2026-06-08T23:07:20.176171+00:00",
+    "last_seen": "2026-07-27T23:00:23.684404+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1577 MCMILLAN ST",
@@ -938,7 +1582,16 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1992,
       "total_appraisal_usd": 56000
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "dajene@hotmail.com",
+        "name": "DOROTHY J MCNEAL",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:04.217242+00:00",
+    "email_confidence": 0.4
   },
   "034026  00014": {
     "parcel_id": "034026  00014",
@@ -958,7 +1611,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199044+00:00",
-    "last_seen": "2026-06-08T23:07:20.176192+00:00",
+    "last_seen": "2026-07-27T23:00:23.684414+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1577  MCMILLAN ST",
@@ -966,7 +1619,10 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1992,
       "total_appraisal_usd": 56000
-    }
+    },
+    "email_confidence": 25,
+    "email_candidates": [],
+    "email_checked_at": "2026-07-27T23:00:19.097928+00:00"
   },
   "034042  00014": {
     "parcel_id": "034042  00014",
@@ -976,25 +1632,41 @@
     "year_built": 1940,
     "total_appraisal_usd": 22700,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034042%20%2000014",
-    "status": "email_needed",
-    "email": "",
+    "status": "emailed",
+    "email": "tobytjones@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:48.129217+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199071+00:00",
-    "last_seen": "2026-06-08T23:07:20.176221+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684427+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11"
+    ],
     "assessor": {
       "property_address": "1596  GABAY ST",
       "owner_name": "JONES TOBY T",
       "land_use": "- SINGLE FAMILY",
       "year_built": 1940,
       "total_appraisal_usd": 22700
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "tobytjones@yahoo.com",
+        "name": "TOBY JONES",
+        "owner_match": true
+      },
+      {
+        "email": "ttjones814@yahoo.com",
+        "name": "TAMARA T JONES",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:09:32.451775+00:00",
+    "email_confidence": 0.85
   },
   "035093 00032": {
     "parcel_id": "035093 00032",
@@ -1004,7 +1676,7 @@
     "year_built": 1968,
     "total_appraisal_usd": 23800,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035093%20%2000032",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -1014,7 +1686,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199105+00:00",
-    "last_seen": "2026-06-08T23:07:20.176261+00:00",
+    "last_seen": "2026-07-27T23:00:23.684443+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1536 S THIRD ST",
@@ -1022,7 +1694,86 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1968,
       "total_appraisal_usd": 23800
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "ernestsanders15@gmail.com",
+        "name": "ERNEST SANDERS",
+        "owner_match": false
+      },
+      {
+        "email": "ader.al.h@hotmail.com",
+        "name": "Bader Alhuraibi",
+        "owner_match": false
+      },
+      {
+        "email": "blackara8@gmail.com",
+        "name": "ARA MCGHEE",
+        "owner_match": false
+      },
+      {
+        "email": "jjm59@altavista.com",
+        "name": "MATT HERMANN",
+        "owner_match": false
+      },
+      {
+        "email": "brittany_rogers1@yahoo.com",
+        "name": "BRITTANY ROGERS",
+        "owner_match": false
+      },
+      {
+        "email": "alisonarabela56@gmail.com",
+        "name": "ALISON ALVARADO",
+        "owner_match": false
+      },
+      {
+        "email": "kenlowe7006@yahoo.com",
+        "name": "KENNETH VERNON",
+        "owner_match": false
+      },
+      {
+        "email": "ara0414@yahoo.com",
+        "name": "ANGELA ANDERSON",
+        "owner_match": false
+      },
+      {
+        "email": "angeliafleming71@gmail.com",
+        "name": "ANGELIA RANDOLPH",
+        "owner_match": false
+      },
+      {
+        "email": "carey.coston@yahoo.com",
+        "name": "CAREY COSTON",
+        "owner_match": false
+      },
+      {
+        "email": "jbloc80s@gmail.com",
+        "name": "Jazman Blocker",
+        "owner_match": false
+      },
+      {
+        "email": "intouch.travis@gmail.com",
+        "name": "WILLIE NEWSON",
+        "owner_match": false
+      },
+      {
+        "email": "hvrert8279@att.net",
+        "name": "DAVID LITTLEJOHN",
+        "owner_match": false
+      },
+      {
+        "email": "defense23@live.com",
+        "name": "MARCELLUS HILLIARD",
+        "owner_match": false
+      },
+      {
+        "email": "washington@att.com",
+        "name": "RASHEEMA WASHINGTON",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:23.693813+00:00",
+    "email_confidence": 0.4
   },
   "035093  00032": {
     "parcel_id": "035093  00032",
@@ -1042,7 +1793,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199128+00:00",
-    "last_seen": "2026-06-08T23:07:20.176280+00:00",
+    "last_seen": "2026-07-27T23:00:23.684452+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1536 S THIRD ST",
@@ -1050,7 +1801,10 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1968,
       "total_appraisal_usd": 23800
-    }
+    },
+    "email_confidence": 25,
+    "email_candidates": [],
+    "email_checked_at": "2026-07-27T23:00:21.547401+00:00"
   },
   "047071  00021": {
     "parcel_id": "047071  00021",
@@ -1060,7 +1814,7 @@
     "year_built": 1976,
     "total_appraisal_usd": 64400,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=047071%20%2000021",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -1070,7 +1824,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199166+00:00",
-    "last_seen": "2026-06-08T23:07:20.176327+00:00",
+    "last_seen": "2026-07-27T23:00:23.684472+00:00",
     "notes": [],
     "assessor": {
       "property_address": "2598  LAMAR AVE",
@@ -1078,7 +1832,26 @@
       "land_use": "- STORE-RETAIL",
       "year_built": 1976,
       "total_appraisal_usd": 64400
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "jccraine@yahoo.com",
+        "name": "SERVICE CENTER",
+        "owner_match": false
+      },
+      {
+        "email": "jccrainle@yahoo.com",
+        "name": "SERVICE CENTER",
+        "owner_match": false
+      },
+      {
+        "email": "jimmyls@hotmail.com",
+        "name": "JIMMY L SYKES",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:28.879654+00:00",
+    "email_confidence": 0.4
   },
   "060170 00016": {
     "parcel_id": "060170 00016",
@@ -1088,25 +1861,52 @@
     "year_built": null,
     "total_appraisal_usd": 14700,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060170%20%2000016",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "olalee19@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:35:57.280506+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199265+00:00",
-    "last_seen": "2026-06-08T23:07:20.176465+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684537+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "1261 CARLTON RD",
       "owner_name": "THWEATT RUSSELL & SERENE S",
       "land_use": "- VACANT LAND",
       "year_built": null,
       "total_appraisal_usd": 14700
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "dthweatt@netscape.net",
+        "name": "DAVID R THWEATT",
+        "owner_match": false
+      },
+      {
+        "email": "olalee19@yahoo.com",
+        "name": "SERENE THWEATT",
+        "owner_match": true
+      },
+      {
+        "email": "cabnbear@bellsouth.net",
+        "name": "SERENE THWEATT",
+        "owner_match": true
+      },
+      {
+        "email": "tserene@blackplanet.com",
+        "name": "Thweatt Serene",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:36.509209+00:00",
+    "email_confidence": 0.85
   },
   "060170  00016": {
     "parcel_id": "060170  00016",
@@ -1126,7 +1926,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199288+00:00",
-    "last_seen": "2026-06-08T23:07:20.176479+00:00",
+    "last_seen": "2026-07-27T23:00:23.684544+00:00",
     "notes": [],
     "assessor": {
       "property_address": "1261  CARLTON RD",
@@ -1134,7 +1934,10 @@
       "land_use": "- VACANT LAND",
       "year_built": null,
       "total_appraisal_usd": 14700
-    }
+    },
+    "email_confidence": 25,
+    "email_candidates": [],
+    "email_checked_at": "2026-07-27T23:00:23.607070+00:00"
   },
   "072055  00042": {
     "parcel_id": "072055  00042",
@@ -1144,7 +1947,7 @@
     "year_built": 1956,
     "total_appraisal_usd": 123300,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=072055%20%2000042",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -1154,7 +1957,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199330+00:00",
-    "last_seen": "2026-06-08T23:07:20.176541+00:00",
+    "last_seen": "2026-07-27T23:00:23.684574+00:00",
     "notes": [],
     "assessor": {
       "property_address": "3038  OVERTON CROSSING ST",
@@ -1162,7 +1965,21 @@
       "land_use": "- SINGLE FAMILY",
       "year_built": 1956,
       "total_appraisal_usd": 123300
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "ctwestbrook456@gmail.com",
+        "name": "TIMMY T WESTBROOK",
+        "owner_match": false
+      },
+      {
+        "email": "rykw6dfj41k1z9n@marketplace.amazon.com",
+        "name": "Timia Westbrook",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:45.934538+00:00",
+    "email_confidence": 0.4
   },
   "073041 G00013": {
     "parcel_id": "073041 G00013",
@@ -1172,7 +1989,7 @@
     "year_built": 1970,
     "total_appraisal_usd": 120300,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=073041%20G00013",
-    "status": "email_needed",
+    "status": "email_review",
     "email": "",
     "email_lookup_url": "",
     "outreach_count": 0,
@@ -1182,7 +1999,7 @@
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199343+00:00",
-    "last_seen": "2026-06-08T23:07:20.176551+00:00",
+    "last_seen": "2026-07-27T23:00:23.684578+00:00",
     "notes": [],
     "assessor": {
       "property_address": "3388  SUNNYFIELD CV",
@@ -1190,7 +2007,16 @@
       "land_use": "- DUPLEX",
       "year_built": 1970,
       "total_appraisal_usd": 120300
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "urayshiod@cei.net",
+        "name": "Urayshio Davis",
+        "owner_match": false
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:34:49.937984+00:00",
+    "email_confidence": 0.4
   },
   "074034 E00006": {
     "parcel_id": "074034 E00006",
@@ -1200,24 +2026,41 @@
     "year_built": 1989,
     "total_appraisal_usd": 83500,
     "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=074034%20E00006",
-    "status": "email_needed",
-    "email": "",
+    "status": "bounced",
+    "email": "enjaminswiger@yahoo.com",
     "email_lookup_url": "",
-    "outreach_count": 0,
-    "last_contact": null,
+    "outreach_count": 1,
+    "last_contact": "2026-06-11T19:36:07.652410+00:00",
     "replied": false,
     "reply_at": null,
     "buyer_match": "Chris Ulander @ Mid South Homebuyers",
     "buy_box_reason": "fits buy-box",
     "first_seen": "2026-05-29T23:00:11.199355+00:00",
-    "last_seen": "2026-06-08T23:07:20.176561+00:00",
-    "notes": [],
+    "last_seen": "2026-07-27T23:00:23.684582+00:00",
+    "notes": [
+      "Deal-1 first-touch sent 2026-06-11",
+      "email bounced/dead per Resend 2026-06-11 -- suppressed"
+    ],
     "assessor": {
       "property_address": "5158  WALTON LAKE DR",
       "owner_name": "BENJAMIN DWAYNE",
       "land_use": "- ZERO LOT LINE-ATTACHED",
       "year_built": 1989,
       "total_appraisal_usd": 83500
-    }
+    },
+    "email_candidates": [
+      {
+        "email": "alexisbolden77@yahoo.com",
+        "name": "ALEXIS BOLDEN",
+        "owner_match": false
+      },
+      {
+        "email": "enjaminswiger@yahoo.com",
+        "name": "BENJAMIN DWAYNE SWIGER",
+        "owner_match": true
+      }
+    ],
+    "email_checked_at": "2026-06-11T18:10:28.677841+00:00",
+    "email_confidence": 0.85
   }
 }

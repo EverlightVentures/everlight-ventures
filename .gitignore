@@ -296,3 +296,19 @@ supabase/.temp/
 06_DEVELOPMENT/trading_agents/
 # Suffixed backups: *.bak.20260426_101356 etc (plain *.bak missed these)
 *.bak.*
+
+# ---- MOLTBOOK AGENT KEYS (2026-07-28) -- LIVE SECRETS ----
+# Contains moltbook_sk_* secret keys, moltbook_claim_* tokens and 7 api_key
+# fields. Was TRACKED, so these values are already in git history and must
+# be treated as compromised until rotated. Untracked here to stop further
+# exposure; history rewrite + rotation is a separate operator decision.
+_state/moltbook/agent_keys.jsonl
+
+# ---- RUNTIME STATE (churns constantly, not source) ----
+_state/heartbeats/
+_state/moltbook/*_seen.json
+_state/moltbook/notifier_state.json
+_state/moltbook/.migrated_to_e5
+_state/sync_conflicts.jsonl
+_state/sync_queue.jsonl
+_state/*.lock

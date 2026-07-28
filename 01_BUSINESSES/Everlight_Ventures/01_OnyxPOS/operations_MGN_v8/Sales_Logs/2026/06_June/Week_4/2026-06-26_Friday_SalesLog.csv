@@ -1,0 +1,2 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Gross_Margin,Qty_Remaining_Before,Qty_Remaining_After,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes,Tax_Exempt_Reason
+2026-06-26,10:56:17,TRX20260626105617d4d0,1001,Rich,,,Test Plant,Test Plant,QA-X,1,,,50.00,0.00,0.00,50.00,0,0,50.00,0.0825,4.12,50.00,CASH,60.00,5.88,,TAXABLE

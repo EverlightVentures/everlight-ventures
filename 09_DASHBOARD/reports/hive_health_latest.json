@@ -1,76 +1,76 @@
 {
-  "generated_at": "2026-06-09T14:50:50Z",
-  "generated_at_pt": "7:50 AM PT",
+  "generated_at": "2026-07-28T13:15:22Z",
+  "generated_at_pt": "6:15 AM PT",
   "checks": [
     {
       "name": "Slack",
       "status": "fail",
       "message": "Slack webhook returned HTTP -1: HTTP Error 404: Not Found",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:08Z"
+      "checked_at": "2026-07-28T13:15:03Z"
     },
     {
       "name": "n8n",
       "status": "fail",
       "message": "Tunnel reconnect failed -- n8n health failed (HTTP -1): <urlopen error [Errno 111] Connection refused>",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:13Z"
+      "checked_at": "2026-07-28T13:15:04Z"
+    },
+    {
+      "name": "n8n Tunnel",
+      "status": "fail",
+      "message": "Could not establish SSH tunnel",
+      "auto_fixed": false,
+      "checked_at": "2026-07-28T13:15:04Z"
     },
     {
       "name": "XLM Bot",
       "status": "fail",
-      "message": "Restart failed -- xlm-bot.service not active: timeout",
+      "message": "Restart failed -- xlm-bot.service not active: ssh: connect to host 163.192.19.196 port 22: Connection timed out",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:50Z"
+      "checked_at": "2026-07-28T13:15:22Z"
     },
     {
       "name": "Google Docs",
       "status": "warn",
       "message": "Google Docs webhook returned HTTP -1: <urlopen error [Errno 111] Connection refused>",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:05Z"
+      "checked_at": "2026-07-28T13:15:02Z"
     },
     {
       "name": "Pipeline",
       "status": "warn",
-      "message": "Last run 7.8h ago (threshold: 6h)",
+      "message": "Last run 15.1h ago (threshold: 6h)",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:05Z"
-    },
-    {
-      "name": "n8n Tunnel",
-      "status": "ok",
-      "message": "Tunnel process alive (PID 6222)",
-      "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:05Z"
-    },
-    {
-      "name": "Blinko",
-      "status": "ok",
-      "message": "Blinko healthy",
-      "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:05Z"
+      "checked_at": "2026-07-28T13:15:02Z"
     },
     {
       "name": "ImprovMX",
       "status": "ok",
       "message": "MX records point to ImprovMX",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:06Z"
+      "checked_at": "2026-07-28T13:15:02Z"
+    },
+    {
+      "name": "Blinko",
+      "status": "ok",
+      "message": "Blinko healthy",
+      "auto_fixed": false,
+      "checked_at": "2026-07-28T13:15:02Z"
     },
     {
       "name": "Resend",
       "status": "ok",
       "message": "Resend API key valid, can send",
       "auto_fixed": false,
-      "checked_at": "2026-06-09T14:50:09Z"
+      "checked_at": "2026-07-28T13:15:03Z"
     }
   ],
   "summary": {
     "total": 9,
-    "ok": 4,
+    "ok": 3,
     "warn": 2,
-    "fail": 3,
+    "fail": 4,
     "auto_fixed": 0
   }
 }

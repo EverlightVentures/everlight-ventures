@@ -1,0 +1,62 @@
+/* ev_fx.css -- the "alive" layer: drifting grid, cursor halo, breathing glass, motes, reveals. */
+
+/* drifting cyber grid behind everything */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(212,175,55,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(212,175,55,.035) 1px,transparent 1px);
+  background-size:64px 64px;animation:fx-grid 34s linear infinite;
+}
+@keyframes fx-grid{to{background-position:64px 64px}}
+
+/* soft gold halo that follows the cursor */
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;transition:background .2s;
+  background:radial-gradient(340px circle at var(--fx-mx,50%) var(--fx-my,40%),
+    rgba(212,175,55,.09),rgba(56,189,248,.03) 32%,transparent 66%);
+}
+
+/* breathing glass -- always subtly alive */
+.glass{animation:fx-breath 6s ease-in-out infinite}
+@keyframes fx-breath{
+  0%,100%{box-shadow:0 6px 26px rgba(0,0,0,.45)}
+  50%{box-shadow:0 0 26px -6px rgba(212,175,55,.16),0 8px 34px rgba(0,0,0,.5)}
+}
+
+/* rune sweep on hover (gold light orbiting the border) */
+.glass.tile::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;opacity:0;
+  transition:opacity .35s;
+  background:conic-gradient(from var(--a,0deg),transparent 0 72%,rgba(212,175,55,.7) 86%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:fx-rune 7s linear infinite;
+}
+.glass.tile:hover::before{opacity:1;animation-duration:2.4s}
+@keyframes fx-rune{to{--a:360deg}}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+
+/* particle motes rising */
+#fx-motes{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.fx-mote{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;
+  background:radial-gradient(circle,rgba(240,214,112,.9),rgba(212,175,55,0));
+  animation:fx-rise linear infinite}
+@keyframes fx-rise{
+  0%{transform:translateY(0) scale(.7);opacity:0}
+  12%{opacity:.85}
+  100%{transform:translateY(-104vh) translateX(var(--drift,0)) scale(1.4);opacity:0}
+}
+
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease-out,transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* count-up + pulse */
+.pulse{animation:fx-pulse 2.4s ease-in-out infinite}
+@keyframes fx-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important}
+  .reveal{opacity:1;transform:none}
+}

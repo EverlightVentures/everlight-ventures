@@ -26,5 +26,26 @@
       "user_directive": "User: 'David Ateubel (sic, STREUBEL) and his property need to be deleted and never contacted again. He's about to file a complaint with BBB. I told u to stop the first time he replied no.'"
     },
     "do_not_contact": true
+  },
+  {
+    "id": "dnc_thill_2026-06-11",
+    "added_utc": "2026-06-11T17:24:21.802924Z",
+    "name": "Todd Hill",
+    "email": "thill@dtjdesign.com",
+    "phone": null,
+    "address": "1371 CORNELL RD NE, ATLANTA, GA 30306",
+    "property_addresses": [
+      "1371 CORNELL RD NE, ATLANTA, GA 30306"
+    ],
+    "blocked_channels": [
+      "email",
+      "sms",
+      "phone",
+      "mail",
+      "all"
+    ],
+    "reason": "Inbound reply 'stop' 2026-06-11 to unauthorized e5 Marquise send (Closing out -- 1371 CORNELL RD NE, ATLANTA, GA 30306). Honor CAN-SPAM opt-out.",
+    "source": "email_reply_stop",
+    "do_not_contact": true
   }
 ]

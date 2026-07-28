@@ -78,12 +78,18 @@ def compliance_check(text):
     for w in BANNED:
         if w in low:
             return False, "banned phrase: " + w
-    if len(text) > MAX_LEN:
-        return False, "over %d chars (%d)" % (MAX_LEN, len(text))
+    if x_len(text) > MAX_LEN:
+        return False, "over %d chars (%d weighted)" % (MAX_LEN, x_len(text))
     return True, "ok"
 
 
 CASHTAG_RE = re.compile(r"\$([A-Za-z][A-Za-z0-9]*)")
+URL_RE = re.compile(r"(?:https?://)?[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}(?:/[^\s]*)?")
+
+
+def x_len(text):
+    """X's weighted character count: every URL counts as 23 (t.co wrap), not raw length."""
+    return len(URL_RE.sub("x" * 23, text))
 
 
 def sanitize_cashtags(text):
@@ -164,7 +170,55 @@ def pick_next(items):
     return None
 
 
+def recent_post_texts(n=12):
+    """Last n successfully posted texts (from the event log) -- uniqueness guard input."""
+    texts = []
+    try:
+        with open(LOG) as f:
+            for line in f:
+                try:
+                    rec = json.loads(line)
+                except ValueError:
+                    continue
+                if rec.get("event") == "post" and rec.get("ok") and rec.get("text"):
+                    texts.append(rec["text"])
+    except OSError:
+        pass
+    return texts[-n:]
+
+
 def cmd_once():
+    # Topical lane first: ONE fresh current-events story per slot, rendered for
+    # all three surfaces. X posts now; the TG rendition queues for the TG run
+    # an hour later; the wallet rendition lands in wallet_brief_latest.txt for
+    # the operator. The queue below is fallback ammo so a slot never goes dark.
+    trio = {}
+    try:
+        import content_engine
+        trio = content_engine.make_topical_trio(recent_post_texts())
+        if trio.get("wallet"):
+            # DM the operator only on live slots (creds present), not manual dry-runs
+            content_engine.write_wallet_brief(trio["wallet"], notify=have_creds())
+    except Exception as e:
+        log_event({"event": "topical_error", "err": repr(e)[:160]})
+    topical = trio.get("x")
+    if topical:
+        ok, info = post_to_x(topical)
+        if info == "dry-run":
+            print("[DRY] tg rendition:\n" + (trio.get("tg") or "(none)"))
+            print("[DRY] wallet rendition:\n" + (trio.get("wallet") or "(none)"))
+            return 0
+        log_event({"event": "post", "id": "topical", "ok": ok, "info": info, "text": topical})
+        print(("POSTED " if ok else "ERROR ") + "topical: " + info)
+        if ok:
+            if trio.get("tg"):
+                try:
+                    content_engine.queue_topical_tg(trio["tg"])
+                    log_event({"event": "tg_queued", "text": trio["tg"]})
+                except Exception as e:
+                    log_event({"event": "tg_queue_error", "err": repr(e)[:120]})
+            return 0
+        # topical send failed -- fall through and give the slot to a queue item
     items = load_queue()
     it = pick_next(items)
     if not it:

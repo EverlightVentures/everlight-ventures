@@ -1,0 +1,2 @@
+Transaction_ID,Date,Time,Employee_ID,Employee_Name,Item_Count,Subtotal,Tax,Card_Fee,Grand_Total,Payment_Method,Amount_Received,Change_Due,Receipt_Number,Notes
+TRX20260626105617d4d0,2026-06-26,10:56:17,1001,Rich,1,50.00,4.12,0.00,54.12,CASH,60.00,5.88,TRX20260626105617d4d0,

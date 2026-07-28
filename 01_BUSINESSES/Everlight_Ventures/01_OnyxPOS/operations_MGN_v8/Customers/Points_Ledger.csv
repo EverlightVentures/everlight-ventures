@@ -1,0 +1,2 @@
+Entry_ID,Customer_ID,Email,Date,Type,Points,Dollar_Value,Transaction_ID,Note
+PTS20260626105617a042,CUST-1001,jane.loyalty@example.com,2026-06-26T10:56:17,EARN,54,,TRX20260626105617d4d0,Earned on $54.12 (x1.0 BRONZE)

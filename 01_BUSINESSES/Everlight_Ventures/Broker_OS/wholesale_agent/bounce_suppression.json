@@ -1,0 +1,82 @@
+{
+ "_meta": "Permanent bounce/complaint suppression. Never email or enrich these.",
+ "addresses": {
+  "enjaminswiger@yahoo.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.602674+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.419199+00:00",
+   "resend_email_id": "163bad23-fb9c-49ae-ac3b-287a0f078076",
+   "subject": "Your property at 5158 Walton Lake Dr -- cash offer?"
+  },
+  "olalee19@yahoo.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.659161+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.423934+00:00",
+   "resend_email_id": "8bcfaa75-707c-4ea6-8059-f9a211e75c38",
+   "subject": "Your property at 1261 Carlton Rd -- cash offer?"
+  },
+  "kizuwandashowers@yahoo.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.680201+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.427269+00:00",
+   "resend_email_id": "2c57d85c-4b7d-451c-bf7d-dd6bd30dadb7",
+   "subject": "Your property at 1382 Florida St -- cash offer?"
+  },
+  "evanstimothy@yahoo.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.702956+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.430559+00:00",
+   "resend_email_id": "f29a37f5-55e9-4e05-85d6-fe2f1d1cab2a",
+   "subject": "Your property at 892 N Claybrook St -- cash offer?"
+  },
+  "hulljerry@bellsouth.net": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.725069+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.433452+00:00",
+   "resend_email_id": "e9ce3cf0-4416-45d6-bd0d-4db8130d7d09",
+   "subject": "Your property at 4372 Ferndale Rd -- cash offer?"
+  },
+  "vpeoples@yahoo.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T20:57:12.743344+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.435911+00:00",
+   "resend_email_id": "adad019a-bba1-4924-ab8b-0840e944d6db",
+   "subject": "Your property at 458 Shawnee Ave -- cash offer?"
+  },
+  "kevin.killbane@gmail.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T21:11:58.438392+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.438401+00:00",
+   "resend_email_id": "bc147f66-298a-4bb0-a0eb-99e382e6503d",
+   "subject": "Closing out -- 383 S ISLAND DR, ROCKY RIVER, OH 44116"
+  },
+  "of.city@gmail.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T21:11:58.443889+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.443897+00:00",
+   "resend_email_id": "7fcc1f3f-3e1d-4fc6-9d14-8478a5ae920f",
+   "subject": "Re: 327 S CHARLOTTE, MEMPHIS, TN"
+  },
+  "charles.fifer@gmail.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T21:11:58.448823+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.448829+00:00",
+   "resend_email_id": "8c5001b9-7da6-486f-aa4f-f456d74fc4f4",
+   "subject": "Quick question about your Memphis property -- 1362 QUINN, MEMPHIS, TN"
+  },
+  "juan.solis-pedraza@gmail.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T21:11:58.453407+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.453414+00:00",
+   "resend_email_id": "c2b739e7-59a9-4740-8e42-6242580bb048",
+   "subject": "Re: 3743 ALMA, MEMPHIS, TN"
+  },
+  "denzel.murphy@gmail.com": {
+   "status": "bounced",
+   "first_flagged_utc": "2026-06-11T21:11:58.458034+00:00",
+   "last_seen_utc": "2026-06-11T21:11:58.458040+00:00",
+   "resend_email_id": "5ef8b4c1-3ee1-4467-af1e-4b44a2a20dd6",
+   "subject": "Re: 1879 BISMARK, MEMPHIS, TN"
+  }
+ }
+}

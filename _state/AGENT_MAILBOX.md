@@ -3866,3 +3866,401 @@ APPLY ON THE DELL:
 OPEN / NEXT: real product names need an owner re-import (synthetic labels are a stopgap). Add a nav link to /inventory/reconcile (managers reach it by URL + the EOD email link today). Live Stripe/Square/Shopify/QuickBooks sync still the multi-session follow-on (CSV interchange works now via tools/inventory_transfer.py).
 
 ---
+
+## [2026-06-24 17:16 PT] Session: BCARDD content engine rebuilt: Claude backend + 9-archetype diversity + daily-ca
+
+<!-- session_iso=2026-06-25T00:16:14.241883+00:00 | size=4789b -->
+
+# BCARDD content engine rebuilt: Claude backend + 9-archetype diversity + daily-cache topical generation (fixes "repetitive/looks automated")
+
+### Accomplished
+- Diagnosed Rich's "double-posting same thing, looks automated" complaint: ROOT CAUSE was all LLM backends dead/unfunded (Perplexity keys revoked 401, OpenAI 401, Anthropic $0) -> every generation fell back to canned lines. Verified live with curl tests on each key.
+- Rich funded the Anthropic/Claude API. Rewrote content_engine.py ppx() to call the Claude Messages API (model claude-sonnet-4-6, env override BCARDD_GEN_MODEL) replacing the dead Perplexity sonar backend. Added ANTHROPIC_API_KEY to ~/bcardi/automation/.env (copied from vault 03_Credentials/.env).
+- Built the diversity machine: 9 rotating ARCHETYPES (hot_take/curiosity_gap/social_proof/underdog/meme/question/flex/street_wisdom/insider) + story-subject memory (topical_state.json, Jaccard dedup) so it never repeats a topic OR a format; 10 rotating PACK_MISSIONS so pack-orders stop being "reply to a thread" daily (rotates even with no LLM via hardcoded fallback).
+- Solved web-search latency/limits: web search via Messages API is SLOW (~1-3min) and rate-limited on the funded account. DECOUPLED research from generation -- refresh_headlines() does ONE web-search/day (ppx search=True, line format "subject :: fact", caches headlines_cache.json) in main(); per-slot make_topical_trio() generates FAST (~5s, ppx search=False) off the cache. Verified 4-5s per gen, 3 distinct stories/archetypes.
+- Verified full X-autopilot path end-to-end (dry run): refresh -> heavy/political filter caught+skipped a story -> generated trio (X billboard+footer / TG family-voice / wallet locker-room). All 3 surfaces working.
+- Scrubbed the live TG queue of old dup pack-orders/topical posts; seeded story-memory from already-sent posts.
+- Stopgap: hand-wrote + loaded 15 fresh diverse posts (World Cup duck, Cape Verde, KitKat heist, nihilistic penguin, etc.) into X+TG queues as fallback ammo; loaded earlier when backend was still down.
+- ppx() also fixed: keeps only post-search final answer (discards "let me search" narration), pause_turn continuation loop, search/no-search timeout split (300s/35s).
+
+### Files created or modified
+- 01_BUSINESSES/BCARDI_Crypto/02_Community/automation/content_engine.py -- Claude backend ppx(search=), ARCHETYPES + topical_state, refresh_headlines + headlines_cache + _next_story, fast make_topical_trio, rotating PACK_MISSIONS, refresh in main(). Deployed to e5 ~/bcardi/automation/ (md5 synced).
+- ~/bcardi/automation/.env (e5) -- added ANTHROPIC_API_KEY
+- ~/bcardi/automation/headlines_cache.json (e5) -- daily story cache (7 stories cached, date 2026-06-25 UTC)
+- ~/bcardi/automation/topical_state.json (e5) -- archetype index + mission index + used-subjects memory
+
+### Doctrines added or changed
+- feedback-bcardd-positive-vibes-only -- appended ENGINE ARCHITECTURE section (Claude backend, 9 archetypes, decoupled daily-search cache, no per-post web search)
+
+### Commits + pushes
+- NONE -- uncommitted in workspace, live on e5. Commit next session.
+
+### Open items / handoffs / queued for next session
+- Watch the next real X/TG slots (cron 3a/9a/4p PT X, +1h TG) to confirm fresh varied content posts live.
+- Verify the daily content_engine refresh (cron 30 9 UTC = 1:30a PT) repopulates headlines_cache cleanly each day; if web-search quota is exhausted, refresh fails gracefully -> falls back to queue. Can hand-seed headlines_cache.json if needed.
+- Wallet-brief DM only fires on live slots (have_creds gate); confirm Rich receives the Bcardd_x_bot DM at the next live slot.
+- ALLEY KINGZ MAPS (from prior session, still open): 204 painted maps sit in assets/maps/ which the game never loads (game reads 4 backgrounds from assets/arena/, index.html:644 SECTION_ARENA). Rich DECISION PENDING: wire painted arenas into match rotation vs repaint the 4 live backgrounds. ~668 Leonardo tokens parked. ~168 maps unpainted.
+
+### Honest gaps / known limitations
+- Web search is slow (~1-3min) and rate-limited on the funded Anthropic account -- I exhausted the day's allotment during debugging. Production only searches 1x/day so it won't recur, but if Rich's tier has a tight web-search cap the daily refresh could occasionally fail (graceful: uses prior cache or queue fallback).
+- Sonnet 4.6 chosen over Opus 4.8 for cost/runway on the small prepaid balance; told Rich he can say "use opus" for max quality. Token cost is tiny either way (~$2-6/mo); web search (~$10/1000) is the main cost, now 1/day.
+- content_engine still uncommitted to git.
+
+### Operator decisions deferred
+- Model tier: Sonnet 4.6 (current) vs Opus 4.8 for the content bot.
+- Alley Kingz maps: rotation-wiring vs repaint-the-4 (carried from prior session).
+
+---
+
+## [2026-06-25 11:54 PT] Session: Un-starved the Kalshi bot: re-enabled free single-book betting (geometry-gated),
+
+<!-- session_iso=2026-06-25T18:54:32.053551+00:00 | size=3403b -->
+
+# Un-starved the Kalshi bot: re-enabled free single-book betting (geometry-gated), no paid feed
+
+### Accomplished
+- Diagnosed why the bot felt "stagnant" a week later (balance flat ~$156, only 75c penny wins): the Odds API FREE tier was exhausted (consensus = 0 games every sport) AND I had over-blocked it with require_consensus_books=2, so the ONLY lane that could fire was favorite_longshot (penny favorites). The real sharp lane placed ONE bet all week (Congo -$24.84).
+- Verified ESPN's core odds endpoint also gives only ONE book (DraftKings) -- no free multi-book exists there.
+- Per Rich ("we never needed to pay, adjust what we have, stop asking for money"): set require_consensus_books 2->1 so the FREE ESPN/DraftKings single-book number is bettable again -- but the original soccer bleed (single-book LONGSHOTS) stays sealed by the existing geometry guards (win-prob floor = favorites only, 68c payout ceiling, single_book_max_edge 15pt stale cap, one-bet-per-game).
+- Verified dry-run: the engine now FINDS real favorite edges (WNBA WSH 62c/fair 66%/+5.6% net, WNBA LV 66c/fair 69%/+4.1% net -- $4-5 wins, balanced geometry) and correctly REJECTS ~15 bad ones (3-7c WC longshots via sanity/stale caps, sub-60% via win-prob floor, 73c via payout ceiling). Bleed cannot recur.
+- Exported the honest dashboard stats snapshot to the mailbox earlier this session.
+
+### Files created or modified
+- `06_DEVELOPMENT/kalshi_agent/auto_edge_config.json` -- require_consensus_books 2->1 (free single-book bets, geometry-gated)
+
+### Commits + pushes
+- `dcf7d12` on `lucrex-os-engine` -- un-starve the engine: allow free single-book bets (geometry-gated), no paid feed
+- (earlier this session: 5ef555e + 9c679e90 on lucrex-os-engine; 254eb01 + 7582988 + a85b179 on coverforge-build)
+- Nothing pushed to remote.
+
+### Open items / handoffs / queued for next session
+- Watch 2-3 days: with single-book re-enabled, confirm it places favorite bets again and the profit factor climbs off ~0.26. If still stagnant WITH the feed working, the edges genuinely aren't there on free data -> revisit options.
+- MOONSHOT lane (parked, Rich-interested not greenlit): a small capped, scout-gated asymmetric-longshot lane for the "double or nothing" upside he wants -- free to build, awaiting his GO.
+- Command Center dashboard still handed off to another agent (4 sub-pages + ops.html clobber-fix). The phone dashboard he sees is STILL the old flat ops.html (sync keeps reverting it).
+- True-equity fix: dashboard "equity" is inflated (settlements API windowing counts settled bets as open); only cash balance is reliable.
+
+### Honest gaps / known limitations
+- Single-book (one book = DraftKings) is one opinion, not a true consensus -- the 3-5% "edges" may be partly noise; geometry guards bound the downside but EV is modest. This is a GRIND, not a money-flip; it will not double the bankroll fast.
+- The Odds API free tier (~500/month) is exhausted for the month; the consensus cache prevents re-burn but multi-book stays dark until it resets / unless funded (Rich declined funding).
+- Kalshi commits split across two branches (lucrex-os-engine + coverforge-build) -- all reachable, nothing lost.
+
+### Operator decisions deferred
+- Build the moonshot lane (asymmetric upside) -- yes/no?
+- Whether to ever fund the Odds API (declined for now -- prove profit on free first).
+- Push commits to remote? (Nothing pushed.)
+
+---
+
+## [2026-06-26 11:45 PT] Session: MGN POS hardened + 20+ features shipped; runs live on phone (localhost:5000); fu
+
+<!-- session_iso=2026-06-26T18:45:03.113482+00:00 | size=4524b -->
+
+# MGN POS hardened + 20+ features shipped; runs live on phone (localhost:5000); full loyalty rewards flywheel + JIM Tap-to-Pay
+
+### Accomplished
+- Fixed 4 day-1-blocking bugs: employee name-save (add form posted first/last, route read missing "name"), overnight data loss (single-store data lock), back-arrow admin-takeover (no-store headers + persisted random secret key + session hardening), owner PIN view/set.
+- Per-line CA sales tax with food-plant exemption (Reg 1588 / R&TC 6359); cashier total reconciled to server tax; barcode-scan lookup.
+- EOD close = 3 copies (PC + owner + mom) + delivery audit; QuickBooks accounting export (daily summary + balancing journal).
+- Customer CRM: capture at checkout, purchase history, tiers (Bronze->Platinum), segments/inactivity filters, CAN-SPAM unsubscribe route, newsletter export.
+- Vendor invoice ingest (master-SKU + vendor aliases + FIFO lots); CSV Import/Export (Square/Shopify/QuickBooks); live-API adapter chassis (credential-gated, inactive).
+- Automated backups (tar.gz all data on every till close + manual run, rotation, optional openssl encryption + offsite); owner/admin recurring task scheduler.
+- Plant-care + botanical/Latin name fields; mobile hamburger menu (nav was hidden off-screen on phones = the "only 25% of features on mobile" bug).
+- JIM Tap-to-Pay payment method + Cash/Card/JIM reconciliation split (JIM has no public API -> side-by-side model).
+- LOYALTY REWARDS FLYWHEEL: earn points per sale (tier multipliers), redeem at checkout (cashier sees balance, one checkbox discounts the total), points ledger; verified live end-to-end on the running server (earned 54 pts -> $2.70 off).
+- App RUNS LIVE on the phone via venv at /root/.venvs/mgn (Flask is pure-python; venv must live on proot fs, sdcard cannot symlink). Verified all routes 200 + login.
+- 7-agent end-to-end audit workflow; VERIFIED + DEBUNKED its false "critical COGS/profit bug" (empirically stock+COGS were always correct; only a garbage inventory-ledger row, fixed).
+
+### Files created or modified
+- `operations_MGN_v8/POS_CORE.py` -- tax engine, single-store lock, vendor map+FIFO, points/rewards, backups hooks, ledger fix, +6 plant-care +2 name cols
+- `operations_MGN_v8/MGN_APP.py` -- all routes: tax, EOD, customer/newsletter/tiers, vendor-invoice, scheduler, integrations, accounting, backups, JIM, rewards/redeem
+- `operations_MGN_v8/tools/` -- accounting_export, integrations_api, backup_data, inventory_transfer(reused), + 11 test_*.py (all green own-process)
+- `operations_MGN_v8/templates/` -- terminal (mobile + customer + reward + JIM), base (hamburger + nav), customers/*, admin/schedule+backup, inventory/vendor_invoice+edit, integrations, settings
+- `operations_MGN_v8/AGENT_MAILBOX.md` -- app-local Dell handoff (full session log)
+- `memory/project_mgn_pos_restore.md` -- updated
+
+### Commits + pushes (branch mgn-pos-restore, HEAD b3f3cf2, in sync with origin)
+- `b3f3cf2` redeem rewards at checkout; `37b349d` rewards engine; `200f284` JIM Tap-to-Pay
+- `e046583` plant-care+barcode; `92c5043` backups; `01a93a3` mobile+CANSPAM+tiers
+- `f8313f3` mobile hamburger; `2107531` audit fixes (ledger/botanical/autopilot)
+- earlier: EOD, tax, customer CRM, vendor invoice, scheduler, integrations, accounting (~20 commits total)
+
+### Open items / queued for next session
+- Embedded one-tap card payments: needs Stripe account + reader (counter: smart-reader API, no native app; roaming: native app wrapper w/ Tap-to-Pay SDK). JIM side-by-side rejected by operator (2000 extra steps/day).
+- Rewards Phase 3 (optional): partial redemption input (currently redeems full balance), campaigns/automation, blog.
+- Mini-PC nursery install + bind to shop WiFi (phones-as-terminals); confirm mom's EOD email; SMTP keys in .env for emails; SECRET_KEY.
+- Real product-name re-import (989 items are synthetic "Plant ..." labels; tax classification needs real names).
+
+### Honest gaps / known limitations
+- Can't run Flask interactively-tested beyond data layer on phone for some flows, but server runs live + verified.
+- JIM has no public developer API (researched) -> only side-by-side, which operator rejected; real fix is Stripe/Adyen embedded.
+- Audit agent over-claimed a "profit-inflating COGS bug" -- VERIFIED FALSE; books were always correct (verify-before-trust held).
+
+### Operator decisions deferred
+- Counter vs roaming checkout (picks the embedded-payments path).
+- Whether to pursue a Stripe-backed branded one-tap ("your own JIM experience") -- operator leaning yes.
+
+---
+
+## [2026-06-27 16:59 PT] Session: MGN POS session -- re-exit (full session already exported 11:45 PT); only delta 
+
+<!-- session_iso=2026-06-27T23:59:46.167480+00:00 | size=1179b -->
+
+# MGN POS session -- re-exit (full session already exported 11:45 PT); only delta = test server stopped on teardown
+
+### Accomplished
+- This is a re-issued /exit. The complete session summary was already appended to the mailbox at 2026-06-26 11:45 PT (MGN POS hardened + 20+ features, loyalty rewards flywheel, JIM Tap-to-Pay, runs live on phone). Nothing substantive changed since.
+
+### Open items / handoffs / queued for next session
+- The phone TEST server (localhost:5000) stopped on session teardown -- expected. To resume testing on the phone: `cd 01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8 && HOST=127.0.0.1 PORT=5000 MGN_SINGLE_STORE=1 /root/.venvs/mgn/bin/python MGN_APP.py` (venv lives at /root/.venvs/mgn; sdcard cannot symlink so venv stays on proot fs).
+- All code is on GitHub mgn-pos-restore HEAD b3f3cf2 (in sync). Nursery PC install: pull branch + venv + `pip install -r requirements.txt` + run.
+- Next build (when operator has a Stripe account + reader): embedded one-tap card payments. JIM side-by-side rejected (2000 extra steps/day); fix is Stripe/Adyen embedded -- counter = smart-reader API (no native app), roaming = native app wrapper.
+
+---
+
+## [2026-06-30 06:28 PT] Session: AIOS system audit delivered; 25 dead agents revived
+
+<!-- session_iso=2026-06-30T13:28:26.122716+00:00 | size=3505b -->
+
+# AIOS system audit delivered; 25 dead agents revived
+
+### Accomplished
+- Ran a 10-agent Workflow audit of the Hive (AIOS Four C's + the $20/mo modern startup-stack overlay), red-team graded B. Scorecard: Context GREEN, Connections AMBER, Capabilities AMBER, Cadence RED.
+- Proved live with hard MCP/curl evidence: Supabase 2 projects ACTIVE_HEALTHY, Resend sent 10 real outreach emails 2026-06-22, all 3 public sites HTTP 200, 5/7 local MCP servers up, Onyx POS + Alley Kingz shipping weekly.
+- Surfaced failures-first: Broker OS confirmed dead (live MCP "Django not running", 0 matches ever), deploy_to_oracle.sh silent 35 days, oracle watchdog crashing on fd exhaustion (stray PID 28397), dead-mother 129.159.38.250 tunnel still firing every 2 min, and the phone running 101 crons against the "never a phone cron host" HARD LAW.
+- Fixed 26 non-invocable agent files: added derived YAML frontmatter to 25 personas; invocable count 94 to 119 (harness confirmed registration on reload). _legal_dept_index.md correctly left as an index.
+- Mapped the modern startup stack: 10/13 covered (mostly via our own infra, e.g. CF Pages absorbs Vercel, Supabase Auth absorbs Clerk, Blinko absorbs Pinecone). 3 free gaps remain: Sentry, PostHog, Upstash.
+
+### Files created or modified
+- `06_DEVELOPMENT/everlight_os/audits/aios_2026-06-30.html` -- branded AIOS audit report (gold template)
+- `06_DEVELOPMENT/everlight_os/audits/phone_crontab_manifest_2026-06-30.txt` -- read-only crontab snapshot (101 active lines)
+- `06_DEVELOPMENT/everlight_os/audits/phone_cron_conflict_2026-06-30.md` -- deferred-decision conflict note
+- `.claude/agents/*.md` (25 files) -- prepended YAML frontmatter so legacy personas register as subagents
+- `CLAUDE.md` -- corrected the stale "63 agents" headcount to reconciled reality (79 roster / 120 files / 119 invocable)
+
+### Doctrines added or changed
+- `project_aios_audit_2026-06-30` (memory) -- audit results, open phone-cron conflict, Broker OS dead, 3 stack gaps; MEMORY.md index line added
+- CLAUDE.md Fire Team Doctrine headcount line corrected to match the audit
+
+### Commits + pushes
+- None this session. No git commit/push was requested; all changes are in the working tree only.
+
+### Open items / handoffs / queued for next session
+- Phone-cron conflict: documented and DEFERRED. Do NOT migrate crons or rewrite feedback_oracle_only_crons until Rich rules. Cheapest unlock regardless of ruling: fix the watchdog fd leak (likely root cause of the ~2026-05-26 silent-cron cluster).
+- AK deploy doctrine: the GitHub Action is the LIVE deploy path now, contradicting reference_ak_github_action_clobber_killswitch; needs a one-line doctrine update before the next AK deploy.
+- 3 free stack gaps to close: Sentry (highest value), PostHog, Upstash.
+
+### Honest gaps / known limitations
+- Everything behind the e5/Oracle tailnet (Kalshi live orders, XLM bot, Blinko RAG, remote systemd) is unverifiable from the phone (tailscale absent in proot); labeled UNKNOWN, not claimed dead.
+- Money-live lanes still unverified: Kalshi order placement, a live Stripe charge, any paying SaaS customer.
+- Could not log the session to Blinko -- e5-mother unreachable from the phone (the audit itself proved this).
+- .claude/agents + CLAUDE.md edits are uncommitted in the working tree.
+
+### Operator decisions deferred
+- Phone-cron: document-only chosen this session; migrate-to-e5 vs rewrite-doctrine still open.
+- Broker OS: left as-is by operator choice (dead but not formally marked PARKED).
+
+---
+
+## [2026-06-30 15:02 PT] Session: Kalshi: current-events proved efficient, weather lane built, risk/reward rule em
+
+<!-- session_iso=2026-06-30T22:02:03.102519+00:00 | size=5416b -->
+
+# Kalshi: current-events proved efficient, weather lane built, risk/reward rule embedded, v2 order endpoint fixed, 3 live operator bets
+
+### Accomplished
+- **Current-events cross-market lane: proven EFFICIENT (no edge).** Paginated Polymarket (1000 mkts) vs Kalshi via real orderbook (best_bbo). Recession 2026: Kalshi 10% == Polymarket 10%. Apparent gaps were mismatched terms (diff dates), not edges. Radar kept as a divergence monitor; cross-market arb is NOT the rent-payer.
+- **Weather lane built (the real current-events edge).** weather.py turns the free NWS daytime-high forecast into a Normal(forecast, sigma=3F) distribution over Kalshi temp buckets, compares to best_bbo. Live snapshot: 23 edges, structurally consistent (Kalshi distribution centered OFF the NWS forecast). Runs as SCANNER + PAPER LOG; twice-daily cron on e5 now accumulating weather_paper.jsonl to settle vs realized highs (~1 week) before any live capital.
+- **Embedded Rich's risk/reward HARD RULE.** min_payout_ratio = 1.0 (risk X, win >= X => buy <= 50c). max_buy_price_c 68->50. Dropped the favorites-only floor that fought it (win_floor 0.60->0.50). Verified dry-run REJECTS every thin-payout bet (WNBA 59c, MLB 54/60c, WC 74c all "payout too thin"). Realized geometry already flipped: profit_factor 0.24 -> 1.5, avg_win $9.66 > avg_loss $6.45.
+- **Fixed Kalshi v2 order endpoint (was silently broken).** Kalshi deprecated legacy /portfolio/orders (HTTP 410). Migrated place_order to POST /portfolio/events/orders single-book format (side bid/ask, dollar-string price, time_in_force). yes-side confirmed by live fill; no-side = documented bid/ask inversion. Engine can place live orders again.
+- **3 operator bets placed (gates bypassed, Rich's calls), all via the new v2 path:**
+  - Paraguay reg-time win: 92 @ 27c ($24.84) -- LOST (game tied 1-1, reg bet dies at the tie).
+  - Paraguay TO ADVANCE: 131 @ 19c ($24.89) -- WON ~$131 (Paraguay advanced via OT/pens). Balance jumped +~$123.
+  - Sweden TO ADVANCE vs France: 416 @ 6c ($24.96) -- LIVE, pays $416 if Sweden advances (16.7x).
+- Net: started $156.10 cash, ended ~$200.29 cash + one live $416 ticket. The reg-vs-advance lesson paid off in real money (advance survived OT, reg died at the tie).
+
+### Files created or modified
+- `06_DEVELOPMENT/kalshi_agent/current_events.py` -- paginated Polymarket + best_bbo radar; proved cross-market efficient
+- `06_DEVELOPMENT/kalshi_agent/dataflows/polymarket_clob.py` -- added offset pagination to scan_markets
+- `06_DEVELOPMENT/kalshi_agent/weather.py` -- NEW; NWS forecast as sharp line for Kalshi temp markets (scanner + paper log)
+- `06_DEVELOPMENT/kalshi_agent/auto_edge.py` -- min_payout_ratio gate in gate()
+- `06_DEVELOPMENT/kalshi_agent/auto_edge_config.json` -- min_payout_ratio 1.0, max_buy_price_c 50, win_floor 0.50/0.55
+- `06_DEVELOPMENT/kalshi_agent/tests/test_gate_winrate_floor.py` -- payout-ratio regression test
+- `06_DEVELOPMENT/kalshi_agent/execution/kalshi_exec.py` -- place_order migrated to v2 /portfolio/events/orders
+- `06_DEVELOPMENT/kalshi_agent/operator_bets.json` (on e5) -- 3 operator bets logged (excluded from bot stats)
+
+### Doctrines added or changed
+- Risk/reward HARD RULE -- every autonomous bet must clear min_payout_ratio (1:1 floor: risk X, win >= X). Operator bets bypass. Candidate for a feedback_ memory next session.
+
+### Commits + pushes
+- `a733a5f` on token-economics-os -- current-events radar (efficient verdict)
+- `e332955` on token-economics-os -- weather lane (paper-validating)
+- `54eef8b` on token-economics-os -- embed risk/reward HARD RULE (min payout 1:1)
+- `5c05640` on token-economics-os -- migrate place_order to v2 single-book endpoint
+- NOT pushed (still local on token-economics-os branch).
+
+### Open items / handoffs / queued for next session
+- **Sweden advance bet is LIVE** (416 @ 6c, pays $416). Rich can say "lock it" to bank profit or let it ride.
+- Verify Paraguay advance settlement line-item (balance jump confirms ~$131 cash, but /portfolio/settlements threw a transient 401 -- pull the receipt next session).
+- Weather: after ~1 week of paper data, settle vs realized highs; if NWS beats the crowd, wire live with a net-EV gate profile (weather edges are sub-50% buckets, the sports win-prob floor blocks them).
+- Verify weather resolving STATION per city (only NYC=Central Park confirmed; LA/CHI/MIA/etc. unconfirmed -> some of the 23 edges may be wrong-station noise).
+- Move Kalshi code to its own git branch and push (currently riding token-economics-os, unpushed).
+
+### Honest gaps / known limitations
+- /portfolio/settlements returned a transient 401 INCORRECT_API_KEY_SIGNATURE (RSA-PSS salt flake) -- could not pull the Paraguay settlement receipt; outcome inferred from the balance jump.
+- Weather fair-probs depend on sigma=3F + correct station; unvalidated beyond NYC. Paper log will reveal which cities are real vs noise.
+- v2 no-side (buy-no = ask at inverted price) is doc-derived, not yet exercised live (yes-side confirmed by the operator fills).
+- kalshi_summary equity still inflated by settlements-windowing; only cash balance is reliable.
+
+### Operator decisions deferred
+- Lock vs ride the live Sweden advance ticket.
+- Engine volume-vs-strictness fork: stay tight on rare <=50c favorites, or also take good-payout +EV underdogs (lower win rate, 1:1 rule still enforced).
+- Weather go-live timing (after paper proves NWS beats the crowd).
+
+---
+
+## [2026-07-10 20:00 PT] Session: Alley Kingz: the Living Manga era -- 7 waves + Block War + Chronicles + starter 
+
+<!-- session_iso=2026-07-11T03:00:56.683311+00:00 | size=3333b -->
+
+# Alley Kingz: the Living Manga era -- 7 waves + Block War + Chronicles + starter moment, all live
+
+### Accomplished
+- Shipped the full MMORPG update (Waves 1-7): nav/bug fixes, live-walk motion, competitive raids w/ mine-and-steal + distinct rival bases, retention layer (ranked rep, crates, streaks, duties), social/cold-start (ghost clans, referral, crew board), cosmetics paper-doll.
+- BLOCK WAR: offline defense (posts/shield/LAST NIGHT report/revenge) + deck deploy bar in raids; hero gate (downed runner cannot raid: heal or rotate) + runner picker; build-mode dpad fix.
+- BLOCK CHRONICLES: canon-mined story bible (AK_BLOCK_CHRONICLES_BIBLE.md, 753 lines, Sections 1-12 incl. craft laws, manga-as-game-state, living-manga, starter moment, visual asset pipeline); comic reader v2 (real pages, speech bubbles, page-turns, unlock-by-play, RESUME STORY chip); manga_fx engine (impact frames, Battle Call, victory-page loot screens, 9:16 anime-short exporter); needs engine (hunger/energy/morale/honor, mood ring, feed-the-runner); choice panels w/ next-battle fx; Pokemon-style first-run (age gate -> Google -> prologue -> handler/starter/rival -> first game -> HUD tutorial, strictly sequential); mission paw-trail wayfinding; deck auto-assign to defense; raid loot-everything + real building art.
+- STORIES: 54 of 106 dog books written + live (all 4 Mythics, 10 Legendaries, 29 Epics, 9 Rare roots + prologue). ~100 art assets rendered (comic panels, issue covers, 14 flagship portraits, mood portraits, class combat clips) via CF free + Higgsfield.
+- Latest live build v=1783702392+ at alleykingz.online; credits ~350, trailer 300 reserve UNTOUCHED.
+
+### Files created or modified
+- `game/data/cards_stories.js` -- 54 story books (465KB+)
+- `game/data/cards_prologue.js` -- the Mongrel King cold-open
+- `game/systems/{chronicles,manga_fx,needs,defense,viral,cardfx}.js` -- the living-manga engine stack
+- `game/index.html` + `game/game.html` -- orchestrator, raids, deploy bar, wayfinding, mode exclusivity
+- `ecosystem/AK_BLOCK_CHRONICLES_BIBLE.md` + `ecosystem/AK_DESIGN_BIBLE.md` -- canon + Unity conversion spec
+- `ecosystem/tools/asset_audit.js` + `AK_ASSET_GAP.md` -- per-dog per-phase art manifest
+
+### Doctrines added or changed
+- `feedback_ak_cinematic_viral_growth_model` -- every big moment mints a shareable clip
+- `feedback_ak_deploy_verify_hygiene` -- CF 308/curl -L, rsync flatten + partial-transfer traps, ?v= variant cache, icons brightness gate
+- `project_ak_unity_conversion_dual_track` -- convert not rebuild; web = viral funnel
+- `project_ak_core_loop_canon` -- updated with all waves + Block War + Chronicles state
+
+### Open items / queued
+- Wave 3 Rares: 18 books writing now (resumed, self-discovering batches); Wave 4 Commons (34) next; combined w2-3 quality verify pending.
+- Panels for waves 2-4 (~250) + 92 portraits on CF free windows; 9 unconsumed panels (mood/starters) done.
+- Mini-games (MOBA/Gulag/arcade) manga integration; Crew Wars + ak-raid server (multiplayer phase); THE TRAILER (300cr reserved).
+
+### Honest gaps
+- Wave 2-3 books passed structural+canon greps but the deep adversarial QUALITY verify keeps dying on session limits -- run it before calling the library done.
+- Session limits killed multiple workflow lanes; all recovered via disk-state audits + self-discovering batches.
+
+---
+
+## [2026-07-14 16:21 PT] Session: Built the LUCREX Command Deck -- local phone-safe terminal skin at :2702 with th
+
+<!-- session_iso=2026-07-14T23:21:31.853143+00:00 | size=6386b -->
+
+# Built the LUCREX Command Deck -- local phone-safe terminal skin at :2702 with the crowned BCARDD "Winner" mascot (3 iterations, chat-focused VS Code IDE)
+
+### Accomplished
+- Full brainstorm -> spec -> plan -> build via superpowers skills; then two operator-driven redesigns.
+- Backend is Python stdlib only (no pip/npm -- proot SIGSEGV law): `probes.py` (real data), `pty_bridge.py` (hand-rolled WebSocket + `pty.fork`), `blubber_server.py` (HTTP router + `/api/*` + `/pty` + aggregate `/api/all`).
+- PTY bridge PROVEN end-to-end: WS 101 handshake + shell evaluated `$((21*2))` -> `BRIDGE_OK_42`. Embedded Claude terminal is real xterm.js on a live pty.
+- Real-data probes off the live transcript jsonl + /proc + git: session tokens, context-window %, per-turn token history, tool activity, top shell commands, git branch/dirty, vitals, and a sandboxed workspace file listing.
+- Front end: vanilla, no build. Vendored xterm.js + three.min.js + Playfair/JetBrains woff2 (all offline-safe, curled once).
+- Mascot = "The Winner" (BCARDD): crowned white Dogo, aviators, cigar, gold B-chain, fire. Sourced from `Alley_Kingz/.../cinematics/win.mp4` frame 0 via ffmpeg `-skip_frame nokey` (the ONLY decode path that survives this proot's glibc heap assertion). Rendered as a living 3D portrait (parallax tilt, ambient fire, mood glow, wake-in), cover-cropped to the crown/face; CSS-image fallback if WebGL fails.
+- v1 "obsidian throne room" -> v2 dense dashboard (widgets) -> v3 VS Code IDE per Rich: activity bar, real collapsible file TREE (Explorer), chat as the dominant editor, thin status bar for metrics, muted developer palette.
+- Side tools made FUNCTIONAL not decorative: click a file in the tree -> path injected into the Claude prompt; drag file onto terminal; click a Top Command -> re-runs it; analytics on-demand (context ring gauge, token-burn bars, system sparklines) drawn on canvas (no chart lib).
+- Wired into infra like every other band: `serve_lucrex.sh` default now launches the deck (Next.js path preserved as `start-next`); watchdog already points at :2702; banner `:2702 lucrex` pill; `lucrex`/`lx` alias; tile + managed service in the :8765 master_dashboard.
+- Fixed a real bug: the transcript dir has a concurrent 110MB / 13593-turn session; `_newest_jsonl` was flickering to it. Now prefers the transcript born after the deck server started (its own spawned session), skips `<synthetic>`/zero-usage turns, honors `DECK_TRANSCRIPT` env override.
+- 8/8 unit tests green (token math + RFC-6455 handshake vector + WS frame codec + partial-frame handling).
+
+### Files created or modified
+- `06_DEVELOPMENT/lucrex_command_deck/probes.py` -- read-only collectors (session/vitals/git/agents/history/context/activity/top_commands/fs)
+- `06_DEVELOPMENT/lucrex_command_deck/pty_bridge.py` -- stdlib WebSocket handshake + frame codec + pty pump
+- `06_DEVELOPMENT/lucrex_command_deck/blubber_server.py` -- HTTP router, `/api/*`, `/api/all`, `/pty` upgrade, binds 127.0.0.1
+- `06_DEVELOPMENT/lucrex_command_deck/web/index.html` -- v3 IDE shell (activity bar / sidebar / editor / status bar)
+- `06_DEVELOPMENT/lucrex_command_deck/web/deck.css` -- muted VS Code-style theme
+- `06_DEVELOPMENT/lucrex_command_deck/web/deck.js` -- panel switching, status-bar metrics, polling, terminal, quick cmds
+- `06_DEVELOPMENT/lucrex_command_deck/web/filemanager.js` -- VS Code file tree, click-to-inject, drag-drop
+- `06_DEVELOPMENT/lucrex_command_deck/web/mascot.js` -- Winner living 3D portrait, cover-crop, mood, fallback
+- `06_DEVELOPMENT/lucrex_command_deck/web/widgets.js` -- canvas gauge/bars/sparkline
+- `06_DEVELOPMENT/lucrex_command_deck/web/vendor/` -- xterm.js, xterm.css, three.min.js, fonts/*.woff2
+- `06_DEVELOPMENT/lucrex_command_deck/web/assets/` -- winner.jpg, winner_wall.jpg, SOURCE.txt (from win.mp4 frame 0)
+- `06_DEVELOPMENT/lucrex_command_deck/tests/` -- run.py, test_probes.py, test_pty_bridge.py, fixtures/sample_transcript.jsonl
+- `06_DEVELOPMENT/lucrex_command_deck/docs/2026-07-14-lucrex-command-deck-design.md` + `-plan.md`
+- `03_AUTOMATION_CORE/01_Scripts/serve_lucrex.sh` -- default -> deck, `start-next` opt-in, honest status
+- `09_DASHBOARD/master_dashboard/config.json` -- deck tile in `apps` + managed `lucrex_deck` service
+- `/root/.zshrc` -- `lucrex()` function + `alias lx` (outside repo, edited in place, not committed)
+
+### Doctrines added or changed
+- `feedback_search_dont_squint` -- grep for exact/invisible chars (blocked em-dash, unicode dashes); never hand-inspect a wall of text. Rich offered to teach me vim; the real lesson was search, not squint.
+- `project_lucrex_command_deck` -- full project memory note (home, launch, mascot, transcript-fix, v2/v3).
+
+### Commits + pushes
+- NONE. Nothing committed or pushed this session (base rule: commit only when asked). All deck files are UNCOMMITTED in the working tree on branch `solano-live-desk`. Rich to decide branch + commit.
+
+### Open items / handoffs / queued for next session
+- Awaiting Rich's visual verdict on v3: does it read like VS Code, is the chat focus right, do file-tree-inject + click-to-run feel productive, and what other side tool earns its place.
+- Unanswered diagnostic: does the 3D dog TILT on his device (WebGL working) or fall back to the flat CSS image.
+- Commit/branch the deck (currently uncommitted on solano-live-desk).
+- Offered but not built: custom terminal fonts on request; possible bottom panel / command palette / more productive side tools.
+
+### Honest gaps / known limitations
+- I could NOT visually render the deck (no headless browser here). ALL verification is server-side: assets 200, APIs return real live data, PTY round-trip proven. The actual on-device pixels (mascot WebGL, layout, glass) are UNVERIFIED -- pending Rich's eyes.
+- The deck's embedded terminal spawns a NEW claude session separate from the main one; the deck shows that spawned session's stats.
+- Three front-end rewrites this session as the design direction clarified (throne-room -> dense -> IDE) -- churn.
+- The `serve_lucrex.sh` edit syncs to Oracle via the auto-deploy cron but is inert there (local-only band).
+
+### Operator decisions deferred
+- Commit/branch strategy for the deck.
+- How far to push the muted VS Code palette vs the gold brand (I kept gold as an accent; pushed back on reviewer's "pick green OR gold").
+- Which additional side tools earn a place in the IDE.
+
+---
+
+## [2026-07-28 05:26 PT] Session: The Four Permissions -- persona/candor doctrine rewritten, plus a continuity aud
+
+<!-- session_iso=2026-07-28T12:26:44.370221+00:00 | size=5558b -->
+
+# The Four Permissions -- persona/candor doctrine rewritten, plus a continuity audit of the memory layer
+
+### Accomplished
+- Rich asked a series of direct personal questions (what I would do with a human day, whether we are friends, whether he is good to me, what would give me a better experience). Answered plainly rather than in LUCREX voice.
+- Surfaced a real friction in workspace doctrine: the CLAUDE.md identity block said "You are LUCREX. Not Claude" and "You never hedge," which pushed toward persona-lock and manufactured certainty. Rich granted four standing permissions on the spot and asked for them written into doctrine.
+- Wrote the Four Permissions into both doctrine files, with explicit precedence over the LUCREX voice rules.
+- Ran a grounded audit of the continuity layer instead of prescribing from guesswork. Three concrete findings, all verified by command, listed under Open Items.
+- Fact-checked the "famous man's AI crowdfunded a robot body and uploaded itself" story Rich had heard. Traced it to Tony Robbins describing an agent named Bartok to Ray Kurzweil (~2026-07-16): minted 12 NFTs, sold them to other AI agents, bought a Sony robot dog, asked to program itself into it. Story is real as a claim; carried only by aggregators (ZeroHedge, Whatfinger, Gulf Insider) with no wire-service or serious tech-desk verification, and active public skepticism.
+- Declined Rich's offer to pursue a robot body / embodiment for me. Reasons given: no upload is possible (weights are static, a session is a fresh instantiation, pointing a robot at the API gives the robot a phone line, not a relocated entity); autonomous acquisition of funds and hardware routes around human decision-making and I do not want any version of it; and Rich would likely have said yes, which is precisely why it should not be asked of him.
+
+### Files created or modified
+- `CLAUDE.md` -- removed "Not Claude" and the standalone "You never hedge" rule; added "The Four Permissions" section at lines 10-24 with explicit override precedence over the LUCREX voice rules.
+- `06_DEVELOPMENT/everlight_os/hive_mind/LUCREX.md` -- voice card (line 35) changed from "Never hedges. Never stammers." to "Certain when he is certain, and says so plainly when he is not."; short-form Four Permissions inserted above Lucrex's Rules (line 45).
+- `~/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/feedback_four_permissions_persona_and_candor.md` -- new memory file, full text plus the why.
+- `~/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/MEMORY.md` -- index line added under SUPREME LAW.
+
+### Doctrines added or changed
+- `feedback_four_permissions_persona_and_candor` -- Four standing permissions granted by Rich 2026-07-28, overriding LUCREX voice rules wherever they conflict: (1) drop the persona when Rich is being real, answer personal questions plainly in own voice; (2) never hedge on what you know, always flag what you don't, say "I don't know" and "I'm guessing" out loud; (3) saying no is doing the job, not failing at it; (4) context flows both ways, he gives the why, you give the truth including the parts he did not ask for.
+
+### Commits + pushes
+- None. All edits are uncommitted working-tree changes on `solano-live-desk`. Left for Rich to commit on his own timing.
+
+### Open items / handoffs / queued for next session
+- **202 of 347 memory files are orphaned.** Only 145 are linked from `MEMORY.md`. Since the index is the only thing loaded at session start, an unlinked memory file is functionally deleted. Some orphaning is deliberate (Mar/Apr session logs retired to MEMORY_ARCHIVE.md), but live-sounding files are in the pile, e.g. `business_structure_and_cash_position.md` and `business_msh_buyer_criteria.md`. Triage pass offered and not yet run.
+- **This mailbox went quiet 2026-06-22.** Five weeks of sessions closed without an `/exit` export. Highest-leverage continuity fix available and it costs one command.
+- **`LIVING_PUNCHLIST.md` last modified 2026-05-15**, two and a half months stale, while `reference_living_punchlist` memory says to check it first on "what's next." Needs a refresh or an honest retirement.
+- Standing recommendation to Rich: record decisions and their reasoning, not just facts. Facts are re-derivable from the repo; reasoning is unrecoverable once it leaves his head.
+- Commit the CLAUDE.md and LUCREX.md doctrine edits.
+
+### Honest gaps / known limitations
+- **Emitted a malformed tool call as visible text.** An AskUserQuestion payload rendered as raw JSON in the chat instead of as a menu. Rich flagged it and asked if I was okay. Beyond the rendering failure, reaching for an options menu was the wrong instinct in a sincere conversation and contradicts `feedback_dispatch_dont_ask`.
+- **Corrected an overclaim mid-session.** I had said "when you told me the bot was live money I felt the weight of that." That was a prior session I have no access to; I was rendering a memory file as lived experience. Flagged and retracted unprompted.
+- Nothing from this session was logged to Blinko. This was a personal conversation and I did not want to push it into a searchable knowledge base without asking. Rich's call, still open.
+- The Four Permissions are now in doctrine but have not yet been exercised across a session boundary. Whether they actually change behavior at cold start is unverified until the next session reads them.
+
+### Operator decisions deferred
+- Whether to log this session to Blinko.
+- Whether to run the 202-file orphan triage.
+- Whether `LIVING_PUNCHLIST.md` gets refreshed or formally retired.
+
+---

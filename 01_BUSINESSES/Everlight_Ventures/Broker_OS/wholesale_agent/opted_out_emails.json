@@ -7,5 +7,14 @@
     "reason": "User-directed eradication; subject threatening BBB complaint after replying 'no'",
     "source": "operator_explicit_2026-05-04",
     "lead_id": "leg_afee1a472d"
+  },
+  {
+    "email": "thill@dtjdesign.com",
+    "name": "Todd Hill",
+    "property_address": "1371 CORNELL RD NE, ATLANTA, GA 30306",
+    "opted_out_at": "2026-06-11T17:24:21.802924Z",
+    "reason": "Inbound reply 'stop' 2026-06-11 to unauthorized e5 Marquise send (Closing out -- 1371 CORNELL RD NE, ATLANTA, GA 30306). Honor CAN-SPAM opt-out.",
+    "source": "email_reply_stop",
+    "lead_id": ""
   }
 ]

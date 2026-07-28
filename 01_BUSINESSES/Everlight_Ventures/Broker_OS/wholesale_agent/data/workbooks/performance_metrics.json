@@ -9,19 +9,19 @@
       "slack:#ceo-brief",
       "gdocs:weekly"
     ],
-    "last_synced_from_leads_db": "2026-06-09T07:00:34.112148+00:00"
+    "last_synced_from_leads_db": "2026-06-22T07:00:15.942459+00:00"
   },
   "current_period": {
     "start_date": "2026-04-07",
     "end_date": null,
     "days_active": 0,
-    "total_leads_in_db": 3854
+    "total_leads_in_db": 3487
   },
   "funnel_metrics": {
     "30d": {
-      "scouted": 773,
-      "scored": 418,
-      "qualified": 4,
+      "scouted": 330,
+      "scored": 125,
+      "qualified": 0,
       "matched": 0,
       "outreach_sent": 0,
       "responses": 0,
@@ -58,11 +58,11 @@
       "dead": 0
     },
     "all_time": {
-      "scouted": 3854,
-      "scored": 3499,
+      "scouted": 3487,
+      "scored": 3273,
       "qualified": 308,
       "matched": 2469,
-      "outreach_sent": 82,
+      "outreach_sent": 73,
       "responses": 0,
       "negotiating": 0,
       "under_contract": 0,
@@ -109,62 +109,81 @@
   "by_lead_type": {},
   "agent_performance": {
     "rex_blackwell": {
-      "tasks_run": 23,
-      "success": 20,
-      "fail": 3,
+      "tasks_run": 62,
+      "success": 48,
+      "fail": 14,
       "leads_found": 0,
-      "scout_count": 103
+      "scout_count": 318
     },
     "frederick_banks": {
-      "tasks_run": 18,
-      "success": 18,
+      "tasks_run": 57,
+      "success": 57,
       "fail": 0,
       "leads_scored": 0,
-      "qualify_count": 72
+      "qualify_count": 228
     },
     "piper_reeves": {
-      "tasks_run": 18,
-      "success": 18,
+      "tasks_run": 50,
+      "success": 50,
       "fail": 0,
       "emails_sent": 0,
       "replies_received": 0,
-      "outreach_count": 28
+      "outreach_count": 92
     },
     "harrison_knox": {
-      "tasks_run": 13,
-      "success": 13,
-      "fail": 0,
+      "tasks_run": 48,
+      "success": 23,
+      "fail": 25,
       "deals_progressed": 0,
-      "followup_count": 39
+      "followup_count": 119
     },
     "adrian_morgan": {
-      "tasks_run": 18,
-      "success": 18,
+      "tasks_run": 57,
+      "success": 57,
       "fail": 0,
       "pitches_created": 0,
-      "pitch_count": 18
+      "pitch_count": 57
     },
     "calvin_osei": {
-      "tasks_run": 18,
-      "success": 18,
+      "tasks_run": 57,
+      "success": 57,
       "fail": 0,
       "matches_created": 0,
-      "match_count": 18
+      "match_count": 57
     },
     "carlos_moreno": {
-      "tasks_run": 14,
-      "success": 14,
+      "tasks_run": 49,
+      "success": 49,
       "fail": 0,
       "commissions_logged": 0,
-      "report_count": 14
+      "report_count": 49
     }
   },
   "daily_snapshots": [
     {
-      "date": "2026-04-07",
+      "date": "2026-06-17",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 785,
+        "scored": 434,
+        "qualified": 1,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-06-18",
+      "funnel_30d": {
+        "scouted": 23,
+        "scored": 15,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -180,10 +199,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-04-24",
+      "date": "2026-06-19",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 28,
+        "scored": 15,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -199,10 +218,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-04-24",
+      "date": "2026-06-19",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 28,
+        "scored": 15,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -218,10 +237,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-04-24",
+      "date": "2026-06-19",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 347,
+        "scored": 141,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -237,10 +256,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-04-25",
+      "date": "2026-06-20",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 343,
+        "scored": 138,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -256,10 +275,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-04-25",
+      "date": "2026-06-20",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 343,
+        "scored": 138,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -275,10 +294,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-16",
+      "date": "2026-06-20",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 331,
+        "scored": 126,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -294,10 +313,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-16",
+      "date": "2026-06-21",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 331,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -313,10 +332,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-17",
+      "date": "2026-06-21",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 331,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -332,10 +351,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-18",
+      "date": "2026-06-21",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 331,
+        "scored": 126,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -351,10 +370,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-18",
+      "date": "2026-06-22",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -370,10 +389,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-18",
+      "date": "2026-06-22",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -389,10 +408,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-19",
+      "date": "2026-06-23",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -408,10 +427,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-20",
+      "date": "2026-06-23",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -427,10 +446,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-20",
+      "date": "2026-06-23",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -446,10 +465,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-21",
+      "date": "2026-06-24",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -465,10 +484,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-22",
+      "date": "2026-06-24",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -484,10 +503,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-22",
+      "date": "2026-06-25",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -503,10 +522,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-22",
+      "date": "2026-06-25",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -522,10 +541,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-23",
+      "date": "2026-06-25",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -541,10 +560,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-23",
+      "date": "2026-06-26",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -560,10 +579,10 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-24",
+      "date": "2026-06-26",
       "funnel_30d": {
-        "scouted": 0,
-        "scored": 0,
+        "scouted": 330,
+        "scored": 125,
         "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
@@ -579,125 +598,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-25",
+      "date": "2026-06-26",
       "funnel_30d": {
-        "scouted": 2584,
-        "scored": 2575,
-        "qualified": 9,
-        "matched": 2440,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-26",
-      "funnel_30d": {
-        "scouted": 2879,
-        "scored": 2668,
-        "qualified": 9,
-        "matched": 2440,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-27",
-      "funnel_30d": {
-        "scouted": 2819,
-        "scored": 2608,
-        "qualified": 9,
-        "matched": 2432,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-28",
-      "funnel_30d": {
-        "scouted": 2815,
-        "scored": 2603,
-        "qualified": 8,
-        "matched": 2432,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-28",
-      "funnel_30d": {
-        "scouted": 2815,
-        "scored": 2603,
-        "qualified": 8,
-        "matched": 2432,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-28",
-      "funnel_30d": {
-        "scouted": 2817,
-        "scored": 2606,
-        "qualified": 8,
-        "matched": 2432,
-        "outreach_sent": 0,
-        "responses": 0,
-        "negotiating": 0,
-        "under_contract": 0,
-        "closed": 0,
-        "paid": 0,
-        "dead": 0
-      },
-      "outreach_today": {},
-      "active_deals": 0,
-      "pipeline_leads": 0
-    },
-    {
-      "date": "2026-05-29",
-      "funnel_30d": {
-        "scouted": 382,
-        "scored": 171,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -712,11 +617,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-29",
+      "date": "2026-06-27",
       "funnel_30d": {
-        "scouted": 382,
-        "scored": 171,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -731,11 +636,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-29",
+      "date": "2026-06-27",
       "funnel_30d": {
-        "scouted": 381,
-        "scored": 170,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -750,11 +655,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-30",
+      "date": "2026-06-28",
       "funnel_30d": {
-        "scouted": 383,
-        "scored": 170,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -769,11 +674,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-30",
+      "date": "2026-06-29",
       "funnel_30d": {
-        "scouted": 383,
-        "scored": 170,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -788,11 +693,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-05-30",
+      "date": "2026-06-29",
       "funnel_30d": {
-        "scouted": 384,
-        "scored": 173,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -807,11 +712,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-01",
+      "date": "2026-06-29",
       "funnel_30d": {
-        "scouted": 386,
-        "scored": 173,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -826,11 +731,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-01",
+      "date": "2026-06-30",
       "funnel_30d": {
-        "scouted": 386,
-        "scored": 173,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -845,11 +750,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-01",
+      "date": "2026-06-30",
       "funnel_30d": {
-        "scouted": 388,
-        "scored": 177,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -864,11 +769,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-02",
+      "date": "2026-07-01",
       "funnel_30d": {
-        "scouted": 388,
-        "scored": 177,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -883,11 +788,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-02",
+      "date": "2026-07-01",
       "funnel_30d": {
-        "scouted": 388,
-        "scored": 177,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -902,11 +807,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-02",
+      "date": "2026-07-02",
       "funnel_30d": {
-        "scouted": 394,
-        "scored": 183,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -921,11 +826,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-03",
+      "date": "2026-07-02",
       "funnel_30d": {
-        "scouted": 395,
-        "scored": 183,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -940,11 +845,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-03",
+      "date": "2026-07-03",
       "funnel_30d": {
-        "scouted": 395,
-        "scored": 183,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -959,11 +864,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-03",
+      "date": "2026-07-03",
       "funnel_30d": {
-        "scouted": 381,
-        "scored": 170,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -978,11 +883,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-04",
+      "date": "2026-07-03",
       "funnel_30d": {
-        "scouted": 381,
-        "scored": 170,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -997,11 +902,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-06",
+      "date": "2026-07-03",
       "funnel_30d": {
-        "scouted": 395,
-        "scored": 184,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1016,11 +921,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-07",
+      "date": "2026-07-04",
       "funnel_30d": {
-        "scouted": 398,
-        "scored": 187,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1035,11 +940,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-08",
+      "date": "2026-07-04",
       "funnel_30d": {
-        "scouted": 398,
-        "scored": 187,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1054,11 +959,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-08",
+      "date": "2026-07-05",
       "funnel_30d": {
-        "scouted": 398,
-        "scored": 187,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1073,11 +978,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-08",
+      "date": "2026-07-06",
       "funnel_30d": {
-        "scouted": 770,
-        "scored": 418,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1092,11 +997,11 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-09",
+      "date": "2026-07-07",
       "funnel_30d": {
-        "scouted": 772,
-        "scored": 418,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
@@ -1111,11 +1016,847 @@
       "pipeline_leads": 0
     },
     {
-      "date": "2026-06-09",
+      "date": "2026-07-07",
       "funnel_30d": {
-        "scouted": 773,
-        "scored": 418,
-        "qualified": 4,
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-08",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-08",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-08",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-09",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-10",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-10",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-10",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-11",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-11",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-12",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-12",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-12",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-13",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-13",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-14",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-15",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-15",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-15",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-16",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-16",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-16",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-17",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-17",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-17",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-18",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-18",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-18",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-19",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-19",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-19",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-20",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-20",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-20",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-21",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-21",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-21",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-22",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-22",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-22",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-23",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-23",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-24",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-25",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-07-27",
+      "funnel_30d": {
+        "scouted": 330,
+        "scored": 125,
+        "qualified": 0,
         "matched": 0,
         "outreach_sent": 0,
         "responses": 0,
