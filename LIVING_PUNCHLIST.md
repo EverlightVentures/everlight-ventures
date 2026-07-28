@@ -1,6 +1,6 @@
 # EVERLIGHT VENTURES — LIVING PUNCH LIST
 
-**Last updated:** 2026-05-17 PT
+**Last updated:** 2026-07-28 PT (reconciliation pass). **Item status below is verified only through 2026-05-29.**
 **Owner:** Rich Gee
 **Operating model:** Macro lane (platform/empire vision) runs in parallel via Hive. Micro lane (close Deal 1 with Chris) is the daily focus. Items in CRITICAL PATH are the only ones that gate today.
 **Doctrine:** This list is NEVER done. We complete items, we add new items, the list grows. Always.
@@ -13,6 +13,40 @@
 - ⏸ Deferred (waiting on dependency)
 - ⚠ Blocked
 - 🆕 Added this session
+
+---
+
+## RECONCILIATION -- 2026-07-28
+
+This list stopped being updated after 2026-05-29. Sixty days passed. The "HOW TO USE"
+rule at the bottom (update at the end of every session) was not followed, so **every open
+item in sections A through L is last-known-May status, not current status.** Treat them as
+leads to re-verify, not as facts.
+
+Rather than invent current status for 65 open items, here is what is verifiable today.
+
+**Verified changed since this list was written:**
+
+- **Broker OS is dead.** The 2026-06-30 AIOS audit found it non-functional and Cadence RED.
+  Sections D and E below assume live broker crons, live IMAP detection, and a working
+  rex_negotiator loop. Those assumptions are stale. Re-verify before trusting #29 through #40.
+- **Item #51 got worse, and there was a hidden cause.** That item said 626 modified files.
+  It is now **2,201**. On 2026-07-28 a stale `.git/index.lock` was found dated **2026-07-14**,
+  left by a crashed git process. Every commit in this repo silently failed from July 14 to
+  July 28. Lock cleared, commits work again. The 2,201 files still need a selective-commit pass.
+- **XLM bot is PARKED** as of 2026-05-28. Any XLM assumption on this list is dead.
+- **Kalshi is live and funded**, orders only from e5 (CA IP). Did not exist when this was written.
+- **e5-mother replaced the dead .250 Oracle box.** Infra references may point at a corpse.
+- **n8n is parked** as of 2026-04-24. Use `publish_gdoc()` directly.
+- **Django :8504 is DEFERRED to Phase 7.** Items assuming a live dashboard are on hold.
+
+**Still true and still the gate:** Deal 1 remains stalled at skip-trace. Item **#91** (the
+real-network bounce test from `marquise@` to the top email candidate) is still the single
+next move that closes it. Nothing in the last sixty days changed that.
+
+**Not on this list at all** (built since 2026-05-29, see section M): Alley Kingz story mode
+plus Stripe shop plus 3D pipeline, Solano Live Desk, AroundMe pivot, Token Economics OS,
+$BCARDD launch, Lucrex Command Deck, Lucrex Legion CLI, and the 2026-06-30 AIOS audit itself.
 
 ---
 
@@ -231,6 +265,59 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 100. &#9208;&#9744; **Apply to Anthropic Fellows cohort with 3-paper portfolio + mentor endorsement.** Target: rolling-admission cohort ~6-8 months out (early-2027 start). Workstream preference: AI Safety primary, AI Security secondary (eradication_gate maps to both). EV math: $61.6k stipend + $60k compute budget + signal value on Hive Mind SaaS deck + relationship LTV (per Pitch's counter-memo).
 
 101. &#9208;&#9744; **Alt-vector parallel pursuit (Branch C overlay).** Even if Fellows rejects, the portfolio opens: (a) Anthropic Solutions Architect / alignment-eng contract roles, (b) MATS / Constellation mentorship pipeline, (c) Hive Mind SaaS enterprise procurement objection-breaker, (d) AI Consulting retainer uplift ($2k/mo &rarr; $5-8k/mo per Pitch's estimate). Track separately &mdash; don't conflate with Fellows acceptance.
+
+---
+
+## M. WORKSTREAMS BORN AFTER THIS LIST (2026-05-29 to 2026-07-28)
+
+🆕 Added 2026-07-28. Sixty days of work happened off-list. Statuses here come from the
+memory index, which is current, not from re-running each system. Anything marked 🔥 is
+flagged because a memory says it is blocking or degrading, not because it was re-verified
+today.
+
+**Alley Kingz** (the most active lane by volume)
+102. ☑ Crown Bloodline story mode spine LIVE. Core loop canon locked (TownHall gates deck-max, raids de-level, world map is RPG, death routes to infirmary).
+103. ☑ Shop LIVE on Stripe. Deploy path is e5 `ship.sh` only, GitHub Action DISABLED to stop clobbering.
+104. ☑ 3D production pipeline DECIDED and proven 2026-07-17 via Higgsfield CLI.
+105. 🔥☐ **AK audit 2026-07-17 found real defects, unresolved:** two faction taxonomies in conflict, a save-loss risk, and a camera-centering trap. These are correctness bugs in a shipped game.
+106. ☐ Handler classes: 6 commanders live, gap is 6 missing portraits.
+107. ⏸☐ Social layer Phase 1 staged, AWAITING GO from Rich.
+108. ⏸☐ Premium UI blocked on Seedance access. Fortnite layer queued behind social.
+
+**Trading and markets**
+109. ☑ Kalshi live and funded. Autonomous engine at e5-mother/kalshi.html. Live orders ONLY from e5 (CA IP).
+110. ☑ XLM bot PARKED 2026-05-28. The old "scale to $1-2k" instruction is STALE, do not act on it.
+111. ☑ Polymarket confirmed a dead end in the US. Pivoted to Kalshi.
+
+**Platform and tooling**
+112. ☑ Token Economics OS Phase 1 BUILT on branch `token-economics-os`.
+113. ☑ Solano Live Desk Phase 1 CHP map BUILT on branch `solano-live-desk` (the current working branch).
+114. ⏸☐ AroundMe pivot to a national safety app, awaiting Phase 0 GO.
+115. ☐ Lucrex Command Deck live locally at :2702. Lucrex OS engine sits unpushed on `lucrex-os-engine`.
+116. 🔥☐ Lucrex Legion multi-Mother CLI blocked on named auth blockers.
+117. ⚠☐ CoverForge SaaS blocked on $0 Anthropic balance and a missing FAL_KEY.
+
+**Crypto and brand**
+118. ☑ $BCARDD launched on Solana / pump.fun. Market as fun, never as investment. Founder stays anonymous.
+
+**Ops and infrastructure**
+119. 🔥☐ **AIOS audit 2026-06-30 findings are still open:** Cadence RED, Broker OS dead, agent count reconciled to 119, three gaps in the free stack.
+120. ☐ MGN POS restore, next step is payroll-lock and EOD (Mountain Gardens Flask, not Onyx).
+121. 🔥☐ **2,201 uncommitted files** in the workspace repo. Needs a selective-commit pass. Root cause of the recent 16 days was a stale git lock, now cleared.
+122. ☐ 34 memory files remain unlinked and unarchived. Triage written at `~/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/MEMORY_ORPHANS_2026-07-28.md`.
+123. 🔥☐ **Feed this list.** It went sixty days without an update, which is what made this reconciliation necessary. The `/exit` mailbox export went quiet the same way (last entry 2026-06-22 before today).
+
+---
+
+## WINS LOG (2026-07-28)
+
+- Four Permissions written into doctrine (`CLAUDE.md` + `LUCREX.md`), committed as `efa325c`. Persona-lock and the blanket "never hedge" rule retired.
+- Found and cleared a stale `.git/index.lock` dated 2026-07-14. Commits had been silently failing for 16 days.
+- Memory index rebuilt: 151 links to 226 links (75 orphaned memories recovered, including the Chris Ulander buy box and the always-free-no-credit-card constraint), at essentially unchanged size (16,318 to 16,323 bytes), so 50 percent more memories now load for the same context cost.
+- Zero dangling links and zero dropped links, verified by set comparison rather than by eye.
+- Orphan triage documented with per-file reasoning at `MEMORY_ORPHANS_2026-07-28.md`.
+- This reconciliation section written, bounding what is verified versus what is stale.
+- Three numbers I quoted earlier in the session were wrong and got corrected in place: 202 orphans became 194 (lowercase-only regex), "most orphans lack frontmatter" became 4 of 137 (checked for indented `type:` and missed the flat style), and the punchlist mtime read as May 15 when rsync had preserved a false timestamp.
 
 ---
 
