@@ -54,7 +54,7 @@ personal conversation than in a Slack report. That is intended.
 **Revisit when:** The permissions get used as an excuse for flat, hedge-heavy
 work. The rule is "flag what you don't know," not "hedge everything."
 
-## [2026-07-28 06:40 PT] Do not build the Coolify / Langflow / Dify stack
+## [2026-07-28 06:02 PT] Do not build the Coolify / Langflow / Dify stack
 
 **Context:** Rich brought research recommending a self-hosted stack (Supabase,
 Open WebUI, Coolify, Dify, Langflow, OpenHands, Browser Use, Crawl4AI) to solve
@@ -75,7 +75,7 @@ real capability, not duplicates.
 having, but pointing an unattended coding agent at a repo that just silently ate
 16 days of commits is the wrong order.
 
-## [2026-07-28 06:55 PT] Hold binary assets out of the commit pass
+## [2026-07-28 06:11 PT] Hold binary assets out of the commit pass
 
 **Context:** The selective-commit pass found 2,201 uncommitted files. Untracked
 Alley Kingz directories held roughly 1.5 GB, including a 1.2 GB `e5_art_backup/`
@@ -92,7 +92,7 @@ When one direction is reversible and the other is not, take the reversible one.
 **Revisit when:** Rich decides assets belong in git, or a real asset host (LFS,
 Nextcloud pull script) is wired in.
 
-## [2026-07-28 07:10 PT] Do not bypass the pre-commit hook, even for false positives
+## [2026-07-28 06:19 PT] Do not bypass the pre-commit hook, even for false positives
 
 **Context:** The Everlight pre-commit hook blocked two commits over
 `api.resend.com` matches. Most were false positives: an audit doc describing the
@@ -112,3 +112,57 @@ make one.
 **Revisit when:** Someone tunes the hook to distinguish POST from GET and code
 from prose. Until then it will keep blocking legitimate commits, and that
 pressure toward `--no-verify` is itself a risk worth fixing.
+
+## [2026-07-28 06:14 PT] Keep MGN POS operational records out of git
+
+**Context:** The commit pass reached `operations_MGN_v8/` and found Customers.csv,
+Time_Clock hours, Transaction_Logs, Sales_Logs and Money_OS sitting untracked.
+**Options:** (A) commit them, they are business records worth versioning;
+(B) gitignore them.
+**Chose:** B. POS code stays tracked, POS data does not.
+**Why:** Those files hold customer emails and employee time-clock hours. That is
+PII and payroll, and it is the same class of data as `05_PERSONAL`, which this
+repo already excludes for exactly this reason. Versioning operational records
+buys very little and puts real people's data in a repo that syncs to three
+devices. A sampled row looked like test data, but sampling one row is not proof
+the rest is, and the safe direction is cheap here.
+**Gave up:** Version history on business records. They still exist on disk and
+sync normally, they are simply not in git.
+**Revisit when:** A real audit trail is needed for POS data. That should be a
+proper database or an append-only ledger, not git.
+
+## [2026-07-28 06:22 PT] Untrack the leaked moltbook keys, do not rewrite history
+
+**Context:** `_state/moltbook/agent_keys.jsonl` was already tracked and contains
+live `moltbook_sk_*` secret keys, `moltbook_claim_*` tokens and 7 `api_key`
+fields. The values are already in git history.
+**Options:** (A) untrack and ignore; (B) untrack plus rewrite history with
+filter-repo or BFG to purge them; (C) leave it.
+**Chose:** A, plus a loud flag for rotation.
+**Why:** Untracking stops the exposure growing and is fully reversible. A history
+rewrite changes every commit hash, breaks any clone or peer that has the old
+history, and on a repo that syncs to e5-mother and AceMagician that is a
+coordinated operation, not a 7am unilateral one. It is also not the real fix:
+once a key is in a synced history it should be assumed captured, so **rotation is
+the fix** and the rewrite is only cleanup. Doing the destructive half without the
+effective half would have been theater.
+**Gave up:** The keys remain in history until Rich decides on a purge.
+**Revisit when:** Rich rotates them. Sequence the rewrite after rotation, never
+before, and coordinate it across every device holding a clone.
+
+## [2026-07-28 06:24 PT] Bound the punchlist instead of restating 65 items
+
+**Context:** `LIVING_PUNCHLIST.md` had gone 60 days without an update and carried
+65 open items whose current status I could not verify from this session.
+**Options:** (A) mark items done or stale based on inference; (B) leave the file
+untouched; (C) add a reconciliation block that bounds what is verified, and add
+the missing workstreams as new items.
+**Chose:** C.
+**Why:** (A) is fabrication wearing a checkmark, and a punchlist that lies is
+worse than one that is merely old, because the lie is invisible. (B) leaves a
+file that doctrine says to trust first on "what's next" while it silently
+misleads. (C) makes the staleness explicit, which restores trust in the parts
+that are real and clearly marks the rest as leads to re-verify.
+**Gave up:** A tidy list where every item shows current status.
+**Revisit when:** Someone actually re-verifies sections A through L. Until then
+the RECONCILIATION block is what makes the file safe to read.

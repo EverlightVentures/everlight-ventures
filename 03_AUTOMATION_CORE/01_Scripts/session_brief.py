@@ -42,10 +42,25 @@ def _read(path: Path) -> str:
 
 
 def _split_entries(text: str, pattern: re.Pattern) -> list[dict]:
-    """Split a log file into entries keyed by its `## [stamp] title` headers."""
+    """Split a log file into entries keyed by its `## [stamp] title` headers.
+
+    Fenced code blocks are skipped. DECISION_LOG.md documents its own format in a
+    ```-fenced example whose header line matches the entry pattern, so a naive
+    parser counts the template as a real decision.
+    """
     entries: list[dict] = []
     current: dict | None = None
+    in_fence = False
     for line in text.splitlines():
+        if line.lstrip().startswith("```"):
+            in_fence = not in_fence
+            if current is not None:
+                current["body"].append(line)
+            continue
+        if in_fence:
+            if current is not None:
+                current["body"].append(line)
+            continue
         m = pattern.match(line)
         if m:
             if current:
