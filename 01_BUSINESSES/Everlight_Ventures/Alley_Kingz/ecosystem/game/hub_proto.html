@@ -5,6 +5,8 @@
 <!-- AK-HUB-PHASE0-v3 2026-06-18: big multi-direction scrolling world. 3 districts (bg tint shifts as you cross),
      a building per game mode wired to its REAL screen (Arena -> ?go=match real battle), dwell-to-enter + fade.
      Standalone throwaway proto, no deps. -->
+<!-- AK-25D 2026-06-20: shared 2.5D "life feel" layer (was inline below; de-duped to ak_25d.css/js). -->
+<link rel="stylesheet" href="ak_25d.css?v=1">
 <style>
   html,body{margin:0;height:100%;background:#06060a;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#E8E8E8;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
   #c{touch-action:none;}  /* AK-MOVE3: the canvas is the pointer target -- without this the browser delays the first frames of every drag deciding scroll-vs-gesture (stuttery start) */
@@ -30,23 +32,89 @@
   #thp-up:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
   #thp-hint{color:#9a8f6a;font-size:11px;margin-top:10px;min-height:14px;}
   #thp-close{margin-top:13px;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;}
-  #interior{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;justify-content:flex-end;background:#08080c; perspective:1100px; perspective-origin:50% 78%;}
+  /* AK-INTERIOR RESKIN 2026-06-20: premium glass keeper card on-brand
+     (gold #c9a84c->#e8c55a, Cinzel/Playfair/Inter) + ALIVE (breathing border,
+     gold shimmer sweep, scanline, floating avatar). menu_bg.mp4 breathes behind
+     #int-card via loops.js; the card glass is translucent enough to let it show.
+     Transform/opacity animations only -- $100-Android safe. */
+  #interior{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;justify-content:flex-end;background:#050507; perspective:1100px; perspective-origin:50% 78%;}
   #int-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
-  #int-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.08) 38%,rgba(8,8,12,.93));}
-  #int-card{position:relative;z-index:2;margin:0 12px 18px;background:rgba(10,10,16,.92);border:1.5px solid #c9a84c;border-radius:16px;padding:16px 18px;font-family:Inter,sans-serif;box-shadow:0 0 30px rgba(201,168,76,.25);}
-  #int-place{color:#9a8f6a;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
-  #int-keeper{display:flex;align-items:center;gap:10px;margin:5px 0 8px;}
-  #int-glyph{font-size:30px;line-height:1;}
-  #int-name{font-family:Cinzel,serif;color:#e8c55a;font-size:18px;font-weight:800;}
-  #int-line{color:#E8E8E8;font-size:14px;line-height:1.45;min-height:40px;}
-  #int-btns{display:flex;gap:10px;margin-top:12px;}
-  #int-go{flex:2;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:10px;padding:13px 0;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.03em;}
+  #int-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,7,.06) 34%,rgba(5,5,7,.95));}
+  #int-card{position:relative;z-index:2;margin:0 12px 18px;background:linear-gradient(168deg,rgba(18,15,24,.88),rgba(10,10,16,.86));border:1.5px solid #c9a84c;border-radius:16px;padding:17px 18px 16px;font-family:Inter,sans-serif;box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 30px rgba(201,168,76,.22);animation:intGlow 4.6s ease-in-out infinite;}
+  #int-card > div:not(.int-fx){position:relative;z-index:1;}
+  /* shimmer + scanline fx (clipped to the card by its own rounded overflow) */
+  .int-fx{position:absolute;inset:0;border-radius:16px;overflow:hidden;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);}
+  .int-fx::before{content:'';position:absolute;top:-20%;bottom:-20%;left:0;width:42%;
+    background:linear-gradient(100deg,transparent,rgba(232,197,90,.14),rgba(255,255,255,.22),rgba(232,197,90,.10),transparent);
+    mix-blend-mode:screen;transform:translateX(-150%) skewX(-18deg);animation:intShine 6.5s ease-in-out infinite;}
+  #int-place{display:inline-block;color:#15110a;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    background:linear-gradient(135deg,#c9a84c,#e8c55a);border-radius:999px;padding:4px 11px;box-shadow:0 0 14px -4px #e8c55a;}
+  #int-keeper{display:flex;align-items:center;gap:11px;margin:9px 0 8px;}
+  #int-glyph{flex:0 0 auto;width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1;
+    border-radius:50%;border:2px solid #c9a84c;background:radial-gradient(circle at 50% 38%,rgba(201,168,76,.22),rgba(10,10,16,.9));
+    box-shadow:0 0 16px -4px #c9a84c;animation:intGlyph 4s ease-in-out infinite;}
+  #int-name{font-family:'Playfair Display',Cinzel,serif;font-size:19px;font-weight:800;letter-spacing:.01em;line-height:1.1;
+    background:linear-gradient(135deg,#e8c55a,#c9a84c 60%,#e8c55a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:#e8c55a;}
+  #int-line{color:#E8E8E8;font-size:14px;line-height:1.5;min-height:40px;}
+  #int-btns{display:flex;gap:10px;margin-top:13px;flex-wrap:wrap;}
+  #int-go{position:relative;overflow:hidden;flex:2;background:linear-gradient(135deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:11px;padding:13px 0;font-family:'Cinzel',serif;font-weight:800;font-size:14px;cursor:pointer;letter-spacing:.05em;box-shadow:0 6px 18px -6px rgba(201,168,76,.6);}
+  #int-go::before{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:translateX(-130%) skewX(-20deg);animation:intBtnSheen 4.2s ease-in-out infinite;}
+  #int-go:active{transform:translateY(2px);}
   #int-go:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
-  #int-exit{flex:1;background:none;border:1px solid rgba(201,168,76,.45);color:#b9a76a;border-radius:10px;padding:13px 0;font-weight:700;font-size:12px;cursor:pointer;}
+  #int-exit{flex:1;background:rgba(10,10,16,.6);border:1px solid rgba(201,168,76,.5);color:#d9c688;border-radius:11px;padding:13px 0;font-family:'Inter',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;cursor:pointer;}
+  #int-exit:active{transform:translateY(2px);}
+  @keyframes intGlow{0%,100%{box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 24px rgba(201,168,76,.16);}50%{box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 44px rgba(201,168,76,.42);}}
+  @keyframes intShine{0%{transform:translateX(-150%) skewX(-18deg);}12%{transform:translateX(-150%) skewX(-18deg);}55%{transform:translateX(270%) skewX(-18deg);}100%{transform:translateX(270%) skewX(-18deg);}}
+  @keyframes intGlyph{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  @keyframes intBtnSheen{0%{transform:translateX(-130%) skewX(-20deg);}22%{transform:translateX(-130%) skewX(-20deg);}60%{transform:translateX(320%) skewX(-20deg);}100%{transform:translateX(320%) skewX(-20deg);}}
+  @media (prefers-reduced-motion:reduce){
+    #int-card,.int-fx::before,#int-glyph,#int-go::before{animation:none;}
+    .int-fx::before{display:none;}
+  }
   #phud .res{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:4px 9px;font-size:11px;font-weight:700;color:#E8E8E8;}
+  /* AK-CURHUD 2026-06-20 (#1): full currency rail -- gold/gems/scrap/keys/bones/wood/stone/metal.
+     Compact icon+value chips that wrap; +N float on gain, red -N flash on spend so the
+     player SEES the economy move. Compositor-only animations (transform/opacity) = 60fps. */
+  #phud{flex-wrap:wrap;max-width:calc(100vw - 116px);row-gap:5px;}
+  #phud .cur{position:relative;background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.35);border-radius:13px;padding:4px 8px 4px 6px;font-size:11px;font-weight:800;color:#E8E8E8;display:inline-flex;align-items:center;gap:3px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 2px 9px -3px rgba(0,0,0,.55);}
+  #phud .cur i{font-style:normal;font-size:12px;line-height:1;filter:drop-shadow(0 1px 1px #000);}
+  #phud .cur b{font-weight:800;letter-spacing:.02em;min-width:8px;text-align:left;}
+  #phud .cur.spend{animation:curSpend .45s ease-out;}
+  @keyframes curSpend{0%{border-color:#ff5a4d;color:#ffd9d4;transform:scale(1.09);}100%{border-color:rgba(201,168,76,.35);color:#E8E8E8;transform:scale(1);}}
+  .cur-float{position:absolute;left:50%;top:-2px;transform:translate(-50%,4px);font-size:11px;font-weight:900;pointer-events:none;white-space:nowrap;text-shadow:0 1px 3px #000;animation:curFloat 1s ease-out forwards;z-index:7;}
+  .cur-float.up{color:#7CFFb0;} .cur-float.dn{color:#ff7a6e;}
+  @keyframes curFloat{0%{opacity:0;transform:translate(-50%,4px);}15%{opacity:1;}100%{opacity:0;transform:translate(-50%,-22px);}}
+  /* AK-ENCIND 2026-06-20 (#8): on-screen "a roamer is near" tell so the hidden encounter/karma content is discoverable. */
+  #encind{position:fixed;left:50%;top:50px;transform:translateX(-50%);z-index:6;display:none;align-items:center;gap:7px;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:800;letter-spacing:.04em;pointer-events:none;background:rgba(10,8,8,.86);border:1px solid #c9a84c;color:#e8c55a;text-shadow:0 1px 3px #000;box-shadow:0 2px 12px -3px rgba(0,0,0,.6);}
+  #encind.show{display:flex;animation:encPulse 1.4s ease-in-out infinite;}
+  #encind.hostile{border-color:#ff5a4d;color:#ff9d92;} #encind.friendly{border-color:#7CFFb0;color:#aef7cf;}
+  #encind .dir{font-size:13px;}
+  @keyframes encPulse{0%,100%{box-shadow:0 0 8px -2px currentColor;}50%{box-shadow:0 0 18px -1px currentColor;}}
+  @media (prefers-reduced-motion:reduce){#encind.show{animation:none;}}
+  /* AK-MKPANEL 2026-06-20 (#8): JOBS & KARMA board (district karma tier + how to raise it + missions). Mirrors #thpanel. */
+  #mkpanel{position:fixed;inset:0;z-index:9;background:rgba(4,4,8,.8);display:none;align-items:center;justify-content:center;perspective:1100px;}
+  #mkp-box{background:linear-gradient(160deg,#15110a,#0a0a0e);border:1.5px solid #c9a84c;border-radius:16px;padding:20px 22px;width:min(88vw,360px);max-height:84vh;overflow:auto;text-align:center;font-family:Inter,sans-serif;box-shadow:0 0 34px rgba(201,168,76,.28);}
+  #mkp-title{font-family:Cinzel,serif;color:#e8c55a;font-size:18px;font-weight:800;letter-spacing:.05em;margin-bottom:12px;}
+  #mkp-body{text-align:left;font-size:12px;color:#cdbd86;line-height:1.55;}
+  #mkp-body h4{margin:13px 0 5px;color:#e8c55a;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;}
+  #mkp-body .kbar{height:8px;border-radius:5px;background:rgba(201,168,76,.16);overflow:hidden;margin:5px 0 3px;}
+  #mkp-body .kfill{height:100%;background:linear-gradient(90deg,#c9a84c,#e8c55a);}
+  #mkp-body .tier{font-size:15px;font-weight:900;color:#fff;}
+  #mkp-body ul{margin:4px 0 0;padding-left:17px;} #mkp-body li{margin:2px 0;}
+  #mkp-body li.lock{color:#7c715090;} #mkp-body li.on{color:#aef7cf;}
+  #mkp-go{margin-top:15px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:10px;padding:12px 0;width:100%;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.03em;}
+  #mkp-close{margin-top:11px;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;}
+  /* AK-THUX 2026-06-20 (#7): the Town Hall upgrade now SHOWS what each level unlocks (caps) + exact cost. */
+  #thp-unlocks{margin:4px 0 14px;font-size:12px;color:#cdbd86;line-height:1.5;text-align:left;}
+  #thp-unlocks .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(201,168,76,.12);padding:4px 1px;}
+  #thp-unlocks .row span:first-child{color:#9a8f6a;} #thp-unlocks .row b{color:#fff;font-weight:800;}
+  #thp-unlocks .row .nx{color:#7CFFb0;font-weight:800;}
   /* AK-LOADING: branded crowned-dog load screen (initial load + page-nav transitions) */
-  #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;
-    background:linear-gradient(180deg,rgba(5,5,7,.12),rgba(5,5,7,.9)), url('assets/ui/lobby_hero.png') center/cover no-repeat #050507;}
+  /* AK-LOADFIX 2026-06-20 (#6): the loadscreen is ONE FILE -- menu_bg.mp4 ONLY.
+     Removed the lobby_hero splash IMAGE (it + the video poster were 2 wasted image
+     loads before the video even started). Solid dark behind the video = the only fallback. */
+  #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;background:#050507;}
   #ls-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:1;}
   #loadscreen > #ls-word,#loadscreen > #ls-bar,#loadscreen > #ls-tip{position:relative;z-index:1;}
   #loadscreen.hide{opacity:0;pointer-events:none;}
@@ -54,57 +122,98 @@
   #ls-bar{margin-top:14px;width:60vw;max-width:280px;height:5px;border-radius:3px;background:rgba(201,168,76,.2);overflow:hidden;}
   #ls-fill{height:100%;width:8%;background:linear-gradient(90deg,#c9a84c,#e8c55a);transition:width .5s ease-out;}
   #ls-tip{margin-top:12px;font-size:11px;color:#c9a84c;opacity:.85;letter-spacing:.04em;}
-  /* ===========================================================================
-     AK-3D 2026-06-20 -- "extruded photo" 2.5D for DOM surfaces (Brawl-Stars look)
-     Pure CSS 3D transforms + a tiny pointer shim. GPU-only, ~0KB, NO WebGL.
-     Per AK_DEEP_DIVE_SYNTHESIS Part 1. Two usage modes:
-       MODE A (single element): scene parent gets .ak-3d; ONE box that has NO
-         overflow:hidden gets BOTH .ak-3d-tilt and .ak-3d-face  (#int-card,#thp-box)
-       MODE B (wrapper): .ak-3d > .ak-3d-tilt > .ak-3d-face, used when the face
-         keeps overflow:hidden/clip-path (shop .aks-card art window).
-     The shim writes --ak-rx / --ak-ry (deg) onto .ak-3d-tilt; CSS reads them.
-     =========================================================================== */
-  .ak-3d{ display:block; perspective:1100px; perspective-origin:50% 50%; }
-  .ak-3d-tilt{
-    display:block; position:relative; transform-style:preserve-3d;
-    transform:rotateX(var(--ak-rx,3deg)) rotateY(var(--ak-ry,0deg));
-    transition:transform .5s cubic-bezier(.2,.7,.2,1);
+  /* AK-3D 2.5D "extruded photo" classes moved to shared ak_25d.css (loaded above). */
+  /* AK-25D-DOM 2026-06-20: shared "life feel" on the still-FLAT hub DOM UI.
+     The HUD chips wear the shared .ak25-glow helper (breathing gold rim) + a
+     static glass bevel here. The self-mounted HUD buttons (world-map / build /
+     harvest / build palette) are created in their systems JS, so we can only
+     reach them by id from this stylesheet -- we give them the SAME breathing rim
+     by reusing the shared ak25Breath keyframe from ak_25d.css. Compositor-only
+     (opacity / static box-shadow), so it holds 60fps over the live hub canvas;
+     NO backdrop-filter (it would re-blur the animating canvas every frame).
+     prefers-reduced-motion drops the breathing to a faint static glow. */
+  #phud .chip, #phud .res{ box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 9px -3px rgba(0,0,0,.55); }
+  /* hosts are position:fixed, so the absolutely-positioned pseudo anchors to the
+     button (and is taken out of the flex flow -> no layout shift on the icons). */
+  #ak-wm-btn::after, #ak-bm-btn::after, #ak-wv-btn::after, #ak-bm-bar::after{
+    content:""; position:absolute; inset:0; z-index:1; pointer-events:none; border-radius:inherit;
+    box-shadow:inset 0 0 18px -7px var(--ak-glow,#e8c55a), inset 0 0 0 1px rgba(232,197,90,.45);
+    opacity:.3; animation:ak25Breath 5.4s ease-in-out infinite;
   }
-  .ak-3d.ak-3d-live .ak-3d-tilt{ transition:none; will-change:transform; }
-  /* extruded thickness: two squeezed dark faces folded off the slab edges.
-     On .ak-3d-tilt (never clipped) so it works on a face that has overflow:hidden. */
-  .ak-3d-tilt::before, .ak-3d-tilt::after{ content:""; position:absolute; pointer-events:none; }
-  .ak-3d-tilt::before{ left:2px; right:2px; bottom:0; height:16px;
-    transform-origin:bottom center; transform:rotateX(-90deg);
-    background:linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,.18)); }
-  .ak-3d-tilt::after{ top:2px; bottom:2px; right:0; width:16px;
-    transform-origin:right center; transform:rotateY(90deg);
-    background:linear-gradient(to left, rgba(0,0,0,.62), rgba(0,0,0,.2)); }
-  /* face marker -- NO transform/shadow by default so it never fights an existing
-     :hover transform or a gold glow already on the surface. */
-  .ak-3d-face{ position:relative; }
-  /* OPT-IN contact shadow (use ONLY on surfaces with no rest box-shadow, e.g. .aks-card) */
-  .ak-3d-shadow{ box-shadow:0 16px 30px -10px rgba(0,0,0,.6); }
-  /* phones: no hover-steer -> keep ONLY the cheap static resting tilt + extrusion */
-  @media (hover:none),(pointer:coarse){
-    .ak-3d-tilt{ transform:rotateX(2.5deg) rotateY(0deg); transition:none; }
-    .ak-3d.ak-3d-live .ak-3d-tilt{ will-change:auto; }
-  }
+  /* the build palette is a full-width bar: bloom its gold top edge, not a full ring */
+  #ak-bm-bar::after{ border-radius:0;
+    box-shadow:inset 0 2px 0 -1px var(--ak-glow,#e8c55a), inset 0 15px 22px -16px rgba(232,197,90,.5); }
   @media (prefers-reduced-motion:reduce){
-    .ak-3d-tilt{ transform:none; transition:none; }
-    .ak-3d-tilt::before, .ak-3d-tilt::after{ display:none; }
+    #ak-wm-btn::after, #ak-bm-btn::after, #ak-wv-btn::after, #ak-bm-bar::after{ animation:none; opacity:.16; }
   }
+  /* AK-ECONUI 2026-06-21: the economy SURFACES (Tools Store / Builder-Foreman / Trade Post).
+     Shared modal scaffolding mirrors #thpanel/#mkpanel; reuses the ak_25d 2.5D treatment
+     (.ak-3d on overlay, .ak-3d-tilt .ak-3d-face on the box). Compositor-only -- no per-frame
+     work while a panel is open (static box-shadow), 60fps + reduced-motion safe. */
+  .econ-ov{position:fixed;inset:0;z-index:11;background:rgba(4,4,8,.84);display:none;align-items:center;justify-content:center;perspective:1100px;}
+  .econ-ov.show{display:flex;}
+  .econ-box{background:linear-gradient(160deg,#15110a,#0a0a0e);border:1.5px solid #c9a84c;border-radius:16px;padding:17px 16px 14px;width:min(93vw,400px);max-height:86vh;overflow:auto;font-family:Inter,sans-serif;box-shadow:0 0 34px rgba(201,168,76,.28);-webkit-overflow-scrolling:touch;}
+  .econ-h{font-family:Cinzel,serif;color:#e8c55a;font-size:18px;font-weight:800;letter-spacing:.05em;text-align:center;}
+  .econ-sub{text-align:center;color:#9a8f6a;font-size:11px;margin:3px 0 11px;letter-spacing:.02em;}
+  .econ-seg{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:11px;}
+  .econ-seg button{background:rgba(10,10,16,.6);border:1px solid rgba(201,168,76,.3);color:#b9a76a;border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.02em;}
+  .econ-seg button.on{background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border-color:#e8c55a;}
+  .econ-row{display:flex;align-items:center;gap:10px;background:rgba(10,10,16,.6);border:1px solid rgba(201,168,76,.2);border-radius:12px;padding:9px 10px;margin:7px 0;}
+  .econ-ico{flex:0 0 auto;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;border:1px solid rgba(201,168,76,.4);background:radial-gradient(circle at 50% 38%,rgba(201,168,76,.18),rgba(10,10,16,.9));}
+  .econ-info{flex:1 1 auto;min-width:0;}
+  .econ-name{color:#e8c55a;font-weight:800;font-size:13px;line-height:1.2;}
+  .econ-meta{color:#b9a76a;font-size:10.5px;line-height:1.45;margin-top:2px;}
+  .econ-act{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;align-items:stretch;}
+  .econ-btn{background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:9px;padding:8px 11px;font-weight:900;font-size:11px;cursor:pointer;white-space:nowrap;letter-spacing:.02em;}
+  .econ-btn.alt{background:rgba(10,10,16,.55);border:1px solid rgba(201,168,76,.45);color:#d9c688;font-weight:700;}
+  .econ-btn.gem{background:linear-gradient(180deg,#7fdfff,#46b8e0);color:#06222b;}
+  .econ-btn:disabled{filter:grayscale(.6);opacity:.5;cursor:not-allowed;}
+  .econ-lock{opacity:.55;} .econ-lock .econ-name{color:#9a8f6a;}
+  .econ-dur{height:5px;border-radius:3px;background:rgba(201,168,76,.16);overflow:hidden;margin-top:5px;}
+  .econ-dur i{display:block;height:100%;background:linear-gradient(90deg,#c9a84c,#e8c55a);}
+  .econ-prev{background:rgba(201,168,76,.07);border:1px dashed rgba(201,168,76,.35);border-radius:11px;padding:11px 12px;margin:10px 0;font-size:12px;color:#cdbd86;line-height:1.6;text-align:center;}
+  .econ-prev b{color:#fff;} .econ-prev .arr{color:#7CFFb0;font-weight:800;}
+  .econ-step{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0;}
+  .econ-step button{width:38px;height:38px;border-radius:10px;background:rgba(10,10,16,.6);border:1px solid rgba(201,168,76,.4);color:#e8c55a;font-size:18px;font-weight:900;cursor:pointer;}
+  .econ-step .amt{min-width:64px;text-align:center;font-size:20px;font-weight:900;color:#fff;}
+  .econ-go{width:100%;margin-top:6px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:11px;padding:13px 0;font-family:Cinzel,serif;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.04em;}
+  .econ-go:disabled{filter:grayscale(.6);opacity:.5;cursor:not-allowed;}
+  .econ-close{margin-top:11px;width:100%;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:9px 0;font-size:11px;cursor:pointer;}
 </style></head><body>
 <canvas id="c"></canvas>
-<div id="loadscreen"><video id="ls-vid" autoplay loop muted playsinline preload="auto" poster="assets/ui/lobby_hero.png"><source src="assets/ui/menu_bg.mp4" type="video/mp4"></video><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
+<div id="loadscreen"><video id="ls-vid" autoplay loop muted playsinline preload="auto"><source src="assets/ui/menu_bg.mp4" type="video/mp4"></video><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
-<div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="chip" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;">&#127963; TH -</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
-<div id="thpanel" class="ak-3d"><div id="thp-box" class="ak-3d-tilt ak-3d-face"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
+<div id="phud"><span class="chip ak25-glow" id="ph-name">&#128100; STRAY</span><span class="chip ak25-glow" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;">&#127963; TH -</span><span class="chip ak25-glow" id="ph-mk" style="cursor:pointer;pointer-events:auto;border-color:#7CFFb0;color:#7CFFb0;">&#128203; JOBS</span><span class="chip ak25-glow" id="ph-bld" style="cursor:pointer;pointer-events:auto;border-color:#7fc8ff;color:#7fc8ff;--ak-glow:#7fc8ff;">&#128119; -/-</span><span class="chip ak25-glow" id="ph-tools" style="cursor:pointer;pointer-events:auto;border-color:#ff9d5c;color:#ff9d5c;--ak-glow:#ff9d5c;">&#128296; TOOLS</span><span class="cur ak25-glow" id="ph-gold"><i>&#129689;</i><b>-</b></span><span class="cur ak25-glow" id="ph-gem"><i>&#128142;</i><b>-</b></span><span class="cur ak25-glow" id="ph-scrap"><i>&#9881;&#65039;</i><b>0</b></span><span class="cur ak25-glow" id="ph-keys"><i>&#128273;</i><b>0</b></span><span class="cur ak25-glow" id="ph-bones"><i>&#129460;</i><b>0</b></span><span class="cur ak25-glow" id="ph-wood"><i>&#129717;</i><b>0</b></span><span class="cur ak25-glow" id="ph-stone"><i>&#129704;</i><b>0</b></span><span class="cur ak25-glow" id="ph-metal"><i>&#128297;</i><b>0</b></span><span class="cur ak25-glow" id="ph-produce" style="cursor:pointer;pointer-events:auto;--ak-glow:#7CFFb0;border-color:#7CFFb0;" title="Tap to trade"><i>&#127807;</i><b>0</b></span></div>
+<div id="encind"><span class="dir"></span><span class="txt"></span></div>
+<div id="thpanel" class="ak-3d"><div id="thp-box" class="ak-3d-tilt ak-3d-face"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><div id="thp-unlocks"></div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
+<div id="mkpanel"><div id="mkp-box" class="ak-3d-tilt ak-3d-face"><div id="mkp-title">&#128203; JOBS &amp; KARMA</div><div id="mkp-body"></div><button id="mkp-go">OPEN THE HIT LIST</button><button id="mkp-close">CLOSE</button></div></div>
 <div id="interior" class="ak-3d"><div id="int-bg"></div><div id="int-card" class="ak-3d-tilt ak-3d-face">
   <div id="int-place">BUILDING</div>
   <div id="int-keeper"><span id="int-glyph">&#128021;</span><span id="int-name">Keeper</span></div>
   <div id="int-line">...</div>
-  <div id="int-btns"><button id="int-go" onclick="interiorGo()">ENTER</button><button id="int-exit" onclick="exitInterior()">LEAVE</button></div>
+  <div id="int-btns"><button id="int-econ" style="display:none;flex:1 1 100%;background:linear-gradient(135deg,#7fdfff,#46b8e0);color:#06222b;border:none;border-radius:11px;padding:12px 0;font-family:'Cinzel',serif;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:.04em;"></button><button id="int-go" onclick="interiorGo()">ENTER</button><button id="int-exit" onclick="exitInterior()">LEAVE</button></div>
+  <div class="int-fx" aria-hidden="true"></div>
+</div></div>
+<!-- AK-ECONUI 2026-06-21: economy surfaces (filled by the AK-ECONUI controller). 2.5D via shared ak_25d classes. -->
+<div id="toolspanel" class="econ-ov ak-3d"><div class="econ-box ak-3d-tilt ak-3d-face">
+  <div class="econ-h">&#128296; TOOLS STORE</div><div class="econ-sub" id="tools-sub">Gear up &mdash; no tool, no harvest</div>
+  <div class="econ-seg" id="tools-seg"></div><div id="tools-body"></div>
+  <button class="econ-close" id="tools-close">CLOSE</button>
+</div></div>
+<div id="crewpanel" class="econ-ov ak-3d"><div class="econ-box ak-3d-tilt ak-3d-face">
+  <div class="econ-h">&#128119; THE FOREMAN</div><div class="econ-sub" id="crew-sub">Put your dogs to work</div>
+  <div id="crew-body"></div>
+  <button class="econ-close" id="crew-close">CLOSE</button>
+</div></div>
+<div id="tradepanel" class="econ-ov ak-3d"><div class="econ-box ak-3d-tilt ak-3d-face">
+  <div class="econ-h">&#128176; TRADE POST</div><div class="econ-sub">Produce &harr; resources &harr; gold</div>
+  <div class="econ-seg" id="trade-from"></div>
+  <div class="econ-step"><button data-amt="dec">&minus;</button><div class="amt" id="trade-amt">0</div><button data-amt="inc">+</button></div>
+  <div class="econ-seg" id="trade-presets"><button data-set="10">10</button><button data-set="50">50</button><button data-set="100">100</button><button data-set="max">MAX</button></div>
+  <div class="econ-seg" id="trade-to"></div>
+  <div class="econ-prev" id="trade-prev">&mdash;</div>
+  <button class="econ-go" id="trade-go">CONFIRM TRADE</button>
+  <button class="econ-close" id="trade-close">CLOSE</button>
 </div></div>
 <div id="dist"></div>
 <canvas id="radar" width="100" height="128"></canvas>
@@ -112,20 +221,24 @@
 <div id="stick"><div id="nub"></div></div>
 <div id="fade"></div>
 <div class="tag">walkable world proto &bull; 3 districts &bull; not the final build</div>
-<script src="economy.js"></script>
-<script src="canon.js"></script>
-<script src="systems/_registry.js"></script>
-<script src="systems/production.js"></script>
-<script src="systems/missions.js"></script>
-<script src="systems/encounters.js"></script>
-<script src="systems/raid.js"></script>
-<script src="systems/seasons.js"></script>
-<script src="systems/trading.js"></script>
-<script src="systems/arcade.js"></script>
-<script src="systems/modes.js"></script>
-<script src="systems/worldmap.js"></script>
-<script src="systems/karma.js"></script>
-<script src="systems/loops.js"></script>
+<script src="economy.js?v=1"></script>
+<script src="canon.js?v=1"></script>
+<script src="systems/_registry.js?v=1"></script>
+<script src="systems/production.js?v=1"></script>
+<script src="systems/missions.js?v=1"></script>
+<script src="systems/encounters.js?v=1"></script>
+<script src="systems/raid.js?v=1"></script>
+<script src="systems/raidscene.js?v=1"></script>
+<script src="systems/seasons.js?v=1"></script>
+<script src="systems/trading.js?v=1"></script>
+<script src="systems/arcade.js?v=1"></script>
+<script src="systems/modes.js?v=1"></script>
+<script src="systems/worldmap.js?v=1"></script>
+<script src="systems/karma.js?v=1"></script>
+<script src="systems/loops.js?v=1"></script>
+<script src="systems/buildmode.js?v=1"></script>
+<script src="systems/worldverbs.js?v=1"></script>
+<script src="systems/districtmusic.js?v=1"></script>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
@@ -148,21 +261,57 @@ const DBG={HOME_TURF:'the_lot',DOWNTOWN:'downtown',NEON_HEIGHTS:'neon_heights',T
 const districtBg={}; Object.keys(DBG).forEach(function(k){var im=new Image();im.src='assets/hub/'+DBG[k]+'_bg.png';districtBg[k]=im;});
 // AK-INTERIOR 2026-06-20: buildings are PLACES, not vending machines. Walk in -> interior scene (own art) -> a KEEPER greets you -> they open the menu (Pokemon-mart style). Menus kept, embedded behind real bots. Keepers later voiced from ak_flavor_pool (see AK_AI_BOTS_PLAN).
 const intImg={}; ['merchant','arena','gem_mine','card_forge','research_lab','kennel'].forEach(function(t){var im=new Image();im.src='assets/interiors/'+t+'.png';intImg[t]=im;});
+// AK-INTBG 2026-06-20 (#9): per-building interior background. ONLY the Town Hall (ARENA) keeps the
+// looping menu_bg.mp4 (see window.akInteriorWantsVideo below, read by systems/loops.js); EVERY other
+// building shows its OWN custom interior art (assets/interiors/<file>.png) with a graceful procedural/dark
+// fallback until that art is generated. Existing art reused: arena/gem_mine/card_forge/research_lab/kennel.
+const INT_BG={ARENA:'arena',TROPHY:'trophy_hall',KENNEL:'kennel',DROP:'drop_shop',GARAGE:'garage',WARD:'wardrobe',ARCH:'archive',CLAN:'crew_yard',PASS:'pass_house',FIXER:'fixer_den',GEM:'gem_mine',MINT:'gold_mint',FORGE:'card_forge',STREET:'street_mode',ARCADE:'arcade',LAB:'research_lab',GEN:'power_gen'};
+var _intBgDead={};   // interior-bg paths that 404'd -> skip straight to the gradient (no re-probe / flicker)
+function intBgSrc(b){ return (b && INT_BG[b.id]) ? ('assets/interiors/'+INT_BG[b.id]+'.png') : null; }
+// Paint #int-bg for a building: dark procedural gradient first, then swap in the custom PNG once it loads
+// (so a missing/slow asset never flashes a broken image). Town Hall keeps its video layer on top.
+function setInteriorBg(b){
+  var bg=document.getElementById('int-bg'); if(!bg) return;
+  bg.style.backgroundImage=''; bg.style.background='radial-gradient(circle at 50% 35%, #1a1510, #08080c)';
+  var src=intBgSrc(b); if(!src || _intBgDead[src]) return;
+  var im=new Image();
+  im.onload=function(){ if(interiorB===b) bg.style.backgroundImage="url('"+src+"')"; };
+  im.onerror=function(){ _intBgDead[src]=1; };
+  im.src=src;
+}
+// AK-KEEPERART 2026-06-20: each keeper carries an `art` portrait (assets/portraits/keeper_*.png).
+// setKeeperPortrait() shows the PNG with the emoji `glyph` as an onerror fallback, so a
+// missing/unpainted portrait never breaks the interior card -- it silently shows the glyph.
 const KEEPERS={
-  ARENA:{name:'Coach Diesel',glyph:'🥊',it:'arena',lines:["Step up, champ. The arena's hot tonight.","You ready to throw down or just sightseein'?","Crown's on the line. Let's move."]},
-  GEM:{name:'Prospector Pip',glyph:'⛏️',it:'gem_mine',lines:["Gems don't mine themselves, partner.","Rich veins today -- grab your haul.","Careful in the shaft, it's slick."]},
-  MINT:{name:'Banker Bones',glyph:'💰',it:'merchant',lines:["Gold's good here. What you need?","The mint never sleeps, friend.","Count it twice -- that's my motto."]},
-  FORGE:{name:'Sparks',glyph:'🔧',it:'card_forge',lines:["Forge is lit. Let's make somethin'.","Bring me scraps, I'll bring the heat.","Every legend starts on this anvil."]},
-  LAB:{name:'Doc Wattson',glyph:'🔬',it:'research_lab',lines:["Science waits for no dog. Pick your upgrades.","The skill tree's bloomin' -- come look.","Knowledge is the sharpest fang."]},
-  KENNEL:{name:'Mama Bones',glyph:'🦴',it:'kennel',lines:["Lookin' to grow the family? Come in.","My pups are the finest in the city.","Breed smart, raise 'em right."]},
-  TROPHY:{name:'Goldie',glyph:'🏆',it:'merchant',lines:["Admire the hardware -- you earned it.","Every belt tells a story, kid.","Hall of kings. You belong here."]},
-  GEN:{name:'Volt',glyph:'⚡',it:'research_lab',lines:["Keep the power flowin'.","No juice, no muscle -- simple.","She's hummin' sweet today."]}
+  ARENA:{name:'Coach Diesel',glyph:'🥊',art:'assets/portraits/keeper_diesel.png',it:'arena',lines:["Step up, champ. The arena's hot tonight.","You ready to throw down or just sightseein'?","Crown's on the line. Let's move."]},
+  GEM:{name:'Prospector Pip',glyph:'⛏️',art:'assets/portraits/keeper_pip.png',it:'gem_mine',lines:["Gems don't mine themselves, partner.","Rich veins today -- grab your haul.","Careful in the shaft, it's slick."]},
+  MINT:{name:'Banker Bones',glyph:'💰',art:'assets/portraits/keeper_bones.png',it:'merchant',lines:["Gold's good here. What you need?","The mint never sleeps, friend.","Count it twice -- that's my motto."]},
+  FORGE:{name:'Sparks',glyph:'🔧',art:'assets/portraits/keeper_sparks.png',it:'card_forge',lines:["Forge is lit. Let's make somethin'.","Bring me scraps, I'll bring the heat.","Every legend starts on this anvil."]},
+  LAB:{name:'Doc Wattson',glyph:'🔬',art:'assets/portraits/keeper_wattson.png',it:'research_lab',lines:["Science waits for no dog. Pick your upgrades.","The skill tree's bloomin' -- come look.","Knowledge is the sharpest fang."]},
+  KENNEL:{name:'Mama Bones',glyph:'🦴',art:'assets/portraits/keeper_mama.png',it:'kennel',lines:["Lookin' to grow the family? Come in.","My pups are the finest in the city.","Breed smart, raise 'em right."]},
+  TROPHY:{name:'Goldie',glyph:'🏆',art:'assets/portraits/keeper_goldie.png',it:'merchant',lines:["Admire the hardware -- you earned it.","Every belt tells a story, kid.","Hall of kings. You belong here."]},
+  GEN:{name:'Volt',glyph:'⚡',art:'assets/portraits/keeper_volt.png',it:'research_lab',lines:["Keep the power flowin'.","No juice, no muscle -- simple.","She's hummin' sweet today."]}
 };
 function keeperFor(b){ var k=KEEPERS[b.id]; if(k)return k; var L=(b.label||'').toLowerCase();
-  if(/shop|chop|market|store/.test(L))return {name:'Scratch',glyph:'💰',it:'merchant',lines:["What you in the market for?","I got deals, friend -- step up.","Cash or trade, your call."]};
-  if(/coll|deck|card|crew|kennel/.test(L))return {name:'Roxy',glyph:'🃏',it:'merchant',lines:["Wanna check the crew? Step up.","Your deck's lookin' sharp.","Pick your fighters wisely."]};
-  return {name:'The Keeper',glyph:'🐕',it:'merchant',lines:["Welcome in.","Look around, take your time.","Holler if you need somethin'."]}; }
+  if(/shop|chop|market|store/.test(L))return {name:'Scratch',glyph:'💰',art:'assets/portraits/keeper_scratch.png',it:'merchant',lines:["What you in the market for?","I got deals, friend -- step up.","Cash or trade, your call."]};
+  if(/coll|deck|card|crew|kennel/.test(L))return {name:'Roxy',glyph:'🃏',art:'assets/portraits/keeper_roxy.png',it:'merchant',lines:["Wanna check the crew? Step up.","Your deck's lookin' sharp.","Pick your fighters wisely."]};
+  return {name:'The Keeper',glyph:'🐕',art:'assets/portraits/keeper_default.png',it:'merchant',lines:["Welcome in.","Look around, take your time.","Holler if you need somethin'."]}; }
+// Paint a keeper portrait into #int-glyph: an <img> over the emoji glyph, fallback to glyph on error/missing.
+// _keeperArtDead remembers paths that 404'd so we skip straight to the glyph next time (no flicker).
+var _keeperArtDead={};
+function setKeeperPortrait(el, art, glyph){
+  if(!el) return;
+  glyph=glyph||'🐕'; el.textContent='';
+  if(!art || _keeperArtDead[art]){ el.textContent=glyph; return; }
+  var img=new Image(); img.alt='';
+  img.style.cssText='width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center top;';
+  img.onerror=function(){ _keeperArtDead[art]=1; if(el){ el.textContent=glyph; } };
+  el.appendChild(img); img.src=art;   // appended first so the onerror swap targets a mounted node
+}
 let interiorOpen=false, interiorB=null;
+// AK-INTBG (#9): systems/loops.js reads this to scope the menu_bg.mp4 interior backdrop to the Town Hall
+// ONLY (ARENA). Every other building shows its own static interior art -- no video.
+window.akInteriorWantsVideo=function(){ return !!(interiorB && interiorB.id==='ARENA'); };
 function B(id,label,col,x,y,w,h,url,act){return {id,label,col,x,y,w,h,url,act};}
 // the 4 painted cities as real zones; linear E-W chain + one LOCKED silhouette off DOWNTOWN-north (barrier demo)
 // 3x3 GRID of districts (gx,gy). Every edge of every cell leads to a neighbor -- no dead ends. spawn = the OPPOSITE edge of the target (Stardew rule). ZW-150=1550, ZH-150=1150.
@@ -253,19 +402,24 @@ function stickEnd(e){if(e&&e.pointerId!=null&&e.pointerId!==stickId)return;stick
 const banner=document.getElementById('banner');let bannerT=0;
 function showBanner(t,hold){banner.textContent=t;banner.style.opacity='1';bannerT=hold||1.6;}
 let entering=false, state='IN_ZONE';   // FSM: IN_ZONE | TRANSITIONING
-function enterInterior(b){ if(interiorOpen)return;
-  if(window.AK_SYSTEMS && window.AK_CTX && AK_SYSTEMS.enterBuilding(b, AK_CTX)){ interiorOpen=true; interiorB=b; return; }
-  interiorOpen=true; interiorB=b; var k=keeperFor(b);
-  var im=intImg[k.it]; var bg=document.getElementById('int-bg');
-  bg.style.backgroundImage=(im&&im.complete&&im.naturalWidth>0)?("url('assets/interiors/"+k.it+".png')"):'';
-  bg.style.background=(im&&im.complete&&im.naturalWidth>0)?bg.style.background:'radial-gradient(circle at 50% 35%, #1a1510, #08080c)';
-  document.getElementById('int-glyph').textContent=k.glyph;
+function enterInterior(b){ if(interiorOpen)return; interiorB=b;   // AK-INTBG (#9): set early so ctx.ui.keeperCard can resolve THIS building's bg
+  if(window.AK_SYSTEMS && window.AK_CTX && AK_SYSTEMS.enterBuilding(b, AK_CTX)){ interiorOpen=true; return; }
+  interiorOpen=true; var k=keeperFor(b);
+  setInteriorBg(b);   // AK-INTBG (#9): per-building custom interior art (Town Hall video handled by loops.js scope)
+  setKeeperPortrait(document.getElementById('int-glyph'), k.art, k.glyph);   // AK-KEEPERART: portrait PNG, glyph fallback
   document.getElementById('int-name').textContent=k.name;
   document.getElementById('int-line').textContent=k.lines[Math.floor(Math.random()*k.lines.length)];
   document.getElementById('int-place').textContent=b.label;
   var go=document.getElementById('int-go');
   if(b.url==='soon'){ go.textContent=(b.act||'this').toUpperCase()+' -- COMING SOON'; go.disabled=true; }
   else { go.textContent='▶ '+(b.act||'enter').toUpperCase(); go.disabled=false; }
+  // AK-ECONUI 2026-06-21: hang an economy surface off a free keeper. Town Hall = the Foreman (assign builders).
+  // (FORGE/GEM/MINT are claimed by production.js -> the econ surfaces are also reachable from the HUD chips.)
+  var econMap={ARENA:{label:'👷 MANAGE CREW',fn:'akOpenCrew'},FORGE:{label:'🛠 TOOLS STORE',fn:'akOpenTools'},GEM:{label:'🛠 TOOLS STORE',fn:'akOpenTools'},MINT:{label:'🔁 TRADE POST',fn:'akOpenTrade'}};
+  var ie=document.getElementById('int-econ');
+  if(ie){ var em=econMap[b.id];
+    if(em && typeof window[em.fn]==='function'){ ie.style.display=''; ie.textContent=em.label; ie.onclick=function(){ exitInterior(); try{ window[em.fn](); }catch(_e){} }; }
+    else { ie.style.display='none'; ie.onclick=null; } }
   document.getElementById('interior').style.display='flex'; }
 function interiorGo(){ if(!interiorB||interiorB.url==='soon')return; doEnter(interiorB.url, interiorB.label); }
 function exitInterior(){ interiorOpen=false; document.getElementById('interior').style.display='none';
@@ -326,6 +480,7 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
     if(activeZone.id==='HOME_TURF' && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+8){ showBanner(npc.name+': '+npc.line,1.4); } }
   if(bannerT>0){bannerT-=dt;if(bannerT<=0)banner.style.opacity='0';}
   if(state==='IN_ZONE' && !interiorOpen && !entering) akTickSystems(dt);
+  updateEncInd();   // AK-ENCIND (#8): surface "a roamer is near" so encounter/karma content is discoverable
   draw();drawFX(dt);drawRadar();requestAnimationFrame(loop);
 }
 function wx(x){return x-cam.x;} function wy(y){return y-cam.y;}
@@ -417,37 +572,363 @@ function drawRadar(){rctx.clearRect(0,0,100,128);
   rctx.strokeStyle='rgba(255,255,255,.22)';rctx.lineWidth=1;rctx.strokeRect(cam.x*sx,oy+cam.y*sy,W*sx,H*sy);
   rctx.fillStyle='#fff';rctx.beginPath();rctx.arc(me.x*sx,oy+me.y*sy,2.4,0,7);rctx.fill();
 }
-// AK-HUD populate: pull player name + economy from shared localStorage (best-effort; textContent = XSS-safe)
-(function(){try{
-  var nm=localStorage.getItem('ak_name')||localStorage.getItem('playerName')||localStorage.getItem('pc_name')||'STRAY';
-  var g=null,gm=null;
-  ['ak_econ','economy','AK_ECON','ak_profile','akProfile','DBPROFILE'].forEach(function(k){try{var v=JSON.parse(localStorage.getItem(k)||'null');if(v){if(v.gold!=null)g=v.gold;if(v.gems!=null)gm=v.gems;else if(v.gem!=null)gm=v.gem;}}catch(_e){}});
-  if(g==null){var gd=localStorage.getItem('ak_gold')||localStorage.getItem('gold');if(gd!=null)g=gd;}
-  if(gm==null){var ge=localStorage.getItem('ak_gems')||localStorage.getItem('gems');if(ge!=null)gm=ge;}
-  document.getElementById('ph-name').textContent=String(nm).slice(0,18);
-  if(g!=null)document.getElementById('ph-gold').textContent='Gold '+String(g).slice(0,9);
-  if(gm!=null)document.getElementById('ph-gem').textContent='Gems '+String(gm).slice(0,9);
-}catch(_e){}})();
+// AK-ENCIND 2026-06-20 (#8): a top-of-screen tell when a wild roamer (hostile stray or friendly NPC)
+// is near, with a directional arrow -- makes the hidden encounter/karma content discoverable. Cheap
+// (a few roamers), DOM writes are guarded so it only touches the DOM on a state CHANGE (no per-frame thrash).
+var _encState='';
+function updateEncInd(){
+  var el=document.getElementById('encind'); if(!el)return;
+  var ind='', kind='', dirTxt='';
+  if(state==='IN_ZONE' && !interiorOpen && window.AK_CTX && AK_CTX._roamers){
+    var rs=AK_CTX._roamers, best=null, bd=1e9, NEAR=320;
+    for(var i=0;i<rs.length;i++){ var r=rs[i];
+      if(r.zone && r.zone!==activeZone.id) continue;
+      if(!(r._enc||r._kf)) continue;
+      var d=Math.hypot(me.x-r.x,me.y-r.y); if(d<bd){bd=d;best=r;} }
+    if(best && bd<NEAR){
+      var ang=Math.atan2(best.y-me.y,best.x-me.x);
+      var arrows=['→','↘','↓','↙','←','↖','↑','↗']; var k=Math.round(ang/(Math.PI/4)); k=((k%8)+8)%8; dirTxt=arrows[k];
+      if(best._enc){ kind='hostile';
+        ind=(best.state==='chase')?'STRAY ON YOUR TAIL':('WILD STRAY NEAR -- '+((best.card&&best.card.name)||'a stray')); }
+      else { kind='friendly';
+        ind='FRIENDLY NEARBY -- '+((best.npc&&best.npc.def&&best.npc.def.label)||(best.resource?'supply cache':'a face')); }
+    }
+  }
+  var key=kind+'|'+ind+'|'+dirTxt; if(key===_encState)return; _encState=key;
+  if(!ind){ el.className=''; return; }
+  var dd=el.querySelector('.dir'), tt=el.querySelector('.txt');
+  if(dd)dd.textContent=dirTxt; if(tt)tt.textContent=' '+ind;
+  el.className='show '+kind;
+}
+// AK-CURHUD 2026-06-20 (#1): unified currency rail driven straight off AK_ECON.loadProfile().
+// Shows gold/gems/scrap/keys/bones/wood/stone/metal; polls the profile and animates a green +N float
+// on any gain and a red -N flash on any spend, so the player SEES the economy move. window.akHud.tick()
+// is called the instant a known spend happens (e.g. a Town Hall upgrade) for zero-lag feedback.
+window.akHud=(function(){
+  var CUR=['gold','gem','scrap','keys','bones','wood','stone','metal','produce'];   // chip ids (ph-<id>) -- AK-ECONUI added produce
+  var last=null;
+  function fmt(n){ n=Math.round(n); var s=n<0?'-':''; n=Math.abs(n);
+    if(n>=1e6)return s+(n/1e6).toFixed(n>=1e7?0:1)+'M'; if(n>=1e4)return s+(n/1e3).toFixed(n>=1e5?0:1)+'k'; return s+n; }
+  function readGems(){ // gems are SERVER-ONLY (never in ak_profile) -- best-effort read so the chip isn't dead
+    try{ if(window.AK_GEMS!=null) return AK_GEMS|0;
+      var ge=localStorage.getItem('ak_gems')||localStorage.getItem('gems'); if(ge!=null)return (parseInt(ge,10)||0);
+    }catch(_e){}
+    return null;
+  }
+  function snap(){
+    var p=null; try{ if(window.AK_ECON&&AK_ECON.loadProfile)p=AK_ECON.loadProfile(); }catch(_e){}
+    if(!p) return null;
+    var scrap=0; if(p.scrap)for(var r in p.scrap)scrap+=p.scrap[r]|0;
+    var gm=readGems();
+    return { gold:p.coins|0, gem:(gm==null?null:gm), scrap:scrap, keys:p.keys|0, bones:p.bones|0, wood:p.wood|0, stone:p.stone|0, metal:p.metal|0, produce:p.produce|0 };
+  }
+  function floatDelta(el,d){
+    var f=document.createElement('span'); f.className='cur-float '+(d>0?'up':'dn'); f.textContent=(d>0?'+':'')+fmt(d);
+    el.appendChild(f); setTimeout(function(){ try{ el.removeChild(f); }catch(_e){} },1050);
+  }
+  function setv(id,val){ var el=document.getElementById('ph-'+id); if(!el)return; var b=el.querySelector('b'); if(b)b.textContent=(val==null?'-':fmt(val)); }
+  function tick(){
+    var s=snap(); if(!s)return;
+    CUR.forEach(function(id){ setv(id,s[id]); });
+    if(last){ CUR.forEach(function(id){
+      var v=s[id], pv=last[id]; if(v==null||pv==null)return; var d=v-pv; if(!d)return;
+      var el=document.getElementById('ph-'+id); if(!el)return;
+      floatDelta(el,d);
+      if(d<0){ el.classList.remove('spend'); void el.offsetWidth; el.classList.add('spend'); setTimeout(function(){ el.classList.remove('spend'); },470); }
+    }); }
+    last=s;
+  }
+  try{ var nm=localStorage.getItem('ak_name')||localStorage.getItem('playerName')||localStorage.getItem('pc_name')||'STRAY';
+    var nmEl=document.getElementById('ph-name'); if(nmEl)nmEl.textContent='👤 '+String(nm).slice(0,16); }catch(_e){}
+  tick();
+  try{ setInterval(tick,350); }catch(_e){}
+  return { tick:tick };
+})();
 // AK-TOWNHALL: keystone meta-gate UI -- HUD chip + a panel to level up. Caps card level (grandfathered so nothing degrades). Reads the REAL economy via AK_ECON.
 (function(){
+  // AK-THUX 2026-06-20 (#7): the panel SHOWS what each level unlocks (caps) + the exact cost; the
+  // gold deduction is verified in economy.js upgradeTownHall (atomic p.coins -= cost) and made VISIBLE
+  // by akHud.tick() (the gold chip flashes red -N) the instant the upgrade lands.
+  function unlockRows(cur,nx){
+    function row(label,a,b){ return '<div class="row"><span>'+label+'</span><span><b>'+a+'</b>'+((b!=null&&String(b)!==String(a))?' <span class="nx">&#8594; '+b+'</span>':'')+'</span></div>'; }
+    if(!cur)return '';
+    return row('Card level cap','Lv '+cur.cardCap, nx?('Lv '+nx.cardCap):null)
+         + row('Crew size',     cur.crewSize,      nx?nx.crewSize:null)
+         + row('Builders',      cur.builders,      nx?nx.builders:null)
+         + row('Base grid',     cur.grid,          nx?nx.grid:null);
+  }
   function thRefresh(){ try{ if(!window.AK_ECON)return;
     var lv=AK_ECON.townHallLevel(), p=AK_ECON.loadProfile(), coins=p.coins|0, cap=AK_ECON.CARD_LV_CAP;
-    var chip=document.getElementById('ph-th'); if(chip)chip.textContent='TH '+lv;
-    var gEl=document.getElementById('ph-gold'); if(gEl)gEl.textContent='Gold '+coins;
-    var lvEl=document.getElementById('thp-lv'),capEl=document.getElementById('thp-cap'),upEl=document.getElementById('thp-up'),hintEl=document.getElementById('thp-hint');
+    var chip=document.getElementById('ph-th'); if(chip)chip.textContent='🏛 TH '+lv;   // ph-gold is owned by akHud now
+    var lvEl=document.getElementById('thp-lv'),capEl=document.getElementById('thp-cap'),unEl=document.getElementById('thp-unlocks'),upEl=document.getElementById('thp-up'),hintEl=document.getElementById('thp-hint');
+    var cur=AK_ECON.townHallPerks?AK_ECON.townHallPerks(lv):null;
     if(lvEl){ lvEl.textContent='Level '+lv;
-      if(lv>=cap){ capEl.textContent='Caps every card at Lv '+lv+' (MAX)'; upEl.disabled=true; upEl.textContent='MAX LEVEL'; hintEl.textContent='Town Hall fully upgraded.'; }
-      else { var cost=AK_ECON.townHallCost(lv); capEl.textContent='Your cards can reach Lv '+lv+' -- raise the Town Hall to level them higher'; upEl.disabled=(coins<cost); upEl.textContent='UPGRADE -> Lv '+(lv+1); hintEl.textContent=(coins<cost?('Need '+cost+' gold (have '+coins+')'):('Cost: '+cost+' gold  (have '+coins+')')); } }
+      if(lv>=cap){ capEl.textContent='Your crew runs at full strength -- everything maxed.'; if(unEl)unEl.innerHTML=unlockRows(cur,null); upEl.disabled=true; upEl.textContent='MAX LEVEL'; hintEl.textContent='Town Hall fully upgraded (Lv '+lv+').'; }
+      else { var cost=AK_ECON.townHallCost(lv), nx=AK_ECON.townHallPerks?AK_ECON.townHallPerks(lv+1):null;
+        capEl.textContent='Raise the Town Hall to unlock higher caps:'; if(unEl)unEl.innerHTML=unlockRows(cur,nx);
+        upEl.disabled=(coins<cost); upEl.textContent='UPGRADE → Lv '+(lv+1)+'  ('+cost+' g)';
+        hintEl.textContent=(coins<cost)?('Need '+cost+' gold -- you have '+coins):('Costs '+cost+' gold (you have '+coins+') -- deducts on upgrade'); } }
   }catch(_e){} }
   var chip=document.getElementById('ph-th'), pn=document.getElementById('thpanel');
   if(chip)chip.addEventListener('click',function(){ thRefresh(); if(pn)pn.style.display='flex'; });
   var cl=document.getElementById('thp-close'); if(cl)cl.addEventListener('click',function(){ if(pn)pn.style.display='none'; });
   var up=document.getElementById('thp-up'); if(up)up.addEventListener('click',function(){ if(!window.AK_ECON)return; var r=AK_ECON.upgradeTownHall();
-    if(r.ok){ if(typeof showBanner==='function')showBanner('Town Hall -> Level '+r.level+'!',2.0); }
+    if(r.ok){ if(typeof showBanner==='function')showBanner('Town Hall → Lv '+r.level+'  (-'+r.spent+' gold)',2.0); if(window.akHud)akHud.tick(); }  // show the spend
     else if(r.error==='INSUFFICIENT_FUNDS'){ if(typeof showBanner==='function')showBanner('Need '+r.need+' gold (have '+r.have+')',1.8); }
     else if(r.error==='MAX'){ if(typeof showBanner==='function')showBanner('Town Hall already maxed (Lv '+r.level+')',1.6); }
     thRefresh(); });
   thRefresh();
+})();
+// AK-MKBOARD 2026-06-20 (#8): JOBS & KARMA board -- surfaces the hidden content. Shows the active
+// district's KARMA tier + progress + HOW to raise it + crew perks (window.AKKarma), and the missions
+// state (active Fixer job / where to take one) + a button into the live Hit List (window.AKQuests).
+(function(){
+  var mkPn=document.getElementById('mkpanel');
+  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
+  function mkRender(){
+    var body=document.getElementById('mkp-body'); if(!body)return;
+    var zid=activeZone.id, html='', K=window.AKKarma;
+    if(K&&K.getZoneFaction){
+      var fac=K.getZoneFaction(zid), tier=K.getTier(zid), pts=K.getKarma(zid)|0, tiers=K.TIERS||[];
+      var next=tiers[tier.idx+1]||null, into=pts-tier.min, span=next?(next.min-tier.min):1;
+      var pct=next?Math.max(0,Math.min(100,Math.round(into/span*100))):100;
+      html+='<h4>'+esc(fac.icon)+' '+esc(activeZone.name||zid)+' &middot; '+esc(fac.name)+'</h4>';
+      html+='<div class="tier">'+esc(tier.icon)+' '+esc(tier.name)+' <span style="color:#9a8f6a;font-size:11px;font-weight:600;">('+pts+' karma)</span></div>';
+      html+='<div class="kbar"><div class="kfill" style="width:'+pct+'%"></div></div>';
+      html+= next ? ('<div style="font-size:11px;color:#9a8f6a;">'+(next.min-pts)+' more to '+esc(next.icon)+' '+esc(next.name)+'</div>')
+                  : '<div style="font-size:11px;color:#e8c55a;">Top tier on this block.</div>';
+      html+='<h4>Raise your karma</h4><ul>';
+      html+='<li>Help the block: walk up to the green <b>?</b> roamers -- lost pups, injured strays, caravans, recruiters.</li>';
+      html+='<li>More karma skews wild encounters <b>friendly</b> and opens crew perks + shop discounts.</li></ul>';
+      if(K.PERKS&&K.PERKS.length){ html+='<h4>Crew perks</h4><ul>';
+        K.PERKS.forEach(function(pk){ var on=tier.idx>=pk.tier; html+='<li class="'+(on?'on':'lock')+'">'+(on?'&#10003; ':'&#128274; T'+pk.tier+' ')+esc(pk.label)+'</li>'; });
+        html+='</ul>'; }
+    } else { html+='<div>District karma is warming up...</div>'; }
+    html+='<h4>Jobs</h4>';
+    try{ var p=(window.AK_ECON&&AK_ECON.loadProfile)?AK_ECON.loadProfile():null; var act=p&&p.missions&&p.missions.active;
+      html+= act ? '<div>You have an active job -- finish it and <b>turn it in at THE FIXER</b> (THE YARDS).</div>'
+                 : '<div>No active job. Take one from <b>Marrow the Fixer</b> at THE FIXER (THE YARDS).</div>';
+    }catch(_e){}
+    html+='<div style="font-size:11px;color:#9a8f6a;margin-top:5px;">The Hit List = daily/weekly bounties paid in gold, scrap, keys &amp; bones.</div>';
+    body.innerHTML=html;
+  }
+  function mkGo(){ try{ if(window.AKQuests&&AKQuests.open){ if(mkPn)mkPn.style.display='none'; AKQuests.open(); return; } }catch(_e){}
+    try{ localStorage.setItem('ak_hub_zone',activeZone.id); localStorage.setItem('ak_hub_pos',JSON.stringify({x:Math.round(me.x),y:Math.round(me.y)})); localStorage.setItem('ak_returning','1'); }catch(_e){}
+    if(typeof showBanner==='function')showBanner('Opening the Hit List…',2); try{ window.location.href='shop/shop.html#hit2'; }catch(_e){} }
+  var mkChip=document.getElementById('ph-mk');
+  if(mkChip)mkChip.addEventListener('click',function(){ mkRender(); if(mkPn)mkPn.style.display='flex'; });
+  var mkc=document.getElementById('mkp-close'); if(mkc)mkc.addEventListener('click',function(){ if(mkPn)mkPn.style.display='none'; });
+  var mkg=document.getElementById('mkp-go'); if(mkg)mkg.addEventListener('click',mkGo);
+})();
+// AK-ECONUI 2026-06-21: the economy SURFACES controller -- TOOLS STORE / THE FOREMAN (builders) / TRADE POST.
+// Wires the prebuilt #toolspanel/#crewpanel/#tradepanel + the ph-tools/ph-bld/ph-produce HUD chips + the
+// interior int-econ buttons (econMap, above). Every AK_ECON / AK_BUILDMODE / canon call is GUARDED so a
+// missing API degrades to a "warming up" note and never throws (the sibling controller died on an ungated
+// call). No per-frame work -- panels render on open/interaction; the Builders readout polls on a light
+// interval; an open Foreman re-renders its timers once a second (only when no card-picker is open). 60fps +
+// reduced-motion safe (the 2.5D look is the shared ak_25d CSS). CRYPTO GATE: gems are server-only -- a gem
+// action surfaces the price + routes to the server settle; gems skip TIMERS / convenience only, NEVER a cap,
+// a level, a tier above the TH gate, or loot quality (design sec 9 HARD LAW).
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function econ(){ return window.AK_ECON || null; }
+  function bm(){ return window.AK_BUILDMODE || null; }
+  function prof(){ try{ var e=econ(); return (e&&e.loadProfile)?e.loadProfile():null; }catch(_e){ return null; } }
+  function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return c==='<'?'&lt;':c==='>'?'&gt;':'&amp;';}); }
+  function banner(t,h){ try{ if(typeof showBanner==='function') showBanner(t,h||1.4); }catch(_e){} }
+  function bump(){ try{ if(window.akHud&&akHud.tick) akHud.tick(); }catch(_e){} }
+  function showP(id){ var p=$(id); if(p)p.classList.add('show'); }
+  function hideP(id){ var p=$(id); if(p)p.classList.remove('show'); }
+  function curZoneId(){ try{ return (typeof activeZone!=='undefined'&&activeZone)?activeZone.id:null; }catch(_e){ return null; } }
+  function fmtNum(n){ n=Math.round(n||0); if(n>=1e6)return (n/1e6).toFixed(1)+'M'; if(n>=1e4)return (n/1e3).toFixed(1)+'k'; return ''+n; }
+  function fmtTime(ms){ ms=Math.max(0,ms||0); var s=Math.ceil(ms/1000); if(s<60)return s+'s'; var m=Math.floor(s/60),ss=s%60; if(m<60)return m+'m'+(ss?(' '+ss+'s'):''); var h=Math.floor(m/60),mm=m%60; return h+'h'+(mm?(' '+mm+'m'):''); }
+  // gems are SERVER-ONLY (crypto gate) -- the client can never spend them. A gem action surfaces the price
+  // + the server-settle prompt (parity-safe convenience, never bypasses a TH gate / cap / level).
+  function gemSync(label,cost){ banner('\u{1F48E} '+(cost!=null?(cost+' '):'')+(label||'instant')+' -- sync to spend',1.5); }
+
+  /* =================== TOOLS STORE (akOpenTools) =================== */
+  var TOOL_META={ axe:{ico:'\u{1FA93}',name:'Axe',harv:'Wood'}, pickaxe:{ico:'⛏️',name:'Pickaxe',harv:'Stone'}, crowbar:{ico:'\u{1F527}',name:'Crowbar',harv:'Scrap + Metal'}, drill:{ico:'\u{1F6E0}️',name:'Drill',harv:'Rare metal'} };
+  var TOOL_ORDER=['axe','pickaxe','crowbar','drill'];
+  var toolsTab='axe';
+  function scrapStr(sc){ var out=[]; for(var k in sc)out.push(sc[k]+' '+k+' scrap'); return out.join(', '); }
+  function renderToolsSeg(){
+    var seg=$('tools-seg'); if(!seg)return; seg.replaceChildren();
+    TOOL_ORDER.forEach(function(t){ var b=document.createElement('button'); b.textContent=TOOL_META[t].ico+' '+TOOL_META[t].name; if(t===toolsTab)b.className='on'; b.onclick=function(){ toolsTab=t; renderToolsSeg(); renderToolsBody(); }; seg.appendChild(b); });
+  }
+  function handleBuy(r,tt){ var meta=TOOL_META[toolsTab];
+    if(r&&r.ok){ banner('Bought T'+tt+' '+meta.name+'!',1.3); bump(); renderToolsBody(); return; }
+    r=r||{};
+    if(r.error==='TH_LOCKED') banner('Town Hall '+r.need+' required (have '+r.have+')',1.6);
+    else if(r.error==='INSUFFICIENT_FUNDS') banner('Need '+r.need+'g (have '+r.have+')',1.5);
+    else if(r.error==='INSUFFICIENT_PRODUCE') banner('Need '+r.need+' produce (have '+r.have+')',1.5);
+    else if(r.error==='INSUFFICIENT_SCRAP') banner('Need '+r.need+' '+r.rarity+' scrap',1.5);
+    else if(r.error==='INSUFFICIENT_METAL') banner('Need '+r.need+' metal (have '+r.have+')',1.5);
+    else if(r.error==='NO_PRODUCE_PATH') banner('No produce path for this tier',1.4);
+    else banner('Could not buy that tool',1.2);
+  }
+  function renderToolsBody(){
+    var body=$('tools-body'); if(!body)return; var e=econ(); body.replaceChildren();
+    if(!e||!e.TOOL_TIERS||!e.toolFor){ body.innerHTML='<div class="econ-prev">Tools are warming up...</div>'; return; }
+    var p=prof()||{}, th=e.townHallLevel?e.townHallLevel(p):1, meta=TOOL_META[toolsTab];
+    var cur=e.toolFor(p,toolsTab)||{tier:0,dur:Infinity,owned:[]};
+    var cdef=e.TOOL_TIERS[cur.tier]||e.TOOL_TIERS[0];
+    var sub=$('tools-sub'); if(sub)sub.textContent=meta.harv+' -- equipped: '+(cdef?cdef.name:'Bare Paws')+(cur.tier?(' (T'+cur.tier+')'):'')+' / Town Hall '+th;
+    // equipped durability + repair
+    if(cur.tier>0 && cdef && isFinite(cdef.durability)){
+      var pctd=Math.max(0,Math.min(100,Math.round((cur.dur/cdef.durability)*100)));
+      var dr=document.createElement('div'); dr.className='econ-row';
+      dr.innerHTML='<div class="econ-ico">'+meta.ico+'</div><div class="econ-info"><div class="econ-name">'+esc(cdef.name)+' T'+cur.tier+' (equipped)</div><div class="econ-meta">Durability '+(isFinite(cur.dur)?cur.dur:'∞')+' / '+cdef.durability+'</div><div class="econ-dur"><i style="width:'+pctd+'%"></i></div></div>';
+      var da=document.createElement('div'); da.className='econ-act';
+      if(cur.dur<cdef.durability){
+        var rg=document.createElement('button'); rg.className='econ-btn'; rg.textContent='REPAIR '+Math.ceil((cdef.gold||0)*0.5)+'g';
+        rg.onclick=function(){ var r=e.repairTool(toolsTab,'gold'); if(r&&r.ok){ banner('Repaired '+meta.name+' (-'+((r.paid&&r.paid.gold)||0)+'g)',1.2); bump(); renderToolsBody(); } else if(r&&r.error==='INSUFFICIENT_FUNDS'){ banner('Need '+r.need+'g to repair',1.4);} };
+        da.appendChild(rg);
+        var rgem=document.createElement('button'); rgem.className='econ-btn gem'; rgem.textContent='\u{1F48E}'; rgem.title='Instant repair (server)'; rgem.onclick=function(){ gemSync('repair'); }; da.appendChild(rgem);
+      } else { var ok=document.createElement('div'); ok.style.cssText='font-size:10px;color:#7CFFb0;font-weight:800;text-align:center;align-self:center;'; ok.textContent='FULL'; da.appendChild(ok); }
+      dr.appendChild(da); body.appendChild(dr);
+    }
+    // tier ladder T1..T4
+    for(var t=1;t<=4;t++){
+      var d=e.TOOL_TIERS[t]; if(!d)continue;
+      var owned=!!(cur.owned&&cur.owned.indexOf(t)>=0), locked=th<(d.unlockTH|0), equipped=(cur.tier===t);
+      var row=document.createElement('div'); row.className='econ-row'+(locked?' econ-lock':'');
+      var stats='Spd '+d.gatherSpeed.toFixed(2)+'x / +'+Math.round(d.bonusLoot*100)+'% loot / '+Math.round(d.rareDrop*100)+'% rare / dur '+d.durability;
+      var costStr=(d.gold!=null)?(d.gold+'g'+(d.scrap?(' + '+scrapStr(d.scrap)):'')+(d.mats&&d.mats.metal?(' + '+d.mats.metal+' metal'):'')):'craft only';
+      var prodStr=(d.produce!=null)?(d.produce+' produce'):null;
+      var line2=locked?('\u{1F512} Unlocks at Town Hall '+d.unlockTH):('Buy: '+costStr+(prodStr?(' or '+prodStr):''));
+      row.innerHTML='<div class="econ-ico">'+meta.ico+'</div><div class="econ-info"><div class="econ-name">T'+t+' '+esc(d.name)+(equipped?' (EQUIPPED)':'')+'</div><div class="econ-meta">'+stats+'<br>'+line2+'</div></div>';
+      var act=document.createElement('div'); act.className='econ-act';
+      if(locked){ var lk=document.createElement('div'); lk.style.cssText='font-size:11px;color:#9a8f6a;font-weight:800;text-align:center;align-self:center;'; lk.textContent='TH '+d.unlockTH; act.appendChild(lk); }
+      else if(owned){
+        if(equipped){ var eqd=document.createElement('div'); eqd.style.cssText='font-size:10px;color:#7CFFb0;font-weight:800;text-align:center;align-self:center;'; eqd.textContent='✓ ON'; act.appendChild(eqd); }
+        else { var eb=document.createElement('button'); eb.className='econ-btn alt'; eb.textContent='EQUIP'; eb.onclick=(function(tt){return function(){ var r=e.equipTool(toolsTab,tt); if(r&&r.ok){ banner('Equipped T'+tt+' '+meta.name,1.1); renderToolsBody(); } };})(t); act.appendChild(eb); }
+      } else {
+        var gb=document.createElement('button'); gb.className='econ-btn'; gb.textContent=(d.gold!=null?('BUY '+d.gold+'g'):'CRAFT'); gb.disabled=(d.gold==null);
+        gb.onclick=(function(tt){return function(){ handleBuy(e.buyTool(toolsTab,tt,'gold'),tt); };})(t); act.appendChild(gb);
+        if(prodStr){ var pb=document.createElement('button'); pb.className='econ-btn alt'; pb.textContent=d.produce+' \u{1F33F}'; pb.title='Buy with produce'; pb.onclick=(function(tt){return function(){ handleBuy(e.buyTool(toolsTab,tt,'produce'),tt); };})(t); act.appendChild(pb); }
+        var gem=document.createElement('button'); gem.className='econ-btn gem'; gem.textContent='\u{1F48E}'; gem.title='Instant buy (server)'; gem.onclick=function(){ gemSync('instant buy'); }; act.appendChild(gem);
+      }
+      row.appendChild(act); body.appendChild(row);
+    }
+  }
+  window.akOpenTools=function(){ renderToolsSeg(); renderToolsBody(); showP('toolspanel'); };
+
+  /* =================== THE FOREMAN / BUILDERS (akOpenCrew) =================== */
+  var TASK_LABEL={build:'\u{1F3D7}️ Build',gather:'⛏️ Gather',tend:'\u{1F331} Tend',train:'\u{1F4DA} Train'};
+  var TASK_ORDER=['build','gather','tend','train'];
+  var pickerSlot=-1;
+  function canonOf(key){ try{ var L=window.CANON_CARDS||[]; for(var i=0;i<L.length;i++){ var c=L[i]; if(c&&(c.name===key||c.id===key||String(c.cardNumber)===String(key)))return c; } }catch(_e){} return null; }
+  function cardArt(key){ try{ var c=canonOf(key)||{name:key,id:key}; if(window.akCardArtRel){ var rel=akCardArtRel(c); if(rel)return 'assets/'+rel; } }catch(_e){} return ''; }
+  function cardName(key){ var c=canonOf(key); return (c&&c.name)||key; }
+  function ownedCards(p){ var out=[]; if(!p||!Array.isArray(p.owned))return out; var e=econ();
+    p.owned.forEach(function(key){ var lvl=1; try{ lvl=(e&&e.cardLevel)?e.cardLevel(p,key):((p.cardLvls&&p.cardLvls[key])||1); }catch(_e){} out.push({key:key,lvl:lvl}); });
+    return out; }
+  function thumbInto(el,key){ var art=cardArt(key); if(!art){ el.textContent='\u{1F415}'; return; }
+    var im=document.createElement('img'); im.alt=''; im.style.cssText='width:100%;height:100%;border-radius:11px;object-fit:cover;';
+    im.onerror=function(){ if(!(window.akImgErr&&akImgErr(im))){ try{ el.textContent='\u{1F415}'; }catch(_e){} } };
+    el.appendChild(im); im.src=art; }
+  function doSkip(slot){ var b=bm(); if(!b||!b.skipBuildJob)return; var r=b.skipBuildJob(slot);
+    if(r&&r.ok){ banner(r.free?'Finished!':('Skipped (-'+r.cost+' \u{1F48E})'),1.1); bump(); renderCrew(); }
+    else if(r&&r.error==='SERVER_REQUIRED'){ gemSync('skip',r.cost); } }
+  function slotRow(s,th){
+    var e=econ();
+    var row=document.createElement('div'); row.className='econ-row';
+    var ico=document.createElement('div'); ico.className='econ-ico'; if(s.card)thumbInto(ico,s.card); else ico.textContent='＋';
+    var info=document.createElement('div'); info.className='econ-info';
+    var spd=(s.speed||1).toFixed(2);
+    if(s.card){ info.innerHTML='<div class="econ-name">'+esc(cardName(s.card))+'</div><div class="econ-meta">Lv '+s.lvl+' / speed <b style="color:#7CFFb0">'+spd+'x</b> / '+TASK_LABEL[s.task||'build']+'</div>'; }
+    else info.innerHTML='<div class="econ-name">Slot '+(s.slot+1)+' -- empty</div><div class="econ-meta">Assign a dog to put it to work</div>';
+    var act=document.createElement('div'); act.className='econ-act';
+    if(s.building){
+      info.innerHTML+='<div class="econ-meta" style="color:#e8c55a;">\u{1F3D7}️ Building -- '+fmtTime(s.remainMs)+' left</div>';
+      var gc=(e&&e.gemSkipCost)?e.gemSkipCost((s.remainMs||0)/1000):0;
+      var sk=document.createElement('button'); sk.className='econ-btn gem'; sk.textContent=gc>0?('\u{1F48E} '+gc):'FINISH'; sk.onclick=(function(sl){return function(){ doSkip(sl); };})(s.slot); act.appendChild(sk);
+    } else {
+      var asg=document.createElement('button'); asg.className='econ-btn'; asg.textContent=s.card?'CHANGE':'ASSIGN'; asg.onclick=(function(sl){return function(){ pickerSlot=(pickerSlot===sl?-1:sl); renderCrew(); };})(s.slot); act.appendChild(asg);
+      if(s.card){
+        var tk=document.createElement('button'); tk.className='econ-btn alt'; tk.textContent='↻ '+(TASK_LABEL[s.task||'build'].replace(/^\S+\s/,''));
+        tk.onclick=(function(sl,cur,card){return function(){ var nx=TASK_ORDER[(TASK_ORDER.indexOf(cur)+1)%TASK_ORDER.length]; var r=bm().assignBuilder(sl,card,nx,curZoneId()); if(r&&r.ok)banner('Slot '+(sl+1)+' -> '+TASK_LABEL[nx],1.1); renderCrew(); };})(s.slot,s.task||'build',s.card); act.appendChild(tk);
+        var un=document.createElement('button'); un.className='econ-btn alt'; un.textContent='✕'; un.title='Clear slot'; un.onclick=(function(sl){return function(){ var r=bm().unassignBuilder(sl); if(r&&r.ok)banner('Slot '+(sl+1)+' cleared',1.0); else if(r&&r.error==='BUSY_BUILDING')banner('Builder is mid-job',1.2); pickerSlot=-1; renderCrew(); };})(s.slot); act.appendChild(un);
+      }
+    }
+    row.appendChild(ico); row.appendChild(info); row.appendChild(act);
+    return row;
+  }
+  function pickerEl(slot){
+    var p=prof()||{}, e=econ(), th=(e&&e.townHallLevel)?e.townHallLevel(p):1;
+    var box=document.createElement('div'); box.style.cssText='background:rgba(0,0,0,.32);border:1px dashed rgba(201,168,76,.4);border-radius:12px;padding:8px 9px;margin:0 0 7px;max-height:210px;overflow:auto;-webkit-overflow-scrolling:touch;';
+    var cards=ownedCards(p);
+    var title=document.createElement('div'); title.style.cssText='font-size:10px;color:#9a8f6a;letter-spacing:.08em;margin-bottom:6px;'; title.textContent='PICK A DOG FOR SLOT '+(slot+1); box.appendChild(title);
+    if(!cards.length){ var none=document.createElement('div'); none.style.cssText='font-size:11px;color:#9a8f6a;text-align:center;padding:8px;'; none.textContent='No dogs in your pack yet -- win cards in the battler first.'; box.appendChild(none); return box; }
+    cards.sort(function(a,c){ return c.lvl-a.lvl; });
+    cards.forEach(function(c){ var spd=(e&&e.builderSpeed)?e.builderSpeed(c.lvl,th):1;
+      var btn=document.createElement('button'); btn.style.cssText='display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(10,10,16,.6);border:1px solid rgba(201,168,76,.25);border-radius:9px;padding:6px 8px;margin:3px 0;color:#E8E8E8;cursor:pointer;';
+      var th2=document.createElement('span'); th2.style.cssText='flex:0 0 auto;width:28px;height:28px;border-radius:7px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid rgba(201,168,76,.3);'; thumbInto(th2,c.key);
+      var nm=document.createElement('b'); nm.style.cssText='color:#e8c55a;flex:1;font-size:12px;'; nm.textContent=cardName(c.key);
+      var lv=document.createElement('span'); lv.style.cssText='font-size:10px;color:#b9a76a;'; lv.textContent='Lv '+c.lvl;
+      var sp=document.createElement('span'); sp.style.cssText='font-size:11px;color:#7CFFb0;font-weight:800;'; sp.textContent=spd.toFixed(2)+'x';
+      btn.appendChild(th2); btn.appendChild(nm); btn.appendChild(lv); btn.appendChild(sp);
+      btn.onclick=(function(key){return function(){ var r=bm().assignBuilder(slot,key,'build',curZoneId()); if(r&&r.ok)banner('Assigned '+cardName(key)+' to slot '+(slot+1),1.2); else if(r&&r.error==='CARD_NOT_OWNED')banner('You do not own that dog',1.2); else if(r&&r.error==='BUSY_BUILDING')banner('Slot is mid-job',1.2); pickerSlot=-1; renderCrew(); };})(c.key);
+      box.appendChild(btn); });
+    return box;
+  }
+  function renderCrew(){
+    var body=$('crew-body'); if(!body)return; var b=bm(),e=econ(); body.replaceChildren();
+    if(!b||!b.builders||!b.builderState){ body.innerHTML='<div class="econ-prev">Builders are warming up...</div>'; return; }
+    var p=prof()||{}, th=(e&&e.townHallLevel)?e.townHallLevel(p):1;
+    var st=b.builderState()||{cap:1,free:1}, list=b.builders()||[];
+    var sub=$('crew-sub'); if(sub)sub.textContent='Builders '+st.free+'/'+st.cap+' available';
+    var head=document.createElement('div'); head.className='econ-prev'; head.innerHTML='\u{1F477} <b>'+st.free+' / '+st.cap+'</b> builders free / Town Hall '+th+(st.cap<6?' -- raise the Town Hall for more slots':' -- full crew'); body.appendChild(head);
+    list.forEach(function(s){ body.appendChild(slotRow(s,th)); if(pickerSlot===s.slot && !s.building) body.appendChild(pickerEl(s.slot)); });
+  }
+  window.akOpenCrew=function(){ pickerSlot=-1; renderCrew(); showP('crewpanel'); };
+
+  /* =================== TRADE POST (akOpenTrade) =================== */
+  var TRADE_ICO={produce:'\u{1F33F}',wood:'\u{1FAB5}',stone:'\u{1FAA8}',metal:'\u{1F529}',gold:'\u{1FA99}'};
+  var tradeFrom='produce', tradeTo='gold', tradeAmt=10;
+  function balOf(p,kind){ if(!p)return 0; if(kind==='gold')return p.coins|0; if(kind==='produce')return p.produce|0; return p[kind]|0; }
+  function toListFor(from){ return (from==='produce')?['wood','stone','metal','gold']:['gold']; }
+  function renderTrade(){
+    var e=econ(), p=prof()||{};
+    var fseg=$('trade-from'); if(fseg){ fseg.replaceChildren(); ['produce','wood','stone','metal'].forEach(function(k){ var btn=document.createElement('button'); btn.textContent=TRADE_ICO[k]+' '+k+' ('+fmtNum(balOf(p,k))+')'; if(k===tradeFrom)btn.className='on'; btn.onclick=function(){ tradeFrom=k; var tos=toListFor(k); if(tos.indexOf(tradeTo)<0)tradeTo=tos[0]; renderTrade(); }; fseg.appendChild(btn); }); }
+    var tseg=$('trade-to'); if(tseg){ tseg.replaceChildren(); toListFor(tradeFrom).forEach(function(k){ var btn=document.createElement('button'); btn.textContent='-> '+TRADE_ICO[k]+' '+k; if(k===tradeTo)btn.className='on'; btn.onclick=function(){ tradeTo=k; renderTrade(); }; tseg.appendChild(btn); }); }
+    var maxv=balOf(p,tradeFrom); if(tradeAmt>maxv)tradeAmt=maxv; if(tradeAmt<0)tradeAmt=0;
+    var amtEl=$('trade-amt'); if(amtEl)amtEl.textContent=fmtNum(tradeAmt);
+    var rate=(e&&e.tradeRate)?e.tradeRate(tradeFrom,tradeTo):0, got=Math.floor(tradeAmt*rate);
+    var prev=$('trade-prev');
+    if(prev){
+      if(!(rate>0)) prev.innerHTML='Pick a valid trade.';
+      else if(tradeAmt<=0) prev.innerHTML='Rate: 1 '+TRADE_ICO[tradeFrom]+' = '+rate+' '+TRADE_ICO[tradeTo]+' / choose an amount';
+      else { var fb=balOf(p,tradeFrom), tb=balOf(p,tradeTo);
+        prev.innerHTML='<b>'+fmtNum(tradeAmt)+'</b> '+TRADE_ICO[tradeFrom]+' '+tradeFrom+' <span class="arr">-></span> <b>'+fmtNum(got)+'</b> '+TRADE_ICO[tradeTo]+' '+tradeTo+'<br><span style="font-size:11px;color:#9a8f6a;">'+tradeFrom+': '+fmtNum(fb)+' -> '+fmtNum(fb-tradeAmt)+' / '+tradeTo+': '+fmtNum(tb)+' -> '+fmtNum(tb+got)+'</span>'; }
+    }
+    var go=$('trade-go'); if(go)go.disabled=!(rate>0 && tradeAmt>0 && got>0 && balOf(p,tradeFrom)>=tradeAmt);
+  }
+  window.akOpenTrade=function(){ var p=prof()||{}; if(balOf(p,tradeFrom)<=0){ ['produce','wood','stone','metal'].some(function(k){ if(balOf(p,k)>0){tradeFrom=k;return true;} return false; }); var tos=toListFor(tradeFrom); if(tos.indexOf(tradeTo)<0)tradeTo=tos[0]; } renderTrade(); showP('tradepanel'); };
+
+  /* =================== WIRING (chips, closes, trade controls) =================== */
+  function bindClose(id,panel){ var b=$(id); if(b)b.addEventListener('click',function(){ hideP(panel); }); }
+  bindClose('tools-close','toolspanel'); bindClose('crew-close','crewpanel'); bindClose('trade-close','tradepanel');
+  ['toolspanel','crewpanel','tradepanel'].forEach(function(id){ var ov=$(id); if(ov)ov.addEventListener('click',function(ev){ if(ev.target===ov)ov.classList.remove('show'); }); });
+  var chT=$('ph-tools'); if(chT)chT.addEventListener('click',function(){ akOpenTools(); });
+  var chB=$('ph-bld');   if(chB)chB.addEventListener('click',function(){ akOpenCrew(); });
+  var chP=$('ph-produce'); if(chP)chP.addEventListener('click',function(){ akOpenTrade(); });
+  // trade steppers + presets + confirm
+  var steps=document.querySelectorAll('#tradepanel .econ-step button[data-amt]');
+  for(var si=0;si<steps.length;si++){ steps[si].addEventListener('click',(function(btn){return function(){ var d=btn.getAttribute('data-amt'); var p=prof()||{}, maxv=balOf(p,tradeFrom); var inc=tradeAmt>=100?10:(tradeAmt>=20?5:1); tradeAmt+=(d==='inc'?inc:-inc); if(tradeAmt<0)tradeAmt=0; if(tradeAmt>maxv)tradeAmt=maxv; renderTrade(); };})(steps[si])); }
+  var presets=document.querySelectorAll('#trade-presets button[data-set]');
+  for(var pi=0;pi<presets.length;pi++){ presets[pi].addEventListener('click',(function(btn){return function(){ var s=btn.getAttribute('data-set'); var p=prof()||{}, maxv=balOf(p,tradeFrom); tradeAmt=(s==='max')?maxv:Math.min(maxv,parseInt(s,10)||0); renderTrade(); };})(presets[pi])); }
+  var tg=$('trade-go'); if(tg)tg.addEventListener('click',function(){ var e=econ(); if(!e||!e.trade)return; var r=e.trade(tradeFrom,tradeTo,tradeAmt|0);
+    if(r&&r.ok){ banner('Traded '+fmtNum(r.spent)+' '+tradeFrom+' -> '+fmtNum(r.got)+' '+tradeTo+(r.overflowGold?(' (+'+r.overflowGold+'g overflow)'):''),1.6); tradeAmt=0; bump(); renderTrade(); }
+    else if(r&&r.error==='INSUFFICIENT')banner('Not enough '+tradeFrom,1.4);
+    else if(r&&r.error==='BELOW_MIN')banner('Amount too small for this rate',1.4);
+    else banner('Trade failed',1.2); });
+  // ph-bld availability readout (light poll; writes only on change)
+  var _bldLast='';
+  function refreshBld(){ try{ var b=bm(); if(!b||!b.builderState)return; var st=b.builderState(); var txt='\u{1F477} '+st.free+'/'+st.cap; if(txt!==_bldLast){ _bldLast=txt; var el=$('ph-bld'); if(el)el.textContent=txt; } }catch(_e){} }
+  refreshBld(); try{ setInterval(refreshBld,800); }catch(_e){}
+  // keep an OPEN Foreman's timers live (only when no picker is open, so the picker scroll isn't reset)
+  try{ setInterval(function(){ var cp=$('crewpanel'); if(cp&&cp.classList.contains('show')&&pickerSlot<0)renderCrew(); },1000); }catch(_e){}
 })();
 // AK-LOADING controller: fill the bar + fade out when ready; akShowLoad() re-shows it on page-nav (into shops/battler + back)
 (function(){var ls=document.getElementById('loadscreen'),fill=document.getElementById('ls-fill');if(!ls)return;
@@ -469,9 +950,10 @@ window.AK_CTX = {
   showBanner: function(text, secs){ showBanner(text, secs); },
   ui:{ keeperCard:function(o){ o=o||{}; var $=function(id){return document.getElementById(id);};
     $('int-place').textContent=o.place||(interiorB&&interiorB.label)||'BUILDING';
-    $('int-glyph').textContent=o.glyph||'🐕'; $('int-name').textContent=o.name||'The Keeper';
+    setKeeperPortrait($('int-glyph'), o.art, o.glyph); $('int-name').textContent=o.name||'The Keeper';   // AK-KEEPERART
     $('int-line').textContent=o.line||''; var bg=$('int-bg');
-    if(o.interiorArt){ bg.style.backgroundImage="url('"+o.interiorArt+"')"; } else { bg.style.backgroundImage=''; bg.style.background='radial-gradient(circle at 50% 35%, #1a1510, #08080c)'; }
+    if(o.interiorArt){ bg.style.backgroundImage="url('"+o.interiorArt+"')"; bg.style.background=''; } else { setInteriorBg(interiorB); }   // AK-INTBG (#9): no module art -> this building's own interior bg
+
     var btns=$('int-btns'); btns.replaceChildren();
     (o.buttons||[]).forEach(function(b){ var el=document.createElement('button'); el.textContent=b.label;
       el.style.cssText=(b.primary!==false)?'flex:2;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:10px;padding:13px 0;font-weight:900;font-size:14px;letter-spacing:.03em;':'flex:1;background:none;border:1px solid rgba(201,168,76,.45);color:#b9a76a;border-radius:10px;padding:13px 0;font-weight:700;font-size:12px;';
@@ -518,37 +1000,6 @@ function akDrawSystems(){ if(!window.AK_SYSTEMS)return; var rs=AK_CTX._roamers;
 try{ if(window.AK_SYSTEMS) AK_SYSTEMS.initAll(AK_CTX); }catch(_e){}
 requestAnimationFrame(loop);
 </script>
-<script>
-/* AK-3D tilt shim -- one delegated pointer handler for ALL .ak-3d scenes.
-   Writes --ak-rx/--ak-ry (deg) onto the inner .ak-3d-tilt; CSS does the rest. */
-(function(){
-  if (window.__akTilt) return; window.__akTilt = true;
-  if (matchMedia('(hover:none),(pointer:coarse)').matches) return;     // static tilt only
-  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-  var MAX = 9, raf = 0, pend = null;
-  function apply(){
-    raf = 0; if(!pend) return;
-    var t = pend.tilt, r = pend.rect;
-    var nx = (pend.x - r.left)/r.width  - .5;     // -0.5 .. 0.5
-    var ny = (pend.y - r.top )/r.height - .5;
-    t.style.setProperty('--ak-ry', ( nx*2*MAX).toFixed(2)+'deg');
-    t.style.setProperty('--ak-rx', (-ny*2*MAX + 3).toFixed(2)+'deg');  // +3 = tabletop bias
-    pend = null;
-  }
-  document.addEventListener('pointermove', function(e){
-    if (e.pointerType === 'touch') return;
-    var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
-    var t = s.querySelector('.ak-3d-tilt'); if(!t) return;
-    s.classList.add('ak-3d-live');
-    pend = { tilt:t, rect:s.getBoundingClientRect(), x:e.clientX, y:e.clientY };
-    if(!raf) raf = requestAnimationFrame(apply);
-  }, {passive:true});
-  document.addEventListener('pointerout', function(e){
-    var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
-    if (s.contains(e.relatedTarget)) return;          // pointer still inside the scene
-    s.classList.remove('ak-3d-live');
-    var t = s.querySelector('.ak-3d-tilt');
-    if(t){ t.style.removeProperty('--ak-rx'); t.style.removeProperty('--ak-ry'); }   // eases back to rest
-  }, {passive:true});
-})();
-</script></body></html>
+<!-- AK-3D tilt shim de-duped to shared ak_25d.js (also exposes window.AK25D.apply). -->
+<script src="ak_25d.js?v=1"></script>
+</body></html>

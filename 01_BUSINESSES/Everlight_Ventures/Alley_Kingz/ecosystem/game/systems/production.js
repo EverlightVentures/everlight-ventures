@@ -37,31 +37,31 @@
   // kind: 'gold' | 'scrap' | 'fragments' | 'keys'   grantKind: the ctx.currency.grant key
   var CFG = {
     GEM:  { kind:'scrap', rarity:'Rare', grantKind:'scrap', rate:5,   costBase:180,
-            keeper:'Prospector Pip', glyph:"⛏️", it:'gem_mine',     color:'#b07bff',
+            keeper:'Prospector Pip', art:'assets/portraits/keeper_pip.png', glyph:"⛏️", it:'gem_mine',     color:'#b07bff',
             resLabel:'RARE SCRAP', resGlyph:"🔩",
             flavors:["Rich veins today, partner -- haul's ready.",
                      "Scrap this raw, even Stonejaw'd want a piece.",
                      "Mind the shaft, it's slick down there."] },
     MINT: { kind:'gold', rarity:null, grantKind:'gold', rate:90,  costBase:200,
-            keeper:'Banker Bones', glyph:"💰", it:'merchant',       color:'#ffd76b',
+            keeper:'Banker Bones', art:'assets/portraits/keeper_bones.png', glyph:"💰", it:'merchant',       color:'#ffd76b',
             resLabel:'GOLD', resGlyph:"🪙",
             flavors:["Gold's good here. The mint never sleeps.",
                      "Count it twice -- that's how $BCARDD's crew stays paid.",
                      "Stack it deep, kid. Streets respect a full purse."] },
     FORGE:{ kind:'fragments', rarity:null, grantKind:'fragments', rate:4, costBase:220,
-            keeper:'Sparks', glyph:"🔧", it:'card_forge',           color:'#ff9d5c',
+            keeper:'Sparks', art:'assets/portraits/keeper_sparks.png', glyph:"🔧", it:'card_forge',           color:'#ff9d5c',
             resLabel:'KEY FRAGMENTS', resGlyph:"🧩",
             flavors:["Forge's lit -- fragments comin' off the anvil.",
                      "Ten of these and you're cuttin' a fresh key.",
                      "Every key starts as scrap and sweat."] },
     LAB:  { kind:'scrap', rarity:'Epic', grantKind:'scrap', rate:2, costBase:260,
-            keeper:'Doc Wattson', glyph:"🔬", it:'research_lab',     color:'#7fc8ff',
+            keeper:'Doc Wattson', art:'assets/portraits/keeper_wattson.png', glyph:"🔬", it:'research_lab',     color:'#7fc8ff',
             resLabel:'EPIC SCRAP', resGlyph:"🔩",
             flavors:["Science waits for no dog -- Epic scrap's brewin'.",
                      "Pure compound, fit for Crown Foxhound himself.",
                      "The good stuff drips slow. Patience, mutt."] },
     GEN:  { kind:'keys', rarity:null, grantKind:'keys', rate:0.5, costBase:300,
-            keeper:'Volt', glyph:"⚡", it:'research_lab',                  color:'#ffce6b',
+            keeper:'Volt', art:'assets/portraits/keeper_volt.png', glyph:"⚡", it:'research_lab',                  color:'#ffce6b',
             resLabel:'KEYS', resGlyph:"🗝️",
             flavors:["She's hummin' sweet -- juice keeps the row movin'.",
                      "No power, no muscle. I keep Rosco's lights on.",
@@ -128,7 +128,9 @@
     if (!p || !cfg) return { ok:false, units:0 };
     var prod = p.prod || {}; var e = prod[bid]; if (!e) return { ok:false, units:0 };
     var lvl = Math.max(1, e.lvl | 0);
-    var rate = ratePerHr(bid, lvl, prod), cap = capFor(bid, lvl);
+    // AK-W3 2026-06-30: a RAIDED/damaged producer yields less until it rebuilds (damageYieldMult 1-0.5*dmg).
+    var dmgMult = 1; try { if (global.AK_ECON && AK_ECON.damageYieldMult) dmgMult = AK_ECON.damageYieldMult(p, bid, Date.now()) || 1; } catch (_e) {}
+    var rate = ratePerHr(bid, lvl, prod) * dmgMult, cap = capFor(bid, lvl);
     if (rate <= 0) return { ok:false, units:0 };
     var hr = Math.max(0, (Date.now() - (e.lastCollect || 0)) / HR_MS);
     var acc = rate * hr; var capped = acc >= cap; if (capped) acc = cap;
@@ -194,7 +196,7 @@
     var upLabel = atMax ? ('MAX LEVEL (Lv ' + lvl + ')') : ('UPGRADE → Lv ' + (lvl + 1) + '  (' + cost + 'g)');
 
     ctx.ui.keeperCard({
-      place: b.label, glyph: cfg.glyph, name: cfg.keeper,
+      place: b.label, art: cfg.art, glyph: cfg.glyph, name: cfg.keeper,
       line: flavor + '   ' + status,
       interiorArt: 'assets/interiors/' + cfg.it + '.png',
       buttons: [

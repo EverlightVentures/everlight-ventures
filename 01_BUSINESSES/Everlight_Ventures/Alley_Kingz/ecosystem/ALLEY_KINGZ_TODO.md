@@ -4,7 +4,7 @@
 > Last updated: 2026-06-19 (session 92cbcbe0). Auto-check-off helper: scripts/ak_todo_sync.py (scans live markers/files -> flips status).
 
 ## DEPLOY: SOLVED 2026-06-19
-- [x] DEPLOY WORKS. Root cause was NOT a wedge/throttle -- the upload is SLOW (528 blobs ~77MB, ~5-9 min) and I kept KILLING it early. FIX: foreground `timeout 540 ssh e5 '...python3 -u cf_pages_direct_upload.py --dir game --project alley-kingz --exclude assets/maps,assets/hub'` run to [5/5] DEPLOYED. (detached/nohup/tmux all die with empty logs here -- use FOREGROUND.) See reference_e5_upload_chain_of_command memory.
+- [x] DEPLOY WORKS. Root cause was NOT a wedge/throttle -- the upload is SLOW (528 blobs ~77MB, ~5-9 min) and I kept KILLING it early. FIX: foreground `timeout 540 ssh e5 '...python3 -u cf_pages_direct_upload.py --dir game --project alley-kingz --exclude assets/maps (NEVER assets/hub -- holds facades)'` run to [5/5] DEPLOYED. (detached/nohup/tmux all die with empty logs here -- use FOREGROUND.) See reference_e5_upload_chain_of_command memory.
 - [x] LIVE NOW: the 1/8s multi-district walkable hub at alleykingz.online/hub_proto (verify with `curl -sL .../hub_proto` -- follow the 308 to the clean URL). Deploy watch-service + watchdog installed on e5.
 - [ ] NOTE: AK-HUBGO marker in index.html reads 0 live -- moot once hub becomes root (index.html gets replaced by the hub); the Arena will route to the battler page directly.
 

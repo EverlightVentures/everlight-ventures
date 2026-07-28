@@ -190,7 +190,7 @@
       var col = rarityCol(rec.rarity);
       var sub = rec.isSpell ? ('Spell -- '+esc(FACTION_INFO[rec.faction]?FACTION_INFO[rec.faction].short:'NEUTRAL'))
         : (esc(rec.cls||rec.role)+' -- '+esc(rec.role)+(rec.variant&&rec.variant!=='ORIGINAL'?(' -- '+esc(rec.variant)):''));
-      rows.push('<button class="cdx-row" data-cact="open" data-num="'+esc(rec.num)+'" style="border-left-color:'+col+'">'+
+      rows.push('<button class="cdx-row r-'+esc(rec.rarity||'Common')+'" data-cact="open" data-num="'+esc(rec.num)+'" style="border-left-color:'+col+';--rar:'+col+'">'+
         '<span class="cdx-rname">'+(rec.isMythic?'<b class="cdx-crown">&#9819;</b> ':'')+esc(rec.name)+'</span>'+
         '<span class="cdx-rsub">'+sub+'</span>'+
         '<span class="cdx-rcost">'+rec.cost+'</span></button>');
@@ -208,7 +208,7 @@
     if(!rec) return '<div class="cdx-empty">No file on this one.</div>';
     var col = rarityCol(rec.rarity);
     var h = '<button class="cdx-back" data-cact="closecard">&larr; Roster</button>';
-    h += '<div class="cdx-detail" style="border-color:'+col+'">';
+    h += '<div class="cdx-detail r-'+esc(rec.rarity||'Common')+'" style="border-color:'+col+';--rar:'+col+'">';
     h += '<div class="cdx-dtop"><div class="cdx-dname">'+(rec.isMythic?'<b class="cdx-crown">&#9819;</b> ':'')+esc(rec.name)+'</div><div class="cdx-dcost">'+rec.cost+'</div></div>';
     h += '<div class="cdx-dmeta">'+esc(rec.rarity)+' &middot; '+esc(rec.factionName||'Neutral')+' &middot; '+esc(rec.role)+(rec.breed?(' &middot; '+esc(rec.breed)):'')+'</div>';
     if(rec.tagline) h += '<div class="cdx-dtag">&quot;'+esc(rec.tagline)+'&quot;</div>';
@@ -487,7 +487,30 @@
         '.cdx-boss b{ font:700 12px Inter,sans-serif; color:#E8E8E8; }',
         '.cdx-boss small{ display:block; font:italic 600 11px "Playfair Display",serif; color:var(--gold-lo,#b9962f); margin:1px 0; }',
         '.cdx-boss span{ font:500 11px Inter,sans-serif; color:#aab0b8; line-height:1.5; }',
-        '.cdx-clear{ font:italic 700 12px "Playfair Display",serif; color:var(--gold-hi,#F2E2A8); margin-top:5px; }'
+        '.cdx-clear{ font:italic 700 12px "Playfair Display",serif; color:var(--gold-hi,#F2E2A8); margin-top:5px; }',
+        '',
+        '/* ===== AK-CODEX-ALIVE 2026-06-20: living-card layer, mirrors the shop AK-CARDALIVE vocabulary. Compositor-only (transform/opacity); the rarity glow is a STATIC inset shadow whose OPACITY breathes. game.html has no .ak-3d pointer shim, so the holo foil SELF-drifts instead of pointer-steering. Honors prefers-reduced-motion. ===== */',
+        '@keyframes cdxShine{ 0%{ transform:translateX(-130%) skewX(-18deg); opacity:0; } 8%{ opacity:.7; } 46%{ transform:translateX(260%) skewX(-18deg); opacity:0; } 100%{ transform:translateX(260%) skewX(-18deg); opacity:0; } }',
+        '@keyframes cdxAura{ 0%,100%{ opacity:.28; } 50%{ opacity:.8; } }',
+        '@keyframes cdxFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-4px); } }',
+        '@keyframes cdxFoil{ to{ transform:rotate(360deg); } }',
+        '/* roster rows: gold shimmer sweep (staggered by nth-child so they never pulse in unison) */',
+        '.cdx-row{ position:relative; overflow:hidden; }',
+        '.cdx-row > *{ position:relative; z-index:2; }',
+        '.cdx-row::after{ content:""; position:absolute; top:-25%; bottom:-25%; left:0; width:34%; z-index:1; pointer-events:none; background:linear-gradient(100deg, transparent, rgba(232,197,90,.13), rgba(255,255,255,.22), rgba(232,197,90,.10), transparent); mix-blend-mode:screen; transform:translateX(-140%) skewX(-18deg); opacity:0; animation:cdxShine 9s ease-in-out infinite; }',
+        '.cdx-row:nth-child(3n)::after{ animation-delay:2.2s; }',
+        '.cdx-row:nth-child(3n+1)::after{ animation-delay:4.6s; }',
+        '.cdx-row:nth-child(3n+2)::after{ animation-delay:6.8s; }',
+        '/* breathing rarity aura -- only the high tiers (few rows -> tiny animated-element count on a long list) */',
+        '.cdx-row.r-Legendary::before, .cdx-row.r-Mythic::before{ content:""; position:absolute; inset:0; z-index:0; pointer-events:none; border-radius:inherit; box-shadow:inset 0 0 15px -6px var(--rar,#D4AF37); opacity:.3; animation:cdxAura 5.4s ease-in-out infinite; }',
+        '/* detail view = the big "card": holographic foil + breathing rarity aura + faint idle float */',
+        '.cdx-detail{ position:relative; overflow:hidden; animation:cdxFloat 5.2s ease-in-out infinite; }',
+        '.cdx-detail > *{ position:relative; z-index:2; }',
+        '.cdx-detail::before{ content:""; position:absolute; inset:-45%; z-index:1; pointer-events:none; background:conic-gradient(from 200deg, rgba(232,197,90,0) 0%, rgba(46,230,255,.10) 20%, rgba(255,45,126,.09) 40%, rgba(232,197,90,.20) 56%, rgba(255,255,255,.12) 62%, rgba(46,230,255,.10) 80%, rgba(232,197,90,0) 100%); mix-blend-mode:screen; opacity:.42; animation:cdxFoil 14s linear infinite; }',
+        '.cdx-detail::after{ content:""; position:absolute; inset:0; z-index:1; pointer-events:none; border-radius:inherit; box-shadow:inset 0 0 26px -8px var(--rar,#D4AF37), inset 0 0 0 1px var(--rar,#D4AF37); opacity:.32; animation:cdxAura 5.6s ease-in-out infinite; }',
+        '.cdx-detail.r-Legendary::after{ box-shadow:inset 0 0 32px -6px var(--rar,#D4AF37), inset 0 0 0 1px var(--rar,#D4AF37); }',
+        '.cdx-detail.r-Mythic::after{ box-shadow:inset 0 0 40px -5px var(--rar,#e8c55a), inset 0 0 0 1px var(--rar,#e8c55a); }',
+        '@media (prefers-reduced-motion:reduce){ .cdx-row::after, .cdx-row.r-Legendary::before, .cdx-row.r-Mythic::before, .cdx-detail, .cdx-detail::before, .cdx-detail::after{ animation:none !important; } .cdx-row::after, .cdx-detail::before{ opacity:0 !important; } }'
       ].join('\n');
       document.head.appendChild(st);
     }catch(_e){}

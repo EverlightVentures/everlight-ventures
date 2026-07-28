@@ -80,14 +80,15 @@
    * THE 7 TIERS -- cumulative thresholds, gold-cyberpunk colors + icons.
    * (The synthesis names the 7 tiers; thresholds/colors/icons tuned here.)
    * ======================================================================== */
+  // AK-DEEMOJI: each tier carries a PNG `art` badge; `icon` emoji stays the graceful fallback.
   var TIERS = [
-    { idx:0, name:'Stranger',  min:0,    color:'#9a8f6a', icon:'👤' }, // bust silhouette
-    { idx:1, name:'New Face',  min:25,   color:'#b9c2cf', icon:'🐾' }, // paw prints
-    { idx:2, name:'Known',     min:75,   color:'#cd8a4a', icon:'🦴' }, // bone
-    { idx:3, name:'Trusted',   min:175,  color:'#5ad0ff', icon:'🤝' }, // handshake
-    { idx:4, name:'Respected', min:350,  color:'#c08bff', icon:'⭐' },        // star
-    { idx:5, name:'Revered',   min:650,  color:'#e8c55a', icon:'👑' }, // crown
-    { idx:6, name:'Legend',    min:1100, color:'#ff7ad9', icon:'🔥' }  // fire
+    { idx:0, name:'Stranger',  min:0,    color:'#9a8f6a', icon:'👤', art:'assets/icons/tier_stranger.png' },  // bust silhouette
+    { idx:1, name:'New Face',  min:25,   color:'#b9c2cf', icon:'🐾', art:'assets/icons/tier_newface.png' },   // paw prints
+    { idx:2, name:'Known',     min:75,   color:'#cd8a4a', icon:'🦴', art:'assets/icons/tier_known.png' },     // bone
+    { idx:3, name:'Trusted',   min:175,  color:'#5ad0ff', icon:'🤝', art:'assets/icons/tier_trusted.png' },   // handshake
+    { idx:4, name:'Respected', min:350,  color:'#c08bff', icon:'⭐', art:'assets/icons/tier_respected.png' }, // star
+    { idx:5, name:'Revered',   min:650,  color:'#e8c55a', icon:'👑', art:'assets/icons/tier_revered.png' },   // crown
+    { idx:6, name:'Legend',    min:1100, color:'#ff7ad9', icon:'🔥', art:'assets/icons/tier_legend.png' }     // fire
   ];
 
   /* tier-gated NPC dialog options (slice 0..tier.idx is unlocked) */
@@ -120,27 +121,27 @@
    * ======================================================================== */
   var FRIENDLY_NPCS = {
     lost_pup: {
-      id:'lost_pup', label:'Lost Pup', verb:'WALK IT HOME', icon:'🐶',
-      rarity:'Common', karma:12, special:false,
+      id:'lost_pup', label:'Lost Pup', verb:'WALK IT HOME', icon:'🐶', art:'assets/icons/npc_lostpup.png',
+      rarity:'Common', karma:12, special:false, escort:true,   // ESCORT job -- walk him to his crew's block, NOT an instant payout
       line:function (f) { return 'A lost pup whimpers between the dumpsters -- "' + f.crew + ' colors… walk me home, mister?"'; },
       reward:[['gold',[40,80]]] },
     injured_stray: {
-      id:'injured_stray', label:'Injured Stray', verb:'PATCH IT UP', icon:'🩹',
+      id:'injured_stray', label:'Injured Stray', verb:'PATCH IT UP', icon:'🩹', art:'assets/icons/npc_injured.png',
       rarity:'Rare', karma:16, special:false,
       line:function (f) { return 'An injured stray favors a paw in the alley. Patch it and the block remembers your face.'; },
       reward:[['scrap',[3,6],'Common'],['bones',[1,2]]] },
     merchant: {
-      id:'merchant', label:'Merchant Caravan', verb:'TRADE FAIR', icon:'🛒',
+      id:'merchant', label:'Merchant Caravan', verb:'TRADE FAIR', icon:'🛒', art:'assets/icons/npc_merchant.png',
       rarity:'Epic', karma:9, special:false,
       line:function (f) { return f.crew + ' runs a scrap caravan through here. Trade fair, build a name.'; },
       reward:[['scrap',[4,8],'Rare']] },
     recruiter: {
-      id:'recruiter', label:'Faction Recruiter', verb:'HEAR THE JOB', icon:'📋',
+      id:'recruiter', label:'Faction Recruiter', verb:'HEAR THE JOB', icon:'📋', art:'assets/icons/npc_recruiter.png',
       rarity:'Legendary', karma:11, special:false,
       line:function (f) { return 'A ' + f.name + ' recruiter sizes you up -- "got a job if you got the spine. See the Fixer."'; },
       reward:[['sp',[1,2]]], mission:true },
     stranger: {
-      id:'stranger', label:'Mysterious Stranger', verb:'LISTEN', icon:'🎴',
+      id:'stranger', label:'Mysterious Stranger', verb:'LISTEN', icon:'🎴', art:'assets/icons/npc_elder.png',
       rarity:null, faceless:true, karma:25, special:true,
       line:function (f) { return 'A hooded dog deals one card face-down on a crate. "The king never died, pup. Keep climbin’."'; },
       reward:[['bones',[6,10]],['keys',[0,1]]], story:true }
@@ -323,10 +324,50 @@
     var def = (npc && npc.def) ? npc.def : (typeof npc === 'string' ? FRIENDLY_NPCS[npc] : npc);
     if (!def || !ctx) return { ok: false };
     var fac = getZoneFaction(zoneId);
+    // RECRUITER -> hand the player a REAL MISSION instead of paying karma on the spot.
+    // The recruiter now CREATES an active job (window.AKMissions, the mission_active wave):
+    // the karma + soft loot become the TURN-IN reward, so the recruiter actually sends you
+    // somewhere. Backward-compat: if mission_active is NOT loaded, fall through to the legacy
+    // instant grant below (zero behavior change on pages without the wave).
+    if (def.mission && global.AKMissions && global.AKMissions.acceptFromRecruiter) {
+      var cardName = (npc && npc.cardName) || null, m = null;
+      try { m = global.AKMissions.acceptFromRecruiter(zoneId, fac, cardName, ctx, rng, def.karma); } catch (_) { m = null; }
+      try { if (global.AKQuests && global.AKQuests.reportEvent) global.AKQuests.reportEvent('karma_recruit', 1); } catch (_) {}
+      return { ok: true, npc: def, faction: fac, accepted: !!m, mission: m, karma: null, rewards: [], rewardStr: '' };
+    }
+    // LOST PUP -> a real ESCORT job, NOT an instant handout. "WALK IT HOME" now hands the
+    // player a walk-home mission (mission_active wave): the pup follows, you have to TRAVERSE
+    // the blocks to his home district, and he is delivered (paid) only once you get him there.
+    // Backward-compat: if the mission wave is NOT loaded, fall through to the legacy instant
+    // grant below (zero behavior change on pages without it).
+    if (def.escort && global.AKMissions && global.AKMissions.acceptEscort) {
+      var pupName = (npc && npc.cardName) || null, em = null;
+      try { em = global.AKMissions.acceptEscort(zoneId, fac, pupName, ctx, rng, def.karma); } catch (_) { em = null; }
+      return { ok: true, npc: def, faction: fac, accepted: !!em, mission: em, escort: true, karma: null, rewards: [], rewardStr: '' };
+    }
     var got = grantReward(ctx, def.reward, rng);
     var k = addKarma(zoneId, def.karma, ctx);
     if (def.mission) { try { if (global.AKQuests && global.AKQuests.reportEvent) global.AKQuests.reportEvent('karma_recruit', 1); } catch (_) {} }
     return { ok: true, npc: def, faction: fac, karma: k, rewards: got, rewardStr: rewardStr(got) };
+  }
+
+  // Build the banner line for a friendly interaction result (shared by the
+  // overlay-less fallback + the panel onClose). Handles the new "job accepted"
+  // recruiter case alongside the classic karma + soft-reward grant.
+  function npcResultLine(def, r) {
+    if (r && r.escort && r.accepted && r.mission) {
+      return def.label + ': "' + (r.mission.objLine || 'walk me home') + '"  -- stick close through the blocks, mutt.';
+    }
+    if (r && r.escort && r.accepted === false) {
+      return def.label + ': too much on your plate -- clear a job before you take the pup.';
+    }
+    if (r && r.accepted && r.mission) {
+      return def.label + ': "' + (r.mission.objLine || r.mission.title || 'job') + '"  -- come back when it is done.';
+    }
+    if (r && r.accepted === false && def.mission) {
+      return def.label + ': board is full -- finish a job first, mutt.';
+    }
+    return def.label + ' remembers you.  ' + ((r && r.rewardStr) || '') + ((r && r.karma) ? '  (+' + def.karma + ' karma)' : '');
   }
 
   /* ======================================================================== *
@@ -421,6 +462,15 @@
       try { g.drawImage(im, X - r, Y - r, r * 2, r * 2); drew = true; } catch (_) {}
       g.restore();
     }
+    // AK-DEEMOJI: no bound crew-dog art -> the NPC's PNG icon, then the emoji glyph
+    if (!drew && self.npc && self.npc.def && self.npc.def.art) {
+      var aim = artImg(self.npc.def.art);
+      if (aim && aim.complete && aim.naturalWidth > 0) {
+        g.save(); g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.closePath(); g.clip();
+        try { g.drawImage(aim, X - r, Y - r, r * 2, r * 2); drew = true; } catch (_) {}
+        g.restore();
+      }
+    }
     if (!drew) {
       g.fillStyle = col; g.globalAlpha = 0.9; g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.fill(); g.globalAlpha = 1;
       g.font = Math.round(r * 1.05) + 'px Inter,system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -471,11 +521,23 @@
     try { im.onerror = function () { if (global.akImgErr) global.akImgErr(im); }; } catch (_) {}
     return im;
   }
+  // AK-DEEMOJI: cached path->Image loader for tier/NPC PNG icons. Cached by path so the
+  // overlay/world draw never allocates a new Image per frame; a 404 marks it dead (null)
+  // so callers fall straight back to the emoji glyph (graceful fallback).
+  var _artCache = {};
+  function artImg(path) {
+    if (!path || typeof Image === 'undefined') return null;
+    if (_artCache.hasOwnProperty(path)) return _artCache[path];
+    var im = new Image(); _artCache[path] = im;
+    try { im.onerror = function () { _artCache[path] = null; }; } catch (_) {}
+    im.src = path;
+    return im;
+  }
 
   function openFriendly(self, ctx) {
     if (S.engaging || !ctx.overlay || !ctx.overlay.open) {   // overlay-less fallback: grant + banner
       var r0 = interact(self.npc, self.zone, ctx);
-      if (r0.ok) { ctx.showBanner(self.npc.def.label + ': ' + r0.rewardStr + (r0.karma ? '  (+' + self.npc.def.karma + ' karma)' : ''), 2.0); self.done = true; ctx.world.removeRoamer(self); }
+      if (r0.ok) { ctx.showBanner(npcResultLine(self.npc.def, r0), 2.2); self.done = true; ctx.world.removeRoamer(self); }
       return;
     }
     S.engaging = true;
@@ -503,6 +565,8 @@
       g.save(); roundRect(g, -pr / 2, -pr / 2, pr, pr, 10); g.clip();
       var im = npc.cardName ? npcImg(ctx, npc.cardName) : null, drew = false;
       if (im && im.complete && im.naturalWidth > 0) { try { g.drawImage(im, -pr / 2, -pr / 2, pr, pr); drew = true; } catch (_) {} }
+      // AK-DEEMOJI: no bound crew-dog art -> the NPC's PNG icon, then the emoji glyph
+      if (!drew && def.art) { var aim = artImg(def.art); if (aim && aim.complete && aim.naturalWidth > 0) { try { g.drawImage(aim, -pr / 2, -pr / 2, pr, pr); drew = true; } catch (_) {} } }
       if (!drew) {
         g.fillStyle = fac.color; g.globalAlpha = 0.22; g.fillRect(-pr / 2, -pr / 2, pr, pr); g.globalAlpha = 1;
         g.font = '60px Inter,system-ui'; g.textAlign = 'center'; g.textBaseline = 'middle';
@@ -549,7 +613,7 @@
         S.engaging = false;
         if (res === 'help' || resolved) {
           var r = interact(npc, self.zone, ctx);
-          var msg = def.label + ' remembers you.  ' + (r.rewardStr || '') + (r.karma ? '  (+' + def.karma + ' karma)' : '');
+          var msg = npcResultLine(def, r);
           if (r.karma && r.karma.leveledUp) msg = fac.name + ': you’re now ' + r.karma.tier.name + ' here!  ' + (r.rewardStr || '');
           ctx.showBanner(msg, 2.2);
           self.done = true; ctx.world.removeRoamer(self);

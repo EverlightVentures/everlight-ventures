@@ -1,18 +1,23 @@
 /* ==========================================================================
-   ALLEY KINGZ // CHOP SHOP -- GRITTY TV-MA RE-SKIN
-   Author: Kaelen Nguyen (Pixel Forge). Street / "Fast Boyz" / Twisted-Metal
-   chop-shop aesthetic. Gold #D4AF37 on vanta-black, chrome + rust + graffiti,
-   sharp clip-path panels, bold condensed type (Anton / Oswald), neon-on-grime.
-   ORIGINAL UI -- Scrap Tokens, Chop Shop, Crew Chest, Garage. NOT Clash frames.
-   Adult, edgy, premium-street. No cute / rounded / pastel / kiddish anywhere.
+   ALLEY KINGZ // CHOP SHOP -- EVERLIGHT PREMIUM RE-SKIN (2026-06-20)
+   Re-skinned from the old "gritty chop-shop" markers to the everlightventures.io
+   house brand: gold gradient #c9a84c -> #e8c55a, glass panels on vanta-black,
+   Cinzel (headers) / Playfair Display (big display) / Inter (body), neon-gold
+   cyberpunk life. Same DOM, same JS hooks -- only the skin + the "alive" layer
+   changed. Premium mobile-game look. 60fps on a $100 Android (transform/opacity
+   animations only, no per-frame heavy filters, no layout thrash). The brand
+   override + ALIVE layer is appended at the very bottom of this file (it wins on
+   shape/skin while every original selector stays intact).
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --gold:#D4AF37; --gold-hi:#f3d77a; --gold-lo:#9c7d28;
-  --vanta:#070708; --ink:#0b0c0f; --panel:#111218; --panel-2:#171922;
-  --steel:#262a33; --steel-hi:#3a404c; --line:#22252e;
-  --text:#ECEDEF; --muted:#838a98; --dim:#525866;
+  /* brand gold (gradient #c9a84c -> #e8c55a, accent #D4AF37) */
+  --gold:#c9a84c; --gold-hi:#e8c55a; --gold-lo:#9c7d28; --gold-acc:#D4AF37;
+  /* brand darks #050507 / #0A0A0A / #15110a + light text #E8E8E8 */
+  --vanta:#050507; --ink:#0A0A0A; --panel:#0f0e14; --panel-2:#15131c; --warm:#15110a;
+  --steel:#2a2620; --steel-hi:#41392a; --line:rgba(201,168,76,.20);
+  --text:#E8E8E8; --muted:#9a8f6a; --dim:#6f6750;
   --rust:#c0612e; --oxblood:#6e1818;
   --cyan:#2ee6ff; --magenta:#ff2d7e; --teal:#1fd6c4; --hazard:#ff8a1f; --green:#5fff8f;
   --ok:#3ad07a; --bad:#ff4d5e; --warn:#ffb13d;
@@ -47,12 +52,12 @@
   box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px rgba(0,0,0,.5);
   backdrop-filter:blur(7px)}
 .aks-mark{display:flex; flex-direction:column; gap:2px; line-height:1}
-.aks-brand{font-family:'Anton',sans-serif; font-size:30px; letter-spacing:1.5px;
+.aks-brand{font-family:'Cinzel',serif; font-size:30px; letter-spacing:1.5px;
   text-transform:uppercase; transform:skewX(-7deg); color:var(--text);
   text-shadow:2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4)}
 .aks-brand b{color:var(--gold);
   text-shadow:0 0 14px rgba(212,175,55,.55), 2px 2px 0 #000}
-.aks-tag{font-family:'Oswald',sans-serif; font-size:10px; color:var(--rust);
+.aks-tag{font-family:'Inter',sans-serif; font-size:10px; color:var(--rust);
   letter-spacing:3.5px; text-transform:uppercase; transform:skewX(-7deg)}
 .aks-spacer{flex:1}
 
@@ -61,7 +66,7 @@
 .aks-coin{display:flex; align-items:center; gap:7px; padding:7px 13px;
   border:1px solid var(--steel); border-left:3px solid var(--steel-hi);
   background:linear-gradient(180deg,#1b1d25,#0e0f14);
-  font-family:'Oswald',sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;
+  font-family:'Inter',sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;
   clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px); letter-spacing:.5px}
 .aks-coin .dot{width:11px;height:11px;border-radius:2px; transform:rotate(45deg)}
 .aks-coin.gems{border-left-color:var(--cyan)} .aks-coin.gems .dot{background:var(--cyan); box-shadow:0 0 9px var(--cyan)}
@@ -78,7 +83,7 @@
   background:repeating-linear-gradient(-45deg, rgba(212,175,55,.10) 0 14px, rgba(212,175,55,.03) 14px 28px);
   border-bottom:1px solid var(--line)}
 .aks-banner .pill{padding:2px 9px; border:1px solid var(--gold); color:var(--gold);
-  font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:1px;
+  font-family:'Inter',sans-serif; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:1px;
   clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px)}
 .aks-banner .pill.bad{border-color:var(--bad); color:var(--bad)}
 .aks-banner .pill.good{border-color:var(--ok); color:var(--ok)}   /* AK-SHOPFIX: signed-in indicator */
@@ -88,7 +93,7 @@
 .aks-tabs{display:flex; gap:6px; padding:12px 16px 0; overflow-x:auto; scrollbar-width:none}
 .aks-tabs::-webkit-scrollbar{display:none}
 .aks-tab{padding:11px 18px 12px; border:1px solid transparent; cursor:pointer; white-space:nowrap;
-  color:var(--muted); font-family:'Oswald',sans-serif; font-weight:600; font-size:13.5px;
+  color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
   letter-spacing:1.5px; text-transform:uppercase;
   clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 0); transition:.12s}
 .aks-tab:hover{color:var(--text)}
@@ -103,7 +108,7 @@
 .aks-grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(176px,1fr));
   max-width:1400px; margin:0 auto}
 .aks-sec{max-width:1400px; margin:0 auto 6px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
-.aks-sec-title{font-family:'Anton',sans-serif; font-size:21px; color:var(--gold-hi);
+.aks-sec-title{font-family:'Cinzel',serif; font-size:21px; color:var(--gold-hi);
   letter-spacing:1px; text-transform:uppercase; transform:skewX(-5deg);
   text-shadow:2px 2px 0 #000}
 .aks-sec-sub{max-width:1400px; margin:0 auto 16px; color:var(--muted); font-size:12px; line-height:1.55}
@@ -111,14 +116,14 @@
 
 /* ---- filter chips (Card Shop) -------------------------------------------- */
 .aks-filters{max-width:1400px; margin:2px auto 16px; display:flex; gap:7px; flex-wrap:wrap; align-items:center}
-.aks-flabel{font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+.aks-flabel{font-family:'Inter',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
   color:var(--dim); margin-right:2px}
-.aks-chip{font-family:'Oswald',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.6px;
+.aks-chip{font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.6px;
   padding:5px 11px; border:1px solid var(--steel); color:var(--muted); cursor:pointer; background:var(--panel);
   text-transform:uppercase; clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px); transition:.12s}
 .aks-chip:hover{color:var(--text); border-color:var(--steel-hi)}
 .aks-chip[aria-pressed="true"]{color:#0a0a0a; background:var(--gold); border-color:var(--gold); font-weight:700}
-.aks-count{font-family:'Oswald',sans-serif; font-size:11px; color:var(--dim); margin-left:auto; letter-spacing:1px}
+.aks-count{font-family:'Inter',sans-serif; font-size:11px; color:var(--dim); margin-left:auto; letter-spacing:1px}
 
 /* ---- the card (gritty chop-shop frame) ----------------------------------- */
 .aks-card{position:relative; display:flex; flex-direction:column;
@@ -143,19 +148,21 @@
 .aks-card:hover .aks-art img{transform:scale(1.05)}
 .aks-art .scrim{position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(180deg, transparent 55%, rgba(7,7,8,.78) 100%)}
-/* rarity ribbon (angular, top-right) */
-.aks-rib{position:absolute; top:9px; right:0; z-index:4; font-family:'Oswald',sans-serif; font-weight:700;
-  font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; padding:3px 10px 3px 13px; color:#0a0a0a;
-  background:var(--rar); clip-path:polygon(10px 0,100% 0,100% 100%,0 100%)}
+/* identifier chips -- a header strip in the meta block, never over the portrait */
+.aks-badges{display:flex; align-items:center; flex-wrap:wrap; gap:6px}
+/* rarity ribbon (angular chip) */
+.aks-rib{font-family:'Inter',sans-serif; font-weight:700;
+  font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; padding:3px 11px; color:#0a0a0a;
+  background:var(--rar); clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .aks-card.r-Common .aks-rib, .aks-card.r-Rare .aks-rib{color:#06070a}
 .aks-card.r-Mythic .aks-rib, .aks-card.r-Epic .aks-rib{color:#fff}
-/* faction glyph (top-left) */
-.aks-fac{position:absolute; top:8px; left:8px; z-index:4; width:26px; height:26px; display:flex;
-  align-items:center; justify-content:center; font-size:14px; color:var(--text);
+/* faction glyph */
+.aks-fac{flex:0 0 auto; width:24px; height:24px; display:flex;
+  align-items:center; justify-content:center; font-size:13px; color:var(--text);
   background:rgba(7,7,8,.66); border:1px solid var(--fac,var(--steel));
   clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px); box-shadow:0 0 10px -3px var(--fac)}
-/* variant stamp (HEAVY / STREET) bottom-left of art */
-.aks-vstamp{position:absolute; left:9px; bottom:9px; z-index:4; font-family:'Oswald',sans-serif;
+/* variant chip (HEAVY / STREET) */
+.aks-vstamp{font-family:'Inter',sans-serif;
   font-weight:700; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:2px 8px;
   color:var(--text); border:1px solid currentColor; transform:skewX(-8deg)}
 .aks-vstamp.heavy{color:#ffb877} .aks-vstamp.street{color:#7fe9ff}
@@ -163,8 +170,8 @@
 .aks-art .fb{position:absolute; inset:0; display:none; flex-direction:column; align-items:center;
   justify-content:center; gap:7px; text-align:center; padding:10px}
 .aks-art .fb .g{font-size:40px; filter:grayscale(.2) drop-shadow(0 0 12px var(--rar))}
-.aks-art .fb .b{font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
-.aks-art .fb .t{font-family:'Oswald',sans-serif; font-size:8.5px; letter-spacing:1.5px; color:var(--dim);
+.aks-art .fb .b{font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.aks-art .fb .t{font-family:'Inter',sans-serif; font-size:8.5px; letter-spacing:1.5px; color:var(--dim);
   border:1px dashed var(--steel-hi); padding:2px 7px; text-transform:uppercase}
 /* swap to the rarity-framed fallback when the painted art is missing */
 .aks-art.fb-on img{display:none}
@@ -172,7 +179,7 @@
 /* faction accent colors (drive the .aks-fac badge glyph + glow) */
 .fac-bone{--fac:var(--rust)} .fac-zoom{--fac:var(--cyan)}
 .fac-leash{--fac:var(--teal)} .fac-k9{--fac:var(--hazard)}
-.aks-fac{font-family:'Anton',sans-serif; color:var(--fac,var(--text))}
+.aks-fac{font-family:'Cinzel',serif; color:var(--fac,var(--text))}
 .aks-fac-img{width:100%; height:100%; border-radius:50%; object-fit:cover; box-shadow:0 0 0 1.5px var(--fac,var(--gold))}
 /* AK-ART: inline gem currency icon (replaces the old diamond glyph on gem prices) */
 .gem-cost::before{content:''; display:inline-block; width:14px; height:14px; background:url('../assets/ui/cur_gems.jpg') center/cover; border-radius:3px; vertical-align:-2px; margin-right:5px}
@@ -183,23 +190,23 @@
 
 /* card meta block */
 .aks-meta{display:flex; flex-direction:column; gap:6px; padding:11px 12px 12px}
-.aks-name{font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; letter-spacing:.4px;
+.aks-name{font-family:'Inter',sans-serif; font-weight:700; font-size:15px; letter-spacing:.4px;
   text-transform:uppercase; line-height:1.05; color:var(--text)}
-.aks-sub{font-family:'Oswald',sans-serif; font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim)}
+.aks-sub{font-family:'Inter',sans-serif; font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim)}
 /* AK-LORE: one-line card tagline on every frame (safe truncation) */
 .aks-tag{font-style:italic; font-size:10.5px; color:var(--gold-hi); line-height:1.3;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .aks-desc{font-size:10.5px; color:var(--muted); line-height:1.45; min-height:30px}
 .aks-row{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto}
-.aks-price{display:flex; align-items:center; gap:6px; font-family:'Oswald',sans-serif; font-weight:700;
+.aks-price{display:flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-weight:700;
   font-size:15px; letter-spacing:.5px; font-variant-numeric:tabular-nums}
 .aks-price .dot{width:11px; height:11px; transform:rotate(45deg); background:var(--rust)}
 .aks-price.cyan .dot{background:var(--cyan)} .aks-price.gold .dot{background:var(--gold)}
-.aks-price small{font-family:'Oswald'; font-size:9px; letter-spacing:1px; color:var(--dim); text-transform:uppercase}
+.aks-price small{font-family:'Inter'; font-size:9px; letter-spacing:1px; color:var(--dim); text-transform:uppercase}
 .aks-price.usd{color:var(--gold); font-size:18px}
 
 /* ---- buttons (angular street) -------------------------------------------- */
-.aks-btn{border:none; cursor:pointer; padding:9px 15px; font-family:'Oswald',sans-serif; font-weight:700;
+.aks-btn{border:none; cursor:pointer; padding:9px 15px; font-family:'Inter',sans-serif; font-weight:700;
   font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#0a0a0a;
   background:linear-gradient(180deg,var(--gold-hi),var(--gold));
   clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px); transition:.12s; white-space:nowrap}
@@ -219,10 +226,10 @@
   linear-gradient(160deg,#10202a,#08090c); display:flex; align-items:center; justify-content:center}
 .aks-gem .aks-art .gemglyph{font-size:46px; filter:drop-shadow(0 0 16px var(--cyan))}
 .aks-gem.best{border-color:var(--gold)}
-.aks-best{position:absolute; top:0; left:0; z-index:5; font-family:'Oswald'; font-weight:700; font-size:9px;
+.aks-best{position:absolute; top:0; left:0; z-index:5; font-family:'Inter'; font-weight:700; font-size:9px;
   letter-spacing:1.5px; text-transform:uppercase; color:#0a0a0a; background:var(--gold); padding:3px 11px 3px 8px;
   clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%)}
-.aks-bonus{font-family:'Oswald'; font-size:10px; font-weight:700; letter-spacing:.8px; color:var(--green); text-transform:uppercase}
+.aks-bonus{font-family:'Inter'; font-size:10px; font-weight:700; letter-spacing:.8px; color:var(--green); text-transform:uppercase}
 
 /* ---- chests --------------------------------------------------------------- */
 .aks-chest .aks-art{aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;
@@ -232,12 +239,12 @@
 .aks-chest.gated{border-color:var(--steel-hi)}
 .aks-chest.gated .aks-art{background:repeating-linear-gradient(-45deg, rgba(255,255,255,.03) 0 14px, #0c0d11 14px 28px)}
 .aks-chest.gated .aks-art .crate{filter:grayscale(.8) opacity(.7)}
-.aks-soon{font-family:'Oswald'; font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+.aks-soon{font-family:'Inter'; font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
   color:var(--dim); border:1px solid var(--steel-hi); padding:2px 8px;
   clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px)}
-.aks-owned{font-family:'Oswald'; font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--muted)}
+.aks-owned{font-family:'Inter'; font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--muted)}
 /* daily-deal "TODAY" stamp on a card */
-.aks-today{position:absolute; top:9px; left:8px; z-index:5; font-family:'Oswald'; font-weight:700; font-size:9px;
+.aks-today{position:absolute; top:9px; left:8px; z-index:5; font-family:'Inter'; font-weight:700; font-size:9px;
   letter-spacing:1.2px; text-transform:uppercase; color:#0a0a0a; background:var(--gold); padding:3px 9px;
   clip-path:polygon(0 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 
@@ -247,15 +254,15 @@
 .aks-up .lvtrack i.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-lo)}
 .aks-up .copies{height:7px; background:#000; border:1px solid var(--line); overflow:hidden; margin-top:3px}
 .aks-up .copies b{display:block; height:100%; background:linear-gradient(90deg,var(--rar,var(--gold)),var(--gold-hi))}
-.aks-up .need{font-family:'Oswald'; font-size:10px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.aks-up .need{font-family:'Inter'; font-size:10px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
 .aks-up .need .ok{color:var(--ok)} .aks-up .need .no{color:var(--bad)}
-.aks-topoff{font-family:'Oswald'; font-size:9.5px; letter-spacing:.6px; color:var(--dim); text-transform:uppercase;
+.aks-topoff{font-family:'Inter'; font-size:9.5px; letter-spacing:.6px; color:var(--dim); text-transform:uppercase;
   display:flex; align-items:center; gap:5px; margin-top:4px}
 .aks-topoff .g{color:var(--cyan)}
 
 /* AK-GARAGE: unified collection garage -- spare-dupe chip + inline detail panel */
 .aks-spare{display:inline-flex; align-items:center; gap:5px; align-self:flex-start; margin-top:3px;
-  font-family:'Oswald'; font-weight:700; font-size:9.5px; letter-spacing:.8px; text-transform:uppercase;
+  font-family:'Inter'; font-weight:700; font-size:9.5px; letter-spacing:.8px; text-transform:uppercase;
   color:var(--gold-hi); background:rgba(212,175,55,.10); border:1px solid rgba(212,175,55,.4);
   padding:2px 7px; clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 .aks-spare .dot{width:6px; height:6px; background:var(--gold-hi); border-radius:50%; box-shadow:0 0 6px var(--gold-hi)}
@@ -268,17 +275,17 @@
 .aks-gd .gd-card.r-Epic{--rar:var(--r-Epic)} .aks-gd .gd-card.r-Legendary{--rar:var(--r-Legendary)}
 .aks-gd .gd-card.r-Mythic{--rar:var(--r-Mythic)}
 .aks-gd .gd-card .aks-art{height:150px; flex:0 0 150px}
-.aks-gd .gd-name{font-family:'Anton'; font-size:19px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-hi)}
-.aks-gd .gd-meta{font-family:'Oswald'; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
+.aks-gd .gd-name{font-family:'Cinzel'; font-size:19px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-hi)}
+.aks-gd .gd-meta{font-family:'Inter'; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted)}
 .aks-gd .gd-tag{font-style:italic; font-size:11px; color:var(--gold-hi); line-height:1.3}
 .aks-gd .gd-bio{font-size:10.5px; color:var(--muted); line-height:1.45}
-.aks-gd .gd-note{font-family:'Oswald'; font-size:9px; letter-spacing:.6px; text-transform:uppercase; color:var(--dim)}
+.aks-gd .gd-note{font-family:'Inter'; font-size:9px; letter-spacing:.6px; text-transform:uppercase; color:var(--dim)}
 .aks-gd .lvtrack{display:flex; gap:3px}
 .aks-gd .lvtrack i{flex:1; height:6px; background:#000; border:1px solid var(--line)}
 .aks-gd .lvtrack i.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-lo)}
 .aks-gd .copies{height:7px; background:#000; border:1px solid var(--line); overflow:hidden}
 .aks-gd .copies b{display:block; height:100%; background:linear-gradient(90deg,var(--rar,var(--gold)),var(--gold-hi))}
-.aks-gd .need{font-family:'Oswald'; font-size:10px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.aks-gd .need{font-family:'Inter'; font-size:10px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
 .aks-gd .need .ok{color:var(--ok)} .aks-gd .need .no{color:var(--bad)}
 .aks-gd .aks-row{display:flex; gap:8px; margin-top:4px}
 
@@ -289,9 +296,9 @@
   clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))}
 .aks-daily-hero .gift{font-size:42px; filter:drop-shadow(0 0 14px var(--gold))}
 .aks-daily-hero .copy{flex:1; min-width:200px}
-.aks-daily-hero h4{font-family:'Anton'; margin:0 0 4px; font-size:18px; letter-spacing:1px; color:var(--gold-hi); text-transform:uppercase}
+.aks-daily-hero h4{font-family:'Cinzel'; margin:0 0 4px; font-size:18px; letter-spacing:1px; color:var(--gold-hi); text-transform:uppercase}
 .aks-daily-hero p{margin:0; color:var(--muted); font-size:12px; line-height:1.5; max-width:520px}
-.aks-reset{font-family:'Oswald'; font-size:11px; letter-spacing:1.5px; color:var(--rust); text-transform:uppercase; margin-left:auto}
+.aks-reset{font-family:'Inter'; font-size:11px; letter-spacing:1.5px; color:var(--rust); text-transform:uppercase; margin-left:auto}
 
 /* ==========================================================================
    LUCKY DRAW -- the headline loot-box ADVERTISEMENT (unlocked, hype, no warning)
@@ -315,12 +322,12 @@
 .aks-pull-art img{width:100%; height:100%; object-fit:cover; filter:saturate(1.1) contrast(1.08)}
 .aks-pull-art .glow{position:absolute; inset:0; pointer-events:none;
   background:radial-gradient(circle at 50% 30%, rgba(255,77,109,.28), transparent 62%); mix-blend-mode:screen}
-.aks-pull-art .tag{position:absolute; top:0; left:0; z-index:2; font-family:'Oswald'; font-weight:700;
+.aks-pull-art .tag{position:absolute; top:0; left:0; z-index:2; font-family:'Inter'; font-weight:700;
   font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#0a0a0a; background:var(--r-Mythic);
   padding:3px 12px 3px 9px; clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%)}
 .aks-hero-copy{position:relative; z-index:1; flex:1; min-width:240px; display:flex; flex-direction:column; gap:9px}
-.aks-hero-kicker{font-family:'Oswald'; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--r-Mythic)}
-.aks-hero-title{font-family:'Anton'; font-size:36px; line-height:.98; letter-spacing:1px; text-transform:uppercase;
+.aks-hero-kicker{font-family:'Inter'; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--r-Mythic)}
+.aks-hero-title{font-family:'Cinzel'; font-size:36px; line-height:.98; letter-spacing:1px; text-transform:uppercase;
   transform:skewX(-6deg); color:var(--text); text-shadow:2px 2px 0 #000, 0 0 26px rgba(212,175,55,.4)}
 .aks-hero-title b{color:var(--gold); text-shadow:0 0 18px rgba(212,175,55,.7), 2px 2px 0 #000}
 .aks-hero-sub{color:var(--muted); font-size:12.5px; line-height:1.55; max-width:430px}
@@ -328,43 +335,43 @@
 /* pull buttons */
 .aks-pull-cta{display:flex; gap:11px; margin-top:6px; flex-wrap:wrap}
 .aks-pull-btn{position:relative; cursor:pointer; border:none; padding:13px 22px; min-width:150px;
-  font-family:'Anton',sans-serif; font-size:17px; letter-spacing:1.5px; text-transform:uppercase; color:#0a0a0a;
+  font-family:'Cinzel',serif; font-size:17px; letter-spacing:1.5px; text-transform:uppercase; color:#0a0a0a;
   background:linear-gradient(180deg,var(--gold-hi),var(--gold)); transform:skewX(-7deg);
   box-shadow:0 6px 0 var(--gold-lo), 0 12px 26px -6px rgba(212,175,55,.6); transition:.1s}
 .aks-pull-btn > span{display:block; transform:skewX(7deg)}
-.aks-pull-btn .cost{font-family:'Oswald'; font-size:11px; font-weight:600; letter-spacing:1px; color:#3a2f08; margin-top:1px}
+.aks-pull-btn .cost{font-family:'Inter'; font-size:11px; font-weight:600; letter-spacing:1px; color:#3a2f08; margin-top:1px}
 .aks-pull-btn:hover{filter:brightness(1.06)}
 .aks-pull-btn:active{transform:skewX(-7deg) translateY(4px); box-shadow:0 2px 0 var(--gold-lo)}
 .aks-pull-btn.ten{background:linear-gradient(180deg,#fff0c2,#e9c24b)}
 .aks-pull-btn.ten::before{content:"BEST"; position:absolute; top:-9px; right:-6px; transform:skewX(7deg);
-  font-family:'Oswald'; font-weight:700; font-size:9px; letter-spacing:1px; color:#0a0a0a; background:var(--green);
+  font-family:'Inter'; font-weight:700; font-size:9px; letter-spacing:1px; color:#0a0a0a; background:var(--green);
   padding:2px 7px; clip-path:polygon(4px 0,100% 0,100% 100%,0 100%)}
 .aks-pull-btn:disabled{filter:grayscale(.5); opacity:.5; cursor:not-allowed; box-shadow:0 3px 0 var(--gold-lo)}
 /* pity meter (flex, not a warning) */
 .aks-pity{margin:2px auto 16px; max-width:1280px; display:flex; flex-direction:column; gap:9px}
 .aks-pity .row{display:flex; align-items:center; gap:12px}
-.aks-pity .lab{font-family:'Oswald'; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); min-width:210px}
+.aks-pity .lab{font-family:'Inter'; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); min-width:210px}
 .aks-pity .lab b{color:var(--r-Mythic)} .aks-pity .lab.leg b{color:var(--r-Legendary)}
 .aks-pity .bar{flex:1; height:11px; background:#000; border:1px solid var(--line); overflow:hidden;
   clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
 .aks-pity .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--oxblood),var(--r-Mythic),var(--gold-hi))}
 .aks-pity .bar.leg i{background:linear-gradient(90deg,#6a5418,var(--r-Legendary),#ffe6a8)}
-.aks-pity .ct{font-family:'Oswald'; font-weight:700; font-size:12px; color:var(--text); min-width:54px; text-align:right; font-variant-numeric:tabular-nums}
+.aks-pity .ct{font-family:'Inter'; font-weight:700; font-size:12px; color:var(--text); min-width:54px; text-align:right; font-variant-numeric:tabular-nums}
 /* DROP RATES table (clean app-store flex -- bright, full opacity, NOT sealed) */
 .aks-rates{max-width:1280px; margin:0 auto 14px; border:1px solid var(--steel);
   background:linear-gradient(180deg,var(--panel-2),var(--ink));
   clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
 .aks-rates .rh{display:flex; justify-content:space-between; align-items:center; padding:9px 14px;
   border-bottom:1px solid var(--line); background:#0c0d11}
-.aks-rates .rh .t{font-family:'Oswald'; font-weight:700; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi)}
-.aks-rates .rh .n{font-family:'Oswald'; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim)}
+.aks-rates .rh .t{font-family:'Inter'; font-weight:700; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi)}
+.aks-rates .rh .n{font-family:'Inter'; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim)}
 .aks-rates .rrow{display:flex; align-items:center; gap:12px; padding:8px 14px; border-bottom:1px solid var(--line)}
 .aks-rates .rrow:last-child{border-bottom:none}
 .aks-rates .rrow .dot{width:9px; height:9px; transform:rotate(45deg); background:var(--rr,var(--muted))}
-.aks-rates .rrow .k{font-family:'Oswald'; font-weight:600; font-size:12.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--text); min-width:96px}
+.aks-rates .rrow .k{font-family:'Inter'; font-weight:600; font-size:12.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--text); min-width:96px}
 .aks-rates .rrow .track{flex:1; height:8px; background:#000; border:1px solid var(--line); overflow:hidden}
 .aks-rates .rrow .track b{display:block; height:100%; background:var(--rr,var(--muted))}
-.aks-rates .rrow .v{font-family:'Oswald'; font-weight:700; font-size:13px; color:var(--text); min-width:48px; text-align:right; font-variant-numeric:tabular-nums}
+.aks-rates .rrow .v{font-family:'Inter'; font-weight:700; font-size:13px; color:var(--text); min-width:48px; text-align:right; font-variant-numeric:tabular-nums}
 .aks-rates .rr-Common{--rr:var(--r-Common)} .aks-rates .rr-Rare{--rr:var(--r-Rare)}
 .aks-rates .rr-Epic{--rr:var(--r-Epic)} .aks-rates .rr-Legendary{--rr:var(--r-Legendary)}
 .aks-rates .rr-Mythic{--rr:var(--r-Mythic)}
@@ -376,7 +383,7 @@
   background:radial-gradient(800px 500px at 50% 40%, rgba(212,175,55,.10), transparent), rgba(4,4,6,.93);
   opacity:0; pointer-events:none; transition:opacity .2s}
 .aks-reveal.show{opacity:1; pointer-events:auto}
-.aks-reveal .rv-title{font-family:'Anton'; font-size:24px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi);
+.aks-reveal .rv-title{font-family:'Cinzel'; font-size:24px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi);
   transform:skewX(-6deg); text-shadow:2px 2px 0 #000}
 .aks-reveal .rv-grid{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; max-width:760px}
 .aks-reveal .rv-card{width:138px; aspect-ratio:3/4; position:relative; overflow:hidden; border:2px solid var(--rar,var(--steel));
@@ -389,15 +396,15 @@
 .aks-reveal .rv-card img{width:100%; height:100%; object-fit:cover}
 .aks-reveal .rv-card .cap{position:absolute; left:0; right:0; bottom:0; padding:5px 7px;
   background:linear-gradient(0deg,rgba(7,7,8,.92),transparent); display:flex; flex-direction:column; gap:1px}
-.aks-reveal .rv-card .cap .nm{font-family:'Oswald'; font-weight:700; font-size:10px; text-transform:uppercase; color:var(--text); line-height:1.05}
-.aks-reveal .rv-card .cap .rr{font-family:'Oswald'; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--rar)}
+.aks-reveal .rv-card .cap .nm{font-family:'Inter'; font-weight:700; font-size:10px; text-transform:uppercase; color:var(--text); line-height:1.05}
+.aks-reveal .rv-card .cap .rr{font-family:'Inter'; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--rar)}
 /* AK-LORE: reveal tagline (every pull) + bio (NEW cards only) */
 .aks-reveal .rv-card .cap .rv-tag{font-style:italic; font-size:8px; color:var(--gold-hi); line-height:1.25;
   overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
 .aks-reveal .rv-card .cap .rv-bio{font-size:7.5px; color:var(--muted); line-height:1.35; margin-top:2px;
   overflow:hidden; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical}
 .aks-reveal .rv-card .fb{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:'Anton'; font-size:30px; color:var(--rar); background:radial-gradient(circle,#1a1d26,#08090c)}
+  font-family:'Cinzel'; font-size:30px; color:var(--rar); background:radial-gradient(circle,#1a1d26,#08090c)}
 .aks-reveal .rv-foot{width:100%; max-width:260px; display:flex}
 
 /* ---- empty / note --------------------------------------------------------- */
@@ -412,7 +419,7 @@
 /* ---- toast ---------------------------------------------------------------- */
 .aks-toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%); padding:12px 22px;
   background:var(--panel-2); border:1px solid var(--gold); border-left:4px solid var(--gold); color:var(--text);
-  font-family:'Oswald'; font-size:13px; letter-spacing:.5px; z-index:100001; opacity:0; transition:.2s;
+  font-family:'Inter'; font-size:13px; letter-spacing:.5px; z-index:100001; opacity:0; transition:.2s;
   pointer-events:none; max-width:90vw; clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
 .aks-toast.show{opacity:1}
 .aks-toast.bad{border-color:var(--bad); border-left-color:var(--bad)}
@@ -449,7 +456,7 @@
 /* ---- AK-SCRAP / AK-KEYS: earned street crates + keys + chest reveal ------- */
 .aks-coin.keys{border-left-color:#8fd14f} .aks-coin.keys .dot{background:#8fd14f; box-shadow:0 0 9px #8fd14f}
 .aks-keysline{display:flex; align-items:center; gap:8px; margin:2px 0 12px; padding:8px 14px; width:fit-content;
-  font-family:'Oswald',sans-serif; font-weight:700; font-size:12px; letter-spacing:1.2px; text-transform:uppercase;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:12px; letter-spacing:1.2px; text-transform:uppercase;
   color:#cfe9b5; border:1px solid rgba(143,209,79,.4); background:linear-gradient(180deg,#16200f,#0b0f08);
   clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
 .aks-keysline .dot{width:11px;height:11px;border-radius:2px;transform:rotate(45deg);background:#8fd14f;box-shadow:0 0 9px #8fd14f}
@@ -461,13 +468,13 @@
 .aks-chest.tier-silver{--tier:#aab4c4} .aks-chest.tier-gold{--tier:#d4af37}
 .aks-chest.tier-diamond{--tier:#62d8e8}
 .aks-chest.earned .aks-art .crate{color:var(--tier); text-shadow:0 0 18px var(--tier)}
-.aks-reveal .rv-card .rv-dupe{position:absolute; top:7px; right:7px; z-index:4; font-family:'Oswald',sans-serif;
+.aks-reveal .rv-card .rv-dupe{position:absolute; top:7px; right:7px; z-index:4; font-family:'Inter',sans-serif;
   font-weight:700; font-size:9px; letter-spacing:1px; text-transform:uppercase; color:#0a0a0a;
   background:var(--rust,#c96f33); padding:2px 7px; clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
 .rv-chips{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:760px}
 .rv-chip{display:flex; align-items:center; gap:7px; padding:7px 13px; border:1px solid var(--steel);
   border-left:3px solid var(--steel-hi); background:linear-gradient(180deg,#1b1d25,#0e0f14);
-  font-family:'Oswald',sans-serif; font-weight:700; font-size:13px; letter-spacing:.5px;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:13px; letter-spacing:.5px;
   clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px); color:var(--text,#e8e8e8)}
 .rv-chip .dot{width:10px;height:10px;border-radius:2px;transform:rotate(45deg);background:var(--steel-hi)}
 .rv-chip.coins{border-left-color:var(--gold)} .rv-chip.coins .dot{background:var(--gold); box-shadow:0 0 9px var(--gold)}
@@ -523,7 +530,7 @@ body::after{
 .aks-hglyph{width:54px;height:54px;margin:0 auto 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:28px;background:rgba(255,255,255,.05);border:2px solid var(--acc,var(--gold))}
 .aks-hglyph.big{width:64px;height:64px;font-size:34px;margin:6px auto 6px}
-.aks-hnm{font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.4px;color:#fff}
+.aks-hnm{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.4px;color:#fff}
 .aks-hsp{font-size:10.5px;color:var(--gold-hi);margin-top:2px}
 .aks-hbadge{margin-top:7px;display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.1em;color:#0a0a0a;
   background:var(--acc,var(--gold));border-radius:6px;padding:3px 6px}
@@ -539,16 +546,16 @@ body::after{
 .aks-gd .gd-tlab{flex:1;min-width:0}
 
 .gd-kw{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.gd-kwchip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-family:'Anton',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--kw);border:1px solid var(--kw);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.18));box-shadow:0 0 8px -2px var(--kw) inset}
+.gd-kwchip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-family:'Cinzel',serif;font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--kw);border:1px solid var(--kw);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.18));box-shadow:0 0 8px -2px var(--kw) inset}
 .gd-kwchip .gd-kwg{font-size:12px;filter:drop-shadow(0 0 3px var(--kw))}
 .gd-kwchip .gd-kwg-img{width:15px;height:15px;border-radius:4px;object-fit:cover;box-shadow:0 0 0 1px var(--kw)}
 .gd-kwchip .gd-kwl{color:var(--text);opacity:.92}
 
 .aks-deckslots{display:flex;flex-wrap:wrap;gap:7px;max-width:1400px;margin:0 auto 14px;padding:0 2px}
-.aks-slotpill{font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:8px 14px;cursor:pointer;color:var(--muted);background:var(--panel);border:1px solid var(--steel);clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px)}
+.aks-slotpill{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:8px 14px;cursor:pointer;color:var(--muted);background:var(--panel);border:1px solid var(--steel);clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px)}
 .aks-slotpill.on{color:#0a0a0a;background:linear-gradient(180deg,var(--gold-hi),var(--gold));border-color:var(--gold)}
 .aks-slotpill.locked{opacity:.4;cursor:default}
-.aks-cost{font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;color:var(--gold-hi)}
+.aks-cost{font-family:'Inter',sans-serif;font-weight:700;font-size:13px;color:var(--gold-hi)}
 .aks-btnrow{display:flex;gap:6px}
 
 /* AK-HANDLERART: commander portrait image (replaces glyph when art exists) */
@@ -563,8 +570,8 @@ body::after{
 .aks-hfg{ display:flex; align-items:center; justify-content:center; font-size:72px; background:linear-gradient(160deg,#1a1822,#0a0a0e); }
 .aks-hcard.full .aks-hcap{ position:absolute; left:0; right:0; bottom:0; padding:30px 11px 11px; text-align:left;
   background:linear-gradient(to top, rgba(5,5,8,.96) 0%, rgba(5,5,8,.72) 48%, transparent 100%); }
-.aks-hcard.full .aks-hnm{ font-family:'Anton',sans-serif; font-size:16px; color:#fff; letter-spacing:.5px; line-height:1.05; text-shadow:0 2px 6px #000; }
-.aks-hcard.full .aks-hsp{ font-family:'Oswald',sans-serif; font-size:10.5px; color:var(--gold-hi); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+.aks-hcard.full .aks-hnm{ font-family:'Cinzel',serif; font-size:16px; color:#fff; letter-spacing:.5px; line-height:1.05; text-shadow:0 2px 6px #000; }
+.aks-hcard.full .aks-hsp{ font-family:'Inter',sans-serif; font-size:10.5px; color:var(--gold-hi); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
 .aks-hcard.full .aks-hbadge{ position:absolute; top:8px; right:8px; margin:0; }
 /* handler-detail: full-width portrait banner at the top of the modal */
 .gd-hbanner{ position:relative; width:100%; aspect-ratio:3/4; max-height:340px; overflow:hidden; border-radius:12px; margin:0 0 8px; }
@@ -585,42 +592,448 @@ body::after{
   box-shadow:inset 0 0 40px rgba(0,0,0,.55) !important}
 
 /* ===========================================================================
-   AK-3D 2026-06-20 -- "extruded photo" 2.5D for DOM surfaces (Brawl-Stars look)
-   Pure CSS 3D transforms + a tiny pointer shim. GPU-only, ~0KB, NO WebGL.
-   Per AK_DEEP_DIVE_SYNTHESIS Part 1. Two usage modes:
-     MODE A (single element): scene parent gets .ak-3d; ONE box that has NO
-       overflow:hidden gets BOTH .ak-3d-tilt and .ak-3d-face  (#int-card,#thp-box)
-     MODE B (wrapper): .ak-3d > .ak-3d-tilt > .ak-3d-face, used when the face
-       keeps overflow:hidden/clip-path (shop .aks-card art window).
-   The shim writes --ak-rx / --ak-ry (deg) onto .ak-3d-tilt; CSS reads them.
+   AK-3D 2.5D "extruded photo" classes (.ak-3d / .ak-3d-tilt / .ak-3d-face /
+   .ak-3d-shadow) moved to the shared game/ak_25d.css (Section A de-dup,
+   2026-06-20). shop.html loads ak_25d.css BEFORE this file, so shop's own
+   .aks-card rules keep winning the cascade and the done cards are byte-identical.
    =========================================================================== */
-.ak-3d{ display:block; perspective:1100px; perspective-origin:50% 50%; }
-.ak-3d-tilt{
-  display:block; position:relative; transform-style:preserve-3d;
-  transform:rotateX(var(--ak-rx,3deg)) rotateY(var(--ak-ry,0deg));
-  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+
+/* ==========================================================================
+   AK-BRAND-RESKIN 2026-06-20 -- EVERLIGHT premium glass + ALIVE layer.
+   Appended LAST so it wins on shape/skin (equal specificity, later rule).
+   Purely additive: no original selector removed, every JS hook class kept.
+   Brand = gold gradient #c9a84c->#e8c55a, glass rgba(10,10,16,.86), 1px gold-
+   tinted borders, 14-16px radius, Cinzel/Playfair/Inter. Animations are
+   transform/opacity (compositor) only -- $100-Android safe, no layout thrash.
+   ========================================================================== */
+:root{
+  --gold-grad:linear-gradient(135deg,#c9a84c 0%,#e8c55a 55%,#c9a84c 100%);
+  --glass:rgba(10,10,16,.86);
+  --glass-2:rgba(18,15,24,.82);
+  --gold-edge:rgba(201,168,76,.55);
+  --gold-soft:rgba(201,168,76,.16);
+  --rad:14px; --rad-lg:16px;
 }
-.ak-3d.ak-3d-live .ak-3d-tilt{ transition:none; will-change:transform; }
-/* extruded thickness: two squeezed dark faces folded off the slab edges.
-   On .ak-3d-tilt (never clipped) so it works on a face that has overflow:hidden. */
-.ak-3d-tilt::before, .ak-3d-tilt::after{ content:""; position:absolute; pointer-events:none; }
-.ak-3d-tilt::before{ left:2px; right:2px; bottom:0; height:16px;
-  transform-origin:bottom center; transform:rotateX(-90deg);
-  background:linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,.18)); }
-.ak-3d-tilt::after{ top:2px; bottom:2px; right:0; width:16px;
-  transform-origin:right center; transform:rotateY(90deg);
-  background:linear-gradient(to left, rgba(0,0,0,.62), rgba(0,0,0,.2)); }
-/* face marker -- NO transform/shadow by default so it never fights an existing
-   :hover transform or a gold glow already on the surface. */
-.ak-3d-face{ position:relative; }
-/* OPT-IN contact shadow (use ONLY on surfaces with no rest box-shadow, e.g. .aks-card) */
-.ak-3d-shadow{ box-shadow:0 16px 30px -10px rgba(0,0,0,.6); }
-/* phones: no hover-steer -> keep ONLY the cheap static resting tilt + extrusion */
-@media (hover:none),(pointer:coarse){
-  .ak-3d-tilt{ transform:rotateX(2.5deg) rotateY(0deg); transition:none; }
-  .ak-3d.ak-3d-live .ak-3d-tilt{ will-change:auto; }
+
+/* ---- shell: brand black + faint scanline + a slow drifting gold ambience so
+   the standalone shop "breathes" even when the menu_bg video is absent. When
+   AKLoops IS present its screen-blended video sits behind these glass panels. */
+.akshop{
+  background:
+    radial-gradient(1100px 640px at 50% -12%, rgba(201,168,76,.12), transparent 60%),
+    radial-gradient(900px 540px at 92% 6%, rgba(46,230,255,.045), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg,#0a0a0e 0%, #050507 74%);
 }
+.akshop::before{ opacity:.05; }
+.akshop::after{
+  content:""; position:fixed; inset:-25%; z-index:0; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(201,168,76,.12), transparent 72%);
+  mix-blend-mode:screen; opacity:.55; animation:aksAmbient 18s ease-in-out infinite;
+}
+@keyframes aksAmbient{
+  0%,100%{ transform:translate3d(-9%,-6%,0) scale(1); }
+  50%    { transform:translate3d(11%,9%,0)  scale(1.18); }
+}
+
+/* ---- ALIVE keyframes (transform/opacity only) ---- */
+@keyframes aksShine{
+  0%   { transform:translateX(-140%) skewX(-18deg); opacity:0; }
+  8%   { opacity:.9; }
+  48%  { transform:translateX(260%)  skewX(-18deg); opacity:0; }
+  100% { transform:translateX(260%)  skewX(-18deg); opacity:0; }
+}
+@keyframes aksFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+@keyframes aksHeroPulse{
+  0%,100%{ box-shadow:0 18px 44px rgba(0,0,0,.5), 0 0 30px -10px var(--gold-soft); }
+  50%    { box-shadow:0 18px 44px rgba(0,0,0,.5), 0 0 52px -6px rgba(201,168,76,.55); }
+}
+@keyframes aksBtnSheen{ 0%{ transform:translateX(-130%) skewX(-20deg);} 100%{ transform:translateX(320%) skewX(-20deg);} }
+
+/* ---- topbar ---- */
+.aks-top{
+  background:linear-gradient(180deg, rgba(15,13,20,.92), rgba(8,8,12,.86));
+  border-bottom:1px solid var(--gold-edge);
+  box-shadow:0 1px 0 rgba(201,168,76,.10) inset, 0 12px 34px rgba(0,0,0,.55);
+}
+.aks-brand{
+  font-family:'Playfair Display','Cinzel',serif; font-weight:800; letter-spacing:.04em;
+  transform:none; text-transform:uppercase; color:#e8c55a; text-shadow:0 2px 10px rgba(0,0,0,.7);
+}
+.aks-brand b{
+  background:var(--gold-grad); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent; text-shadow:none;
+}
+.aks-mark .aks-tag{
+  font-family:'Inter',sans-serif; color:var(--muted); font-style:normal;
+  letter-spacing:.28em; transform:none; white-space:nowrap;
+}
+
+/* ---- wallet chips: glass pills, gold-tinted ---- */
+.aks-coin{
+  clip-path:none; border-radius:999px; border:1px solid var(--gold-edge); border-left:1px solid var(--gold-edge);
+  background:var(--glass); font-family:'Inter',sans-serif; font-weight:700; letter-spacing:.02em;
+  box-shadow:0 2px 10px rgba(0,0,0,.4), 0 0 0 1px rgba(201,168,76,.06) inset;
+}
+.aks-coin .dot{ border-radius:50%; transform:none; }
+.aks-coin.gems .dot{ background:var(--cyan); }
+.aks-coin.coins .dot{ background:var(--gold-hi); }
+.aks-close{
+  clip-path:none; border-radius:12px; border:1px solid var(--gold-edge);
+  background:var(--glass); color:var(--gold-hi);
+}
+.aks-close:hover{ border-color:var(--gold-hi); color:#fff; box-shadow:0 0 16px -4px var(--gold-hi); }
+
+/* ---- legal/local banner ---- */
+.aks-banner{ background:linear-gradient(180deg, rgba(201,168,76,.06), rgba(201,168,76,.02)); border-bottom:1px solid var(--line); }
+.aks-banner .pill{ clip-path:none; border-radius:999px; }
+
+/* ---- tabs: clean top-pill, gold-gradient active ---- */
+.aks-tab{
+  clip-path:none; border-radius:10px 10px 0 0; font-family:'Inter',sans-serif; font-weight:700;
+  letter-spacing:.12em; border-color:transparent;
+}
+.aks-tab[aria-selected="true"]{
+  color:#0a0a0a; background:var(--gold-grad); border-color:transparent;
+  box-shadow:0 0 18px -5px var(--gold-hi);
+}
+
+/* ---- section headers ---- */
+.aks-sec-title{
+  font-family:'Cinzel',serif; font-weight:800; transform:none; letter-spacing:.04em;
+  background:var(--gold-grad); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+  text-shadow:none; filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));
+}
+
+/* ---- filter chips: glass pills ---- */
+.aks-chip{
+  clip-path:none; border-radius:999px; border:1px solid var(--line); background:var(--glass);
+  font-family:'Inter',sans-serif; font-weight:600; letter-spacing:.04em;
+}
+.aks-chip:hover{ border-color:var(--gold-edge); color:var(--gold-hi); }
+.aks-chip[aria-pressed="true"]{ background:var(--gold-grad); border-color:transparent; color:#0a0a0a; box-shadow:0 0 14px -5px var(--gold-hi); }
+
+/* ---- the card: brand glass, gold-tinted, rounded, ALIVE shimmer ---- */
+.aks-card{
+  clip-path:none; border-radius:var(--rad); border:1px solid var(--line);
+  background:linear-gradient(165deg, var(--glass-2), var(--glass));
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.7);
+}
+.aks-card::before{ width:3px; border-radius:var(--rad) 0 0 var(--rad); }   /* rarity spine */
+/* static rarity-tinted glow (cheap -- no per-frame paint loop) */
+.aks-card.r-Legendary{ box-shadow:0 14px 34px -14px rgba(0,0,0,.7), 0 0 18px -6px var(--r-Legendary); }
+.aks-card.r-Mythic{ box-shadow:0 14px 34px -14px rgba(0,0,0,.7), 0 0 20px -5px var(--r-Mythic); }
+.aks-card:hover{ border-color:var(--gold-edge); box-shadow:0 18px 40px -12px rgba(0,0,0,.7), 0 0 26px -6px var(--rar); }
+/* diagonal gold shimmer sweep (clipped by the card's overflow:hidden) */
+.aks-card > .aks-art, .aks-card > .aks-meta{ position:relative; z-index:1; }
+.aks-card::after{
+  content:""; position:absolute; top:-10%; bottom:-10%; left:0; width:38%; z-index:2; pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(232,197,90,.16), rgba(255,255,255,.26), rgba(232,197,90,.12), transparent);
+  mix-blend-mode:screen; transform:translateX(-140%) skewX(-18deg); opacity:0;
+  animation:aksShine 7.5s ease-in-out infinite;
+}
+.aks-card:nth-child(3n)::after{ animation-delay:1.4s; }
+.aks-card:nth-child(3n+1)::after{ animation-delay:3.1s; }
+.aks-card:nth-child(3n+2)::after{ animation-delay:4.7s; }
+
+.aks-art{ border-radius:var(--rad) var(--rad) 0 0; border-bottom:1px solid var(--line); }
+.aks-rib{ clip-path:none; border-radius:0 var(--rad) 0 8px; }
+.aks-fac{ clip-path:none; border-radius:9px; }
+.aks-vstamp{ transform:none; border-radius:6px; }
+.aks-today, .aks-best{ clip-path:none; border-radius:0 0 9px 0; }
+.aks-spare{ clip-path:none; border-radius:8px; }
+
+/* card text -> brand type */
+.aks-name{ font-family:'Cinzel',serif; font-weight:700; letter-spacing:.02em; text-transform:none; color:#f1e6c4; }
+.aks-sub{ font-family:'Inter',sans-serif; letter-spacing:.14em; }
+.aks-card .aks-tag{ color:var(--gold-hi); }
+
+/* ---- buttons: brand gold gradient + sweeping sheen on hover ---- */
+.aks-btn{
+  clip-path:none; border-radius:10px; font-family:'Inter',sans-serif; font-weight:800; letter-spacing:.06em;
+  background:var(--gold-grad); color:#15110a; position:relative; overflow:hidden;
+  box-shadow:0 6px 16px -6px rgba(201,168,76,.5);
+}
+.aks-btn::after{
+  content:""; position:absolute; top:0; bottom:0; left:0; width:40%; pointer-events:none;
+  background:linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+  transform:translateX(-130%) skewX(-20deg); opacity:0;
+}
+.aks-btn:hover::after{ opacity:.85; animation:aksBtnSheen .85s ease-out; }
+.aks-btn:hover{ box-shadow:0 8px 22px -6px var(--gold-hi); filter:none; }
+.aks-btn.ghost{ background:transparent; color:var(--gold-hi); border:1px solid var(--gold-edge); }
+.aks-btn.ghost:hover{ background:rgba(201,168,76,.10); }
+.aks-btn.hot{ background:linear-gradient(135deg,#ff7a3a,#ff5a5a); color:#fff; }
+
+/* ---- gem packs ---- */
+.aks-gem .aks-art{ border-radius:var(--rad) var(--rad) 0 0; }
+.aks-card.aks-gem.best{ border-color:var(--gold-edge); box-shadow:0 0 26px -8px var(--gold-hi), 0 14px 34px -14px rgba(0,0,0,.7); }
+
+/* ---- chests + keys line ---- */
+.aks-chest .aks-art{ border-radius:var(--rad) var(--rad) 0 0; }
+.aks-soon, .aks-keysline{ clip-path:none; border-radius:999px; }
+
+/* ---- daily lot ---- */
+.aks-daily-hero{
+  clip-path:none; border-radius:var(--rad-lg); border:1px solid var(--gold-edge); border-left:4px solid var(--gold-hi);
+  background:linear-gradient(120deg, rgba(201,168,76,.10), var(--glass-2));
+}
+.aks-daily-hero h4{ font-family:'Cinzel',serif; color:#e8c55a; }
+.aks-daily-hero .gift{ animation:aksFloat 5s ease-in-out infinite; }
+
+/* ---- lucky draw hero (the headline tile -- breathing gold + floating art) ---- */
+.aks-banner-hero{
+  clip-path:none; border-radius:var(--rad-lg); border:1px solid var(--gold-edge); border-top:3px solid var(--gold-hi);
+  background:
+    radial-gradient(700px 360px at 80% -20%, rgba(201,168,76,.22), transparent 60%),
+    radial-gradient(500px 300px at 8% 120%, rgba(255,77,109,.14), transparent 55%),
+    linear-gradient(160deg, var(--warm), #08090c);
+  animation:aksHeroPulse 4.4s ease-in-out infinite;
+}
+.aks-pull-art{ clip-path:none; border-radius:var(--rad); animation:aksFloat 5.5s ease-in-out infinite; }
+.aks-pull-art .tag{ clip-path:none; border-radius:0 0 9px 0; }
+.aks-hero-kicker{ font-family:'Inter',sans-serif; letter-spacing:.28em; color:var(--gold-hi); }
+.aks-hero-title{
+  font-family:'Playfair Display','Cinzel',serif; font-weight:800; transform:none; letter-spacing:.01em;
+  color:#f1e6c4; text-shadow:0 2px 14px rgba(0,0,0,.6);
+}
+.aks-hero-title b{
+  background:var(--gold-grad); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent; text-shadow:none;
+}
+.aks-pull-btn{
+  transform:none; border-radius:12px; font-family:'Cinzel',serif; font-weight:800; letter-spacing:.06em;
+  background:var(--gold-grad); color:#15110a; overflow:hidden;
+  box-shadow:0 6px 0 var(--gold-lo), 0 14px 30px -8px rgba(201,168,76,.55);
+}
+.aks-pull-btn > span{ transform:none; }
+.aks-pull-btn:active{ transform:translateY(4px); box-shadow:0 2px 0 var(--gold-lo); }
+.aks-pull-btn.ten::before{ transform:none; clip-path:none; border-radius:999px; }
+
+/* ---- drop rates + pity: glass ---- */
+.aks-rates{ clip-path:none; border-radius:var(--rad); border:1px solid var(--line); background:linear-gradient(180deg, var(--glass-2), var(--glass)); }
+.aks-rates .rh{ background:rgba(8,8,12,.6); }
+.aks-rates .rh .t{ font-family:'Cinzel',serif; color:var(--gold-hi); }
+.aks-pity .bar{ clip-path:none; border-radius:999px; }
+
+/* ---- draw reveal ---- */
+.aks-reveal{ background:radial-gradient(800px 500px at 50% 38%, rgba(201,168,76,.12), transparent), rgba(4,4,6,.94); }
+.aks-reveal .rv-title{ font-family:'Cinzel',serif; transform:none; color:#e8c55a; }
+.aks-reveal .rv-card{ clip-path:none; border-radius:12px; }
+.aks-reveal .rv-card .rv-dupe{ clip-path:none; border-radius:6px; }
+
+/* ---- garage detail dialog ---- */
+.aks-gd .gd-card{
+  clip-path:none; border-radius:var(--rad-lg); border:2px solid var(--rar, var(--gold-edge));
+  background:linear-gradient(170deg, var(--glass-2), rgba(8,8,14,.92));
+  box-shadow:0 0 40px -10px var(--rar, rgba(201,168,76,.5));
+}
+.aks-gd .gd-name{ font-family:'Cinzel',serif; color:#e8c55a; }
+
+/* ---- crew chips / slot pills ---- */
+.rv-chip{ clip-path:none; border-radius:999px; border:1px solid var(--gold-edge); border-left:1px solid var(--gold-edge); background:var(--glass); }
+.aks-slotpill{ clip-path:none; border-radius:999px; border:1px solid var(--line); background:var(--glass); }
+.aks-slotpill.on{ background:var(--gold-grad); border-color:transparent; }
+
+/* ---- handler portrait cards: brand life ---- */
+.aks-hnm{ font-family:'Cinzel',serif; }
+.aks-hcard.full{ border-radius:var(--rad); overflow:hidden; }
+.aks-hcard.full::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(100deg, transparent 40%, rgba(232,197,90,.16) 50%, transparent 60%);
+  transform:translateX(-120%) skewX(-16deg); mix-blend-mode:screen; opacity:0;
+  animation:aksShine 8.5s ease-in-out infinite;
+}
+.aks-hcard.full .aks-hcap, .aks-hcard.full .aks-hbadge{ z-index:2; }
+
+/* ---- footer + toast + empty ---- */
+.aks-foot{ background:rgba(5,5,7,.6); border-top:1px solid var(--line); }
+.aks-toast{ clip-path:none; border-radius:12px; border:1px solid var(--gold-edge); border-left:4px solid var(--gold-hi); background:var(--glass); font-family:'Inter',sans-serif; }
+.aks-empty{ border:1px dashed var(--gold-edge); border-radius:var(--rad); }
+
+/* ---- $100-Android / accessibility guards: kill every ambient loop ---- */
 @media (prefers-reduced-motion:reduce){
-  .ak-3d-tilt{ transform:none; transition:none; }
-  .ak-3d-tilt::before, .ak-3d-tilt::after{ display:none; }
+  .akshop::after, .aks-card::after, .aks-banner-hero, .aks-pull-art,
+  .aks-daily-hero .gift, .aks-hcard.full::after{ animation:none !important; }
 }
+
+/* ==========================================================================
+   AK-CHAT-RESKIN 2026-06-20 -- custom gold-cyberpunk speech bubbles for the
+   World/Crew chat (shop.html#crew2 crewPaintMsgs + the social.js overlay).
+   Brand: Cinzel names / Inter body, gold #c9a84c->#e8c55a, dark glass
+   rgba(10,10,16,.9), gold hairline + per-crew accent colour (--crew), a gold
+   shimmer sweep on the newest message, and DISTINCT sent (.mine = right, gold)
+   vs received (left, glass) bubbles with dog-gang paw avatars. Compositor-only
+   animation (transform/opacity) -> $100-Android safe. JS send/receive hooks
+   are untouched: classes only, no markup the logic depends on. Defined here in
+   shop.css (loaded by shop.html AND game.html -- the only two chat surfaces).
+   ========================================================================== */
+.akc-list{ display:flex; flex-direction:column; gap:9px; }
+.akc-row{ display:flex; align-items:flex-end; gap:8px; max-width:88%; align-self:flex-start; }
+.akc-row.mine{ flex-direction:row-reverse; align-self:flex-end; }
+.akc-av{ flex:0 0 auto; width:27px; height:27px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:15px; line-height:1;
+  background:radial-gradient(circle at 50% 32%, rgba(201,168,76,.24), rgba(10,10,16,.92));
+  border:1.5px solid var(--crew, #c9a84c); box-shadow:0 0 7px rgba(201,168,76,.28); color:#f3e6c0; }
+.akc-bub{ position:relative; min-width:0;
+  background:linear-gradient(180deg, rgba(20,20,28,.92), rgba(10,10,16,.92));
+  border:1px solid rgba(201,168,76,.26); border-left:2px solid var(--crew, #c9a84c);
+  border-radius:14px 14px 14px 4px; padding:6px 11px 7px;
+  box-shadow:0 2px 9px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.045); overflow:hidden; }
+.akc-row.mine .akc-bub{
+  background:linear-gradient(180deg, rgba(201,168,76,.22), rgba(143,110,30,.17));
+  border:1px solid rgba(232,197,90,.5); border-left:1px solid rgba(232,197,90,.5);
+  border-right:2px solid #e8c55a; border-radius:14px 14px 4px 14px; }
+.akc-hd{ display:flex; align-items:baseline; gap:7px; margin-bottom:1px; }
+.akc-nm{ font-family:'Cinzel', Georgia, serif; font-weight:700; font-size:11.5px; letter-spacing:.3px;
+  background:linear-gradient(90deg, #c9a84c, #e8c55a); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:#e8c55a; }
+.akc-row.mine .akc-nm{ background:linear-gradient(90deg, #fff1cc, #e8c55a);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.akc-ft{ font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase;
+  color:var(--crew, #8a8a96); opacity:.85; }
+.akc-bd{ font-family:'Inter', system-ui, sans-serif; color:#ece7da; font-size:13.5px;
+  line-height:1.4; word-break:break-word; }
+.akc-row.mine .akc-bd{ color:#fff7e6; }
+.akc-row.fresh{ animation:akcPop .26s cubic-bezier(.2,.8,.2,1) both; }
+.akc-row.fresh .akc-bub::after{ content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(115deg, transparent 32%, rgba(232,197,90,.34) 50%, transparent 68%);
+  transform:translateX(-130%); animation:akcShimmer .9s ease-out .08s 1; pointer-events:none; }
+.akc-input{ flex:1; background:rgba(6,7,11,.7); border:1px solid rgba(201,168,76,.3);
+  color:#f3eede; border-radius:20px; padding:11px 16px; font-size:14px;
+  font-family:'Inter', system-ui, sans-serif; outline:none;
+  transition:border-color .15s, box-shadow .15s; }
+.akc-input:focus{ border-color:rgba(232,197,90,.7);
+  box-shadow:0 0 0 2px rgba(201,168,76,.16), inset 0 0 12px rgba(201,168,76,.07); }
+.akc-input::placeholder{ color:#7a7a86; }
+@keyframes akcPop{ from{ opacity:0; transform:translateY(7px) scale(.97); } to{ opacity:1; transform:none; } }
+@keyframes akcShimmer{ to{ transform:translateX(130%); } }
+@media (prefers-reduced-motion:reduce){
+  .akc-row.fresh{ animation:none; }
+  .akc-row.fresh .akc-bub::after{ display:none; }
+}
+
+/* ==========================================================================
+   AK-CARDALIVE 2026-06-20 -- the "living card" layer for EVERY DOM card-DISPLAY
+   surface the shop renders (Card Shop grid, Deck Lab, Collection/Garage, Codex2,
+   handler grid -- all built by shop.js cardFrame() => .aks-card .ak-3d-face).
+   Purely additive, appended LAST so it wins. Compositor-only (opacity + transform;
+   the lone box-shadow lives on the rare tiers' STATIC inner glow whose OPACITY is
+   what animates) -> 60fps on a $100 Android. Honors prefers-reduced-motion. Reuses
+   the .ak-3d tilt shim's --ak-ry var so the holographic foil SHIFTS with the
+   pointer tilt on desktop hover; phones still get the breathing aura + foil sweep
+   + float (those need no shim). Operator ask: "make the cards feel alive."
+   ========================================================================== */
+@keyframes akAuraBreath{ 0%,100%{ opacity:.30; } 50%{ opacity:.85; } }
+@keyframes akCardFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+
+/* holographic foil -- the free ::before on the art window. A faint gold/cyan/
+   magenta sheen that ROTATES a fraction of the live pointer tilt (deg * scalar =
+   deg, valid CSS) so it slides across the art as you steer the card. Idle =
+   fully transparent (zero paint); blooms only while .ak-3d-live is steering. */
+.aks-card .aks-art::before{
+  content:""; position:absolute; inset:-45%; z-index:2; pointer-events:none;
+  background:conic-gradient(from 210deg,
+    rgba(232,197,90,0) 0%, rgba(46,230,255,.12) 22%, rgba(255,45,126,.10) 42%,
+    rgba(232,197,90,.18) 58%, rgba(46,230,255,.12) 78%, rgba(232,197,90,0) 100%);
+  mix-blend-mode:screen; opacity:0; transition:opacity .45s ease;
+  transform:rotate(calc(var(--ak-ry,0deg) * 0.7));
+}
+.ak-3d-live .aks-art::before{ opacity:.5; }
+
+/* breathing rarity aura -- ONLY the Legendary + Mythic tiers (the "stronger"
+   treatment), which keeps the idle-animated element count tiny on a full grid.
+   Static inner glow on the art window, OPACITY-breathing (compositor), tinted by
+   --rar (already set per rarity on .aks-card). */
+.aks-card.r-Legendary .aks-art::after,
+.aks-card.r-Mythic .aks-art::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
+  box-shadow:inset 0 0 26px -7px var(--rar), inset 0 0 0 1px var(--rar);
+  opacity:.30; animation:akAuraBreath 5.4s ease-in-out infinite;
+}
+.aks-card.r-Mythic .aks-art::after{ box-shadow:inset 0 0 36px -5px var(--rar), inset 0 0 0 1px var(--rar); }
+
+/* faint idle float on a FEATURED / SELECTED card + the BEST-VALUE gem pack */
+.aks-card.featured, .aks-card.sel, .aks-card.selected, .aks-card.aks-gem.best{
+  animation:akCardFloat 4.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .aks-card .aks-art::before, .aks-card .aks-art::after{ animation:none !important; opacity:0 !important; }
+  .aks-card.featured, .aks-card.sel, .aks-card.selected, .aks-card.aks-gem.best{ animation:none !important; }
+}
+
+/* ==========================================================================
+   AK-25D-SHOP 2026-06-20 (Section 1) -- rarity/tier-tinted breathing glow for
+   the now-2.5D FLAT tiles that don't inherit the rare-tier .aks-art aura:
+   gem packs (cyan) + crates (tier colour / gold). Conflict-free: gem/chest art
+   never used ::after before (the rare-tier aura is r-Legendary/r-Mythic only;
+   the holographic foil is ::before). Static tinted box-shadow + OPACITY breath
+   = compositor only, 60fps on a $100 Android. Reuses akAuraBreath.
+   ========================================================================== */
+.aks-gem .aks-art::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
+  box-shadow:inset 0 0 26px -8px var(--cyan), inset 0 0 0 1px rgba(46,230,255,.5);
+  opacity:.26; animation:akAuraBreath 5.6s ease-in-out infinite;
+}
+.aks-gem.best .aks-art::after{ box-shadow:inset 0 0 30px -6px var(--gold-hi), inset 0 0 0 1px rgba(232,197,90,.6); }
+.aks-chest .aks-art::after{
+  content:""; position:absolute; inset:0; z-index:2; pointer-events:none; border-radius:inherit;
+  box-shadow:inset 0 0 26px -8px var(--tier,var(--gold-hi)), inset 0 0 0 1px var(--tier,rgba(232,197,90,.5));
+  opacity:.24; animation:akAuraBreath 6s ease-in-out infinite;
+}
+.aks-chest.gated .aks-art::after{ opacity:.12; }   /* "soon" crates stay subtle */
+/* pity meter -- now a 2.5D panel (.ak-3d-face): give it a solid gold-glass face
+   so the extruded side/bottom edges fold off a real surface (matches .aks-rates).
+   Additive only -- the flex row layout + inner bars are untouched. */
+.aks-pity.ak-3d-face{ padding:12px 14px; border:1px solid var(--line); border-radius:var(--rad);
+  background:linear-gradient(180deg, var(--glass-2), var(--glass)); }
+@media (prefers-reduced-motion:reduce){
+  .aks-gem .aks-art::after, .aks-chest .aks-art::after{ animation:none !important; opacity:0 !important; }
+}
+
+/* ==========================================================================
+   AK-ODDS 2026-06-25 -- LOOT-BOX ODDS DISCLOSURE (Apple 3.1.1 / Google / FTC).
+   The "View drop rates" affordance + the before-purchase odds modal. Reuses the
+   existing .aks-rates drop-rates table styling; only the link button + modal
+   shell are new. Clear + conspicuous: gold-edged, never hidden.
+   ========================================================================== */
+.aks-oddsbtn{display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:11px; letter-spacing:.8px;
+  text-transform:uppercase; color:var(--gold-hi); background:rgba(212,175,55,.10);
+  border:1px solid var(--gold-edge,rgba(201,168,76,.55)); padding:7px 13px;
+  clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px); transition:.12s}
+.aks-oddsbtn:hover{background:rgba(212,175,55,.20); box-shadow:0 0 14px -4px var(--gold)}
+.aks-oddsbtn:active{transform:translateY(1px)}
+.aks-oddsbtn .i{display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px;
+  border-radius:50%; border:1px solid currentColor; font-size:10px; font-style:normal; line-height:1; font-weight:800}
+/* in a section head, push the affordance to the right edge (still conspicuous) */
+.aks-sec .aks-oddsbtn{margin-left:auto}
+/* the draw-surface link sits right under the pull buttons */
+.aks-odds-row{margin-top:12px}
+/* the before-purchase odds modal (over the .aks-reveal overlay shell) */
+.aks-odds .aks-odds-card{width:min(94vw,560px); max-height:90vh; overflow-y:auto;
+  display:flex; flex-direction:column; gap:12px; padding:18px 18px 16px;
+  background:linear-gradient(170deg,#16151f,#0a0a12); border:2px solid var(--gold);
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  box-shadow:0 0 34px -8px var(--gold)}
+.aks-odds .aks-odds-title{font-family:'Cinzel',serif; font-size:20px; letter-spacing:1px;
+  text-transform:uppercase; color:var(--gold-hi); text-shadow:2px 2px 0 #000}
+.aks-odds .aks-odds-kicker{font-family:'Inter',sans-serif; font-size:10.5px; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--muted); margin-top:3px}
+/* fit the reused .aks-rates table to the modal (override its page-width defaults) */
+.aks-odds .aks-rates{max-width:none; margin:0}
+.aks-odds .rv-foot{max-width:none}
+
+/* AK-WARDROBE 2026-07-03: cosmetic paper-doll -- browser tiles + live square preview.
+   The preview reuses .aks-art (forced square inline) as the base portrait; each
+   equipped part is an absolutely-positioned layer over it at its dx/dy/scale. */
+.aks-cos-preview{max-width:340px; margin:0 auto 8px}
+.aks-art img.aks-cos-layer{position:absolute; object-fit:contain; width:auto; height:auto;
+  transform:none; transition:none; pointer-events:none; z-index:2}
+.aks-cos-thumb{width:100%; min-height:96px; display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.35)}
+.aks-cos-thumb img{width:auto; height:auto; max-width:76%; max-height:86%; object-fit:contain}
+.aks-cos-slot{font-family:'Inter',sans-serif; font-size:11px; letter-spacing:1.6px; text-transform:uppercase;
+  font-weight:800; color:var(--gold-lo); max-width:1400px; margin:16px auto 2px}

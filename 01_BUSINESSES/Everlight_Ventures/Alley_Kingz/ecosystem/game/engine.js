@@ -65,7 +65,9 @@ const FACTION_PAL = {
   k9_circuitry:     { base:'#00E0C0', dark:'#064b42', light:'#9affec' }  // teal/chrome
 };
 // Rig source-car -> short glyph used on the 2D chassis
-const RIG_GLYPH = { 'Muscle Car':'M', 'GTR':'S', 'Van':'V', 'Monster Truck':'T' };
+// AK-RIGTM 2026-07-18: real-world car marque retired to 'Sport' across canon.js + both
+// cards.json copies. Glyph 'S' unchanged. Matches the 'sport' family in art/build_asset_prompts.py.
+const RIG_GLYPH = { 'Muscle Car':'M', 'Sport':'S', 'Van':'V', 'Monster Truck':'T' };
 
 // Per-card silhouette body shape, keyed by canon role. (Spec section 2.)
 const BODY_SHAPE = {
@@ -4511,6 +4513,17 @@ function sfx(name){
   }
   // AK-AUDIO: custom UI sound bites -- procedural (ZzFX-style), no asset, ships free + zero license.
   else if(name==='chest_open'){ tone(90,'square',0.12,0.24,46); [659,880,1175].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.22,0.17,f*1.02),i*70)); }   // wood crack -> gold burst
+  // AK-JUICE 2026-07-17: the tiered chest ladder systems/juice.js drives. Rarity is AUDIBLE now,
+  // a diamond crate no longer sounds like a wood one. Dedicated Mythic rung + bonus_1..4 climb.
+  else if(name==='chest_land'){ tone(64,'sine',0.20,0.32,44); }
+  else if(name==='chest_tick'){ tone(900,'square',0.03,0.05,900); }
+  else if(name==='chest_unlock'){ tone(150,'sawtooth',0.16,0.20,90); setTimeout(()=>tone(320,'square',0.06,0.10,260),60); }
+  else if(name==='chest_common'){ tone(300,'sine',0.30,0.13,210); }
+  else if(name==='chest_rare'){ [523,659].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.24,0.17,f),i*90)); }
+  else if(name==='chest_epic'){ [523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.32,0.19,f),i*80)); }
+  else if(name==='chest_legendary'){ tone(65,'sine',0.6,0.30,58); [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.40,0.21,f),i*95)); }
+  else if(name==='chest_mythic'){ tone(55,'sine',0.95,0.34,50); [659,784,988,1318,1568].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.5,0.23,f),i*115)); }
+  else if(name && String(name).slice(0,6)==='bonus_'){ const bn=Math.max(1,Math.min(4,parseInt(String(name).slice(6),10)||1)); tone(392+bn*98,'triangle',0.18,0.18,392+bn*98); }
   else if(name==='reward'){ [784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,'triangle',0.18,0.14,f*1.03),i*60)); }                                          // ascending shimmer
   else if(name==='tap'){ tone(420,'square',0.04,0.10,300); }                                                                                                       // crisp UI click
   // AK-AUDIO: combat + mechanic identifiers (synth placeholders; drop assets/sfx/<name>.mp3 to upgrade to bespoke).

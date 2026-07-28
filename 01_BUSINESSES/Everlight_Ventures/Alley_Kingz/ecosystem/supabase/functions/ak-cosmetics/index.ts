@@ -1,7 +1,23 @@
 // ak-cosmetics -- Alley Kingz "The Drop" cosmetic shop + ownership.
 // Server records OWNERSHIP (persists); the catalog's visual recipes live in
 // drip.js. Daily rotation is deterministic by date so every player sees the same
-// Drop with a shared countdown. Gold is deducted client-side (cosmetic, low stakes).
+// Drop with a shared countdown.
+//
+// AK-COS-GOLD 2026-07-18 -- GOLD IS NOT SERVER-AUTHORITATIVE. The old header here
+// claimed "gold is deducted client-side (cosmetic, low stakes)"; that is the whole
+// bug, not a design note. Gold is ak_profile.coins in client localStorage
+// (economy.js), synced newest-wins by AKAccount.pushNow. There is NO gold row in
+// game_currencies (that table holds gems / nos / chips only) and no gold RPC, so
+// this fn cannot read or debit a balance the way ak-pass spends gems through the
+// atomic ak_spend_gems. A signed-in player can therefore still POST
+// {action:"buy"} and take a rotation item without paying. Trusting a price or a
+// balance sent in the request body would NOT fix that (the client picks the
+// number), so we do not pretend to.
+// TODO-SERVER: real fix needs a gold ledger + an atomic ak_spend_gold RPC that
+// debits inside the same statement as the grant. See the lane report for the
+// migration; it is a game-economy migration, not a patch to this file.
+// What IS enforceable server-side is enforced below: sell only what today's Drop
+// actually offers, and write a ledger row so the free-grab is detectable.
 //
 // Actions: get | buy
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -61,12 +77,23 @@ Deno.serve(async (req) => {
     }
     if (action === "buy") {
       const id = String(body.id || "");
-      if (!PRICES[id]) return json({ ok: false, error: "no such item" }, 400);
+      const price = PRICES[id];
+      if (!price) return json({ ok: false, error: "no such item" }, 400);
+      // AK-COS-GOLD 2026-07-18: sell ONLY today's rotation. Both real buyers render
+      // from the server rotation (drip.js renderShop, shop.js dripShopSection), so an
+      // off-rotation id is always a forged POST. Narrows the free-grab from all 13
+      // catalog ids to the 5 live ones; it does NOT make the buy cost anything (see header).
+      if (rotation().indexOf(id) < 0) return json({ ok: false, error: "not in today's Drop" }, 400);
       const { data: have } = await admin.from("ak_owned_cosmetics").select("cosmetic_id").eq("user_id", uid).eq("cosmetic_id", id).maybeSingle();
       if (have) return json({ ok: false, error: "already owned" }, 409);
       const { error } = await admin.from("ak_owned_cosmetics").insert({ user_id: uid, cosmetic_id: id, source: "shop" });
       if (error) return json({ ok: false, error: String(error.message) }, 500);
-      return json({ ok: true, id: id, price: PRICES[id] });
+      // AK-COS-GOLD 2026-07-18: audit row on the shop's existing ledger (ak_transactions
+      // keys gold as coins). This records the CLIENT-settled spend; it is not a server
+      // debit, and it is the only trail that catches a free-grab today (N grants with no
+      // matching gold burn). Best-effort like ak-pass: a ledger miss never voids a grant.
+      await admin.from("ak_transactions").insert({ player_id: uid, action: "buy_cosmetic", sku: id, currency_deltas: { coins: -price }, source: "ak-cosmetics" });
+      return json({ ok: true, id: id, price: price });
     }
     return json({ ok: false, error: "unknown action" }, 400);
   } catch (e) { return json({ ok: false, error: String((e as Error)?.message || e) }, 500); }

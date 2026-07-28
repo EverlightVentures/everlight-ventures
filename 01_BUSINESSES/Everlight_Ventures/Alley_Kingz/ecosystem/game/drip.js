@@ -32,8 +32,45 @@
   };
   var RAR_COL = { Common: "#cfcfd6", Rare: "#5aa9ff", Epic: "#c06bff", Mythic: "#ff5e8a" };
 
+  // ---- COSMETIC PAPER-DOLL (modular parts layered on the canonical d x d portrait square) ----
+  // Slot taxonomy is Unity-socket-ready: head (crown/hat), eyes (glasses/aviators),
+  // neck (chain), muzzle (cigar), torso (outfit/jacket), hand (weapon). A part =
+  // {id, slot, rarity, name, img:'assets/cosmetics/<id>.png', dx, dy, scale} where
+  // dx/dy = the part's CENTER and scale = its size, both FRACTIONS of the unit's d x d
+  // canonical square. Parts are authored on the SAME square as the portrait, so a
+  // consumer drops them in with no per-card math. Draw order is back-to-front so the
+  // head sits over the torso and the weapon over everything. Equip persists in
+  // localStorage exactly like D.skins; ownership is best-effort via ak-cosmetics.
+  var COS_SLOTS = ["head", "eyes", "neck", "muzzle", "torso", "hand"];
+  var COS_ORDER = ["torso", "neck", "muzzle", "head", "eyes", "hand"];   // back-to-front paint order
+  var COS_PRICE = {                                    // GEM_PER_COPY-style ladder: gold for common/rare recolors, gems for the rarer parts
+    Common:    { cur: "gold", amt: 300 },
+    Rare:      { cur: "gold", amt: 600 },
+    Epic:      { cur: "gems", amt: 60 },
+    Legendary: { cur: "gems", amt: 120 },
+    Mythic:    { cur: "gems", amt: 200 },
+  };
+  var COSMETICS = {
+    // head -- crown/hat (anchor y ~0.02-0.30)
+    crown_gold:     { slot: "head",   rarity: "Legendary", name: "Gold Crown",     dx: 0.50, dy: 0.10, scale: 0.60 },
+    cap_snap:       { slot: "head",   rarity: "Common",    name: "Snapback",       dx: 0.50, dy: 0.16, scale: 0.54 },
+    // eyes -- glasses/aviators (anchor y ~0.30-0.45)
+    aviator_flag:   { slot: "eyes",   rarity: "Epic",      name: "Flag Aviators",  dx: 0.50, dy: 0.37, scale: 0.50 },
+    shades_black:   { slot: "eyes",   rarity: "Common",    name: "Black Shades",   dx: 0.50, dy: 0.38, scale: 0.48 },
+    // neck -- chain (anchor y ~0.55-0.70)
+    chain_dollarb:  { slot: "neck",   rarity: "Epic",      name: "Dollar-B Chain", dx: 0.50, dy: 0.64, scale: 0.56 },
+    rope_bone:      { slot: "neck",   rarity: "Common",    name: "Bone Rope",      dx: 0.50, dy: 0.62, scale: 0.50 },
+    // muzzle -- cigar (anchor y ~0.42-0.52)
+    cigar_gold:     { slot: "muzzle", rarity: "Rare",      name: "Gold Cigar",     dx: 0.62, dy: 0.48, scale: 0.34 },
+    // torso -- outfit/jacket (anchor y ~0.55-0.95)
+    jacket_varsity: { slot: "torso",  rarity: "Rare",      name: "Varsity Jacket", dx: 0.50, dy: 0.76, scale: 0.76 },
+    tank_wife:      { slot: "torso",  rarity: "Common",    name: "Tank Top",       dx: 0.50, dy: 0.78, scale: 0.70 },
+    // hand -- weapon (anchor x ~0.70-1.0)
+    bat_spike:      { slot: "hand",   rarity: "Rare",      name: "Spiked Bat",     dx: 0.84, dy: 0.58, scale: 0.50 },
+  };
+
   var D = { booted: false, owned: {}, rotation: [], prices: {}, resets: 0, tab: "shop",
-            styleAll: null, board: null, skins: {}, emotes: [] };
+            styleAll: null, board: null, skins: {}, emotes: [], cosEquip: {}, cosAll: {} };
 
   function sbc() { try { return global.AKAccount && global.AKAccount.client && global.AKAccount.client(); } catch (_) { return null; } }
   function me() { try { return global.AKAccount && global.AKAccount.user && global.AKAccount.user(); } catch (_) { return null; } }
@@ -66,6 +103,8 @@
     try { D.owned = JSON.parse(lsGet("ak_cos_owned") || "{}") || {}; } catch (_) { D.owned = {}; }
     try { D.skins = JSON.parse(lsGet("ak_skins") || "{}") || {}; } catch (_) { D.skins = {}; }
     try { D.emotes = JSON.parse(lsGet("ak_emotes") || "[]") || []; } catch (_) { D.emotes = []; }
+    try { D.cosEquip = JSON.parse(lsGet("ak_cos_equip") || "{}") || {}; } catch (_) { D.cosEquip = {}; }
+    try { D.cosAll = JSON.parse(lsGet("ak_cos_all") || "{}") || {}; } catch (_) { D.cosAll = {}; }
   }
   function ownsId(id) { return !!D.owned[id]; }
   function cardFilter(card) {                       // engine drawUnit hook
@@ -81,6 +120,76 @@
   }
   function equippedEmotes() {
     return D.emotes.filter(function (id) { return D.owned[id] && CATALOG[id]; }).map(function (id) { return { id: id, emoji: CATALOG[id].emoji, text: CATALOG[id].text }; });
+  }
+
+  // ---- COSMETIC PAPER-DOLL resolvers (engine-facing, fast + sync + guarded) ----
+  function cosImg(slot, id) { return "assets/cosmetics/" + slot + "_" + id + ".png"; }   // disk files are slot-prefixed (head_crown_gold.png)
+  function cosRarCol(r) { try { if (global.AK && global.AK.RARITY_COL && global.AK.RARITY_COL[r]) return global.AK.RARITY_COL[r]; } catch (_) {} return RAR_COL[r] || "#cfcfd6"; }
+  // AKDrip.cardOverlays(card) -> ordered [{img,dx,dy,scale,slot,id}] for the parts equipped on
+  // that card, resolved per-card first then a squad-wide default, gated on ownership exactly
+  // like cardFilter. Already sorted back-to-front (COS_ORDER) so the consumer just drawImage()s
+  // each on the same d x d square, front to back of the array. [] when nothing is equipped or
+  // owned. Never throws -- a missing/unknown/unowned part is silently skipped.
+  function cardOverlays(card) {
+    var out = [];
+    try {
+      var nm = card && card.name;
+      var per = (nm && D.cosEquip[nm]) || null;
+      for (var i = 0; i < COS_ORDER.length; i++) {
+        var slot = COS_ORDER[i];
+        var id = (per && per[slot]) || D.cosAll[slot] || null;
+        if (!id) continue;
+        var part = COSMETICS[id];
+        if (!part || part.slot !== slot) continue;   // unknown / mismatched part -> skip (no-op)
+        if (!D.owned[id]) continue;                   // ownership gate (mirrors cardFilter)
+        out.push({ id: id, slot: slot, img: cosImg(slot, id), dx: part.dx, dy: part.dy, scale: part.scale });
+      }
+    } catch (_) {}
+    return out;
+  }
+  // AKDrip.equipCosmetic(cardName, slot, partId): cardName null/"" -> squad-wide default slot.
+  // Persists the loadout locally (mirrors D.skins), then best-effort refreshes ownership from the
+  // server (merge-only; offline / missing server = silent no-op, the local equip still sticks).
+  function equipCosmetic(cardName, slot, partId) {
+    if (COS_SLOTS.indexOf(slot) < 0) return false;
+    var part = COSMETICS[partId];
+    if (!part || part.slot !== slot) return false;    // unknown part / wrong slot -> refuse, no crash
+    if (cardName) {
+      if (!D.cosEquip[cardName]) D.cosEquip[cardName] = {};
+      D.cosEquip[cardName][slot] = partId;
+      lsSet("ak_cos_equip", JSON.stringify(D.cosEquip));
+    } else {
+      D.cosAll[slot] = partId;
+      lsSet("ak_cos_all", JSON.stringify(D.cosAll));
+    }
+    try { call("ak-cosmetics", { action: "get" }).then(function (r) {
+      if (r && r.ok && Array.isArray(r.owned)) { r.owned.forEach(function (oid) { D.owned[oid] = 1; }); lsSet("ak_cos_owned", JSON.stringify(D.owned)); }
+    }, function () {}); } catch (_) {}
+    return true;
+  }
+  // AKDrip.unequip(cardName, slot): clears a slot (per-card when cardName set, else the squad default).
+  function unequip(cardName, slot) {
+    if (cardName) {
+      if (D.cosEquip[cardName]) {
+        delete D.cosEquip[cardName][slot];
+        if (!Object.keys(D.cosEquip[cardName]).length) delete D.cosEquip[cardName];
+        lsSet("ak_cos_equip", JSON.stringify(D.cosEquip));
+      }
+    } else {
+      delete D.cosAll[slot];
+      lsSet("ak_cos_all", JSON.stringify(D.cosAll));
+    }
+    return true;
+  }
+  // AKDrip.cosmeticCatalog() -> the parts for the wardrobe UI, enriched with img, rarity color
+  // (AK.RARITY_COL) + the COS_PRICE ladder ({currency:'gold'|'gems', price:amt}).
+  function cosmeticCatalog() {
+    return Object.keys(COSMETICS).map(function (id) {
+      var p = COSMETICS[id];
+      var pr = COS_PRICE[p.rarity] || COS_PRICE.Common;
+      return { id: id, slot: p.slot, rarity: p.rarity, name: p.name, img: cosImg(id),
+               dx: p.dx, dy: p.dy, scale: p.scale, color: cosRarCol(p.rarity), currency: pr.cur, price: pr.amt };
+    });
   }
 
   function injectCss() {
@@ -298,7 +407,8 @@
     if (btn) btn.addEventListener("click", open);
     try { global.addEventListener("ak-auth", function (e) { if (e && e.detail && e.detail.user) load(); }); } catch (_) {}
     setInterval(emoteTick, 900);       // show the emote button only during a live match
-    global.AKDrip = { open: open, close: close, cardFilter: cardFilter, boardFilter: boardFilter, equippedEmotes: equippedEmotes };
+    global.AKDrip = { open: open, close: close, cardFilter: cardFilter, boardFilter: boardFilter, equippedEmotes: equippedEmotes,
+                      cardOverlays: cardOverlays, equipCosmetic: equipCosmetic, unequip: unequip, cosmeticCatalog: cosmeticCatalog };
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
 })(typeof window !== "undefined" ? window : this);

@@ -160,6 +160,17 @@
       document.head.appendChild(s);
     });
   }
+  // AK-DRIP: cosmetics engine (window.AKDrip). Lazy-inject on shop.html so the Wardrobe tab has an engine.
+  function ensureDrip() {
+    if (global.AKDrip || !SHOP_DIR) return Promise.resolve();
+    return new Promise(function (resolve) {
+      var s = document.createElement("script");
+      s.src = SHOP_DIR + "../drip.js";
+      s.onload = function () { resolve(); };
+      s.onerror = function () { resolve(); };
+      document.head.appendChild(s);
+    });
+  }
   // Local profile view (offline wallet source of truth = ak_profile).
   function localProfile() {
     var e = econ();
@@ -347,7 +358,7 @@
   }
 
   function tabsBar() {
-    var t = [["deck", "Deck Lab"], ["gems", "Gems"], ["cards", "Card Shop"], ["draw", "Lucky Draw"], ["chests", "Crates"], ["upgrade", "Collection"], ["codex2", "Codex"], ["handlers", "Handlers"], ["drip2", "Drip"], ["crew2", "Crew"], ["pass2", "Alley Pass"], ["hit2", "Hit List"], ["street", "Street Code"]];
+    var t = [["deck", "Deck Lab"], ["gems", "Gems"], ["cards", "Card Shop"], ["fence", "The Fence"], ["draw", "Lucky Draw"], ["chests", "Crates"], ["upgrade", "Collection"], ["codex2", "Codex"], ["handlers", "Handlers"], ["drip2", "Drip"], ["crew2", "Crew"], ["pass2", "Alley Pass"], ["hit2", "Hit List"], ["watch2", "The Watch"], ["street", "Street Code"]];
     return h("div", { class: "aks-tabs" }, t.map(function (x) {
       return h("div", {
         class: "aks-tab", role: "tab", "data-tab": x[0],
@@ -362,6 +373,7 @@
     var nodes = activeTab === "deck" ? deckView()
       : activeTab === "gems" ? gemsView()
       : activeTab === "cards" ? cardsView()
+        : activeTab === "fence" ? fenceView()
         : activeTab === "draw" ? drawView()
           : activeTab === "chests" ? chestsView()
             : activeTab === "handlers" ? handlersView()
@@ -371,6 +383,7 @@
               : activeTab === "crew2" ? crewView()
               : activeTab === "pass2" ? passView()
               : activeTab === "hit2" ? hitView()
+              : activeTab === "watch2" ? shieldView()
               : upgradeView();
     nodes.forEach(function (n) { body.appendChild(n); });
   }
@@ -406,17 +419,27 @@
       h("div", { class: "b", text: card.name || "" }),
       h("div", { class: "t", text: (card.rarity || "") + " // art incoming" }),
     ]));
+    // AK-BADGES 2026-07-02 (operator: chips ENHANCE not BLOCK the portrait):
+    // faction crest / rarity ribbon / variant stamp now render via badgeRow()
+    // in the meta header strip -- never overlaid on the .aks-art cover image.
+    (extraNodes || []).forEach(function (n) { box.appendChild(n); });
+    return box;
+  }
+  // AK-BADGES: identifier chips (faction crest + rarity ribbon + variant stamp)
+  // as a header-strip row that sits ABOVE the card art, so it labels the portrait
+  // without covering it. Returns null when the card carries no chip data.
+  function badgeRow(card) {
+    var fi = facInfo(card.faction), kids = [];
     if (card.faction) {
       var _cf = FAC_CREST[card.faction], _fb = h("div", { class: "aks-fac " + fi.cls, title: card.faction });
       if (_cf) { var _im = h("img", { class: "aks-fac-img", src: "../assets/ui/" + _cf + ".jpg", alt: "" }); _im.onerror = function () { _fb.textContent = fi.g; }; _fb.appendChild(_im); }
       else _fb.textContent = fi.g;
-      box.appendChild(_fb);
+      kids.push(_fb);
     }
-    if (card.rarity) box.appendChild(h("div", { class: "aks-rib", text: card.rarity }));
-    if (card.variant === "HEAVY") box.appendChild(h("div", { class: "aks-vstamp heavy", text: "Heavy" }));
-    else if (card.variant === "STREET") box.appendChild(h("div", { class: "aks-vstamp street", text: "Street" }));
-    (extraNodes || []).forEach(function (n) { box.appendChild(n); });
-    return box;
+    if (card.rarity) kids.push(h("div", { class: "aks-rib", text: card.rarity }));
+    if (card.variant === "HEAVY") kids.push(h("div", { class: "aks-vstamp heavy", text: "Heavy" }));
+    else if (card.variant === "STREET") kids.push(h("div", { class: "aks-vstamp street", text: "Street" }));
+    return kids.length ? h("div", { class: "aks-badges" }, kids) : null;
   }
   // AK-3D 2026-06-20: wrap a card tile in the extruded-photo 2.5D scene (MODE B -- wrapper).
   function wrap3d(node){ return h("div", { class:"ak-3d" }, [ h("div", { class:"ak-3d-tilt" }, [ node ]) ]); }
@@ -432,10 +455,49 @@
     else meta.push(h("div", { class: "aks-desc", text: card.desc || "" }));
     (opts.metaExtra || []).forEach(function (n) { meta.push(n); });
     meta.push(h("div", { class: "aks-row" }, [opts.priceNode || h("span"), opts.btnNode || h("span")]));
+    var bdg = badgeRow(card); if (bdg) meta.unshift(bdg);                     // AK-BADGES: crest/rarity/variant chips as the header strip, off the portrait
     return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(card.rarity) + (opts.cls ? (" " + opts.cls) : "") }, [
       artBox(card, opts.topStamp ? [opts.topStamp] : []),
       h("div", { class: "aks-meta" }, meta),
     ]));
+  }
+  // AK-CARDPICK 2026-06-30 (operator: "reuse the card art so it's visual and
+  // interactive ... show off the amazing cards"): a COMPACT, tappable card-art
+  // tile for pickers + slot swaps (deck builder, per-card skin assign). Reuses
+  // artBox() -- the SAME real-portrait resolver the shop tiles use -- so the
+  // player sees the actual card art (rarity conveyed by the tile frame + top
+  // border, chips live in the shop card's header strip), never a text row or a
+  // <select>. opts: {selected, label, sub, title, onclick}.
+  // 60fps: state-change transitions only (transform/opacity/shadow), no per-frame work.
+  function cardPickTile(card, opts) {
+    opts = opts || {};
+    var rar = card.rarity || "Common";
+    var sel = !!opts.selected;
+    var art = artBox(card);
+    // neutralize the modal's `.gd-card .aks-art{height:150px}` so the portrait
+    // sizes to its picker column via the native 3/4 aspect-ratio (stays compact).
+    art.style.height = "auto"; art.style.flex = "0 0 auto";
+    return h("div", {
+      class: "ak-pick " + rarClass(rar) + (sel ? " on" : ""),
+      title: opts.title || card.name || "",
+      style: "position:relative;cursor:pointer;border-radius:10px;overflow:hidden;"
+        + "border:1.5px solid " + (sel ? "var(--gold-hi)" : "var(--line)") + ";"
+        + "box-shadow:" + (sel ? "0 0 0 1px var(--gold-hi),0 0 18px -4px var(--gold)" : "0 6px 16px -9px rgba(0,0,0,.75)") + ";"
+        + "transform:translateY(" + (sel ? "-2px" : "0") + ");"
+        + "transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease;"
+        + "will-change:transform;background:linear-gradient(180deg,rgba(20,21,27,.55),rgba(8,9,12,.9))",
+      onclick: opts.onclick || null,
+    }, [
+      art,
+      h("div", { style: "padding:5px 7px;border-top:2px solid var(--r-" + rar + ");background:rgba(8,9,12,.82)" }, [
+        h("div", { style: "font:700 10.5px/1.15 'Inter',sans-serif;color:" + (sel ? "var(--gold-hi)" : "var(--text)") + ";white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: opts.label || card.name || "" }),
+        opts.sub ? h("div", { style: "font:600 8px/1.25 'Inter',sans-serif;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis", text: opts.sub }) : null,
+      ]),
+    ]);
+  }
+  // shared auto-fill grid for card-art pickers (matches the gold-glass shop look).
+  function pickGrid(nodes) {
+    return h("div", { style: "display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;margin-top:8px" }, nodes);
   }
   function subLine(card) {
     var bits = [];
@@ -531,10 +593,12 @@
     gimg.onerror = function () { gimg.remove(); gbox.appendChild(h("div", { class: "gemglyph", text: "◆" })); };
     gimg.src = ASSET_BASE + "shop/" + p.sku + ".png";
     gbox.appendChild(gimg);
-    return h("div", { class: "aks-card aks-gem" + (best ? " best" : "") }, [
+    // AK-25D: extruded-photo 2.5D + tilt (matches the done CARDS path). Shimmer +
+    // cyan gem-glow come from shop.css (.aks-card::after sweep + .aks-gem glow).
+    return wrap3d(h("div", { class: "aks-card aks-gem ak-3d-face ak-3d-shadow" + (best ? " best" : "") }, [
       gbox,
       h("div", { class: "aks-meta" }, meta),
-    ]);
+    ]));
   }
 
   // ---- CARD SHOP view (deterministic, real art, filters, daily deal) ------
@@ -593,7 +657,9 @@
   function dailyHero() {
     var card = dailyCard();
     if (!card) return null;
-    return h("div", { class: "aks-daily-hero" }, [
+    // AK-25D: the daily-deal hero panel gets the extruded-photo 2.5D + tilt (the
+    // gift glyph keeps its float). MODE B wrapper.
+    return wrap3d(h("div", { class: "aks-daily-hero ak-3d-face ak-3d-shadow" }, [
       (function () { var g = h("div", { class: "gift" }); var im = h("img", { class: "gift-img", src: "../assets/ui/daily_drop.png", alt: "" }); im.onerror = function () { g.textContent = "◈"; }; g.appendChild(im); return g; })(),  // AK-ART: daily-deal hero art (existing daily_drop.png)
       h("div", { class: "copy" }, [
         h("h4", { text: "Daily Deal" }),
@@ -603,7 +669,7 @@
       scrapPriceNode(card),
       buyCardBtn(card),
       h("div", { class: "aks-reset", text: "Resets 00:00 UTC" }),
-    ]);
+    ]));
   }
   function cardsView() {
     var cards = shopCards();
@@ -643,7 +709,9 @@
         onclick: function () { doDraw(n, cost); },
       }, [h("span", { text: "Pull x" + n }), h("span", { class: "cost", text: fmt(cost) + " Gems" })]);
     }
-    var hero = h("div", { class: "aks-banner-hero" }, [
+    // AK-25D: the headline Lucky-Draw banner gets the extruded-photo face + tilt.
+    // No ak-3d-shadow here -- its aksHeroPulse box-shadow keeps winning the cascade.
+    var hero = h("div", { class: "aks-banner-hero ak-3d-face" }, [
       artWrap,
       h("div", { class: "aks-hero-copy" }, [
         h("div", { class: "aks-hero-kicker", text: "The Crown Banner" }),
@@ -652,12 +720,13 @@
           " dogs. Every pull lands a card -- and a ", h("b", { text: "guaranteed Mythic by pull " + d.hard_pity_mythic }),
           ". Prizes are in-game cards for your crew."]),
         h("div", { class: "aks-pull-cta" }, [pullBtn(1, d.cost_gems), pullBtn(10, d.cost_gems_10, "ten")]),
+        h("div", { class: "aks-odds-row" }, [oddsLinkBtn("draw")]),   // AK-ODDS: clear+conspicuous odds, before purchase
       ]),
     ]);
 
     var pity = pityMeter(d, w);
     var rates = dropRates(d);
-    return [h("div", { class: "aks-draw" }, [hero]), pity, rates];
+    return [h("div", { class: "aks-draw" }, [wrap3d(hero)]), pity, rates];
   }
   function pityMeter(d, w) {
     var pm = w.draw_pity_m || 0, pl = w.draw_pity_l || 0;
@@ -669,10 +738,13 @@
         h("div", { class: "ct", text: cur + " / " + max }),
       ]);
     }
-    return h("div", { class: "aks-pity" }, [
+    // AK-25D: the pity meter panel gets the extruded-photo 2.5D + tilt to match
+    // its sibling Drop Rates panel (shop.css gives .aks-pity a solid face so the
+    // extrusion folds off a real surface).
+    return wrap3d(h("div", { class: "aks-pity ak-3d-face ak-3d-shadow" }, [
       bar("m", "Mythic guaranteed within", String(d.hard_pity_mythic), pm, d.hard_pity_mythic),
       bar("leg", "Legendary or better within", String(d.legendary_floor), pl, d.legendary_floor),
-    ]);
+    ]));
   }
   function dropRates(d) {
     var order = ["Mythic", "Legendary", "Epic", "Rare", "Common"];
@@ -686,12 +758,127 @@
         h("span", { class: "v", text: pct + "%" }),
       ]);
     });
-    return h("div", { class: "aks-rates" }, [
+    // AK-25D: the Drop Rates panel gets the extruded-photo 2.5D + tilt.
+    return wrap3d(h("div", { class: "aks-rates ak-3d-face ak-3d-shadow" }, [
       h("div", { class: "rh" }, [h("span", { class: "t", text: "Drop Rates" }), h("span", { class: "n", text: "per pull" })]),
     ].concat(rows, [
       h("div", { class: "rfoot", text: "Mythic odds climb after pull " + d.soft_pity_start + " and are guaranteed by pull " + d.hard_pity_mythic + ". A Legendary or better lands at least every " + d.legendary_floor + " pulls. Prizes are in-game cards." }),
-    ]));
+    ])));
   }
+  // ==========================================================================
+  // AK-ODDS 2026-06-25 -- LOOT-BOX ODDS DISCLOSURE (the #1 legal must-do).
+  // Apple App Store 3.1.1(c) + Google Play loot-box policy + FTC (mitigates the
+  // HoYoverse-style risk for a game with under-18 players) REQUIRE the exact
+  // drop probabilities, clear + conspicuous, BEFORE a randomized purchase.
+  // Randomized surfaces: the Lucky Draw (gacha) + the Crates tab (earned Street
+  // Crates + gem random crates).
+  //
+  // SOURCE OF TRUTH for crate card-rarity odds = economy.js DROP_W
+  // (Common 70 / Rare 22 / Epic 7 / Mythic 1) + CHEST_TABLE (per-tier rarity
+  // floors + the Diamond crate's 5% Mythic slot). We READ THESE LIVE from
+  // AK_ECON.DROP_W / AK_ECON.CHEST_TABLE at runtime, so the disclosed odds can
+  // NEVER drift from the real pull rates. The literal below is a FALLBACK only,
+  // used if AK_ECON has not injected yet -- keep it in sync with economy.js.
+  // Lucky Draw odds are read LIVE from state.draw.odds (server-authoritative).
+  var ODDS_DROP_W_FALLBACK = [["Common", 70], ["Rare", 22], ["Epic", 7], ["Mythic", 1]];
+
+  function pctStr(n) { n = +n || 0; return (n % 1 === 0 ? n.toFixed(0) : n.toFixed(1)) + "%"; }
+
+  // Crate card-rarity odds as percentages -- LIVE from AK_ECON.DROP_W (the same
+  // weights openChest() rolls), fallback to the mirror above.
+  function crateRarityOdds() {
+    var e = econ();
+    var live = !!(e && Array.isArray(e.DROP_W) && e.DROP_W.length);
+    var w = live ? e.DROP_W : ODDS_DROP_W_FALLBACK;
+    var total = 0; w.forEach(function (x) { total += (x[1] || 0); });
+    return { live: live, rows: w.map(function (x) { return { k: x[0], pct: total ? (x[1] / total * 100) : 0 }; }) };
+  }
+  // Per-tier rarity-floor / forced-Mythic note -- LIVE from AK_ECON.CHEST_TABLE.
+  function crateFloorsNote() {
+    var e = econ(), ct = (e && e.CHEST_TABLE) || null;
+    if (!ct) return "Higher crate tiers guarantee better cards (rarity floors) and the Diamond crate has a 5% Mythic slot. SOURCE OF TRUTH: economy.js CHEST_TABLE.";
+    var parts = [];
+    Object.keys(ct).forEach(function (tier) {
+      var spec = ct[tier]; if (!spec) return;
+      var bits = [];
+      if (spec.floors && spec.floors.length) {
+        var byR = {}; spec.floors.forEach(function (f) { byR[f] = (byR[f] || 0) + 1; });
+        bits.push(Object.keys(byR).map(function (r) { return byR[r] + "x guaranteed " + r + "+"; }).join(", "));
+      }
+      if (spec.mythicChance > 0) bits.push(pctStr(spec.mythicChance * 100) + " Mythic slot");
+      if (bits.length) parts.push(tier.charAt(0).toUpperCase() + tier.slice(1) + " -- " + bits.join(" + "));
+    });
+    return "Base card odds above apply to every crate slot. Tier guarantees stacked on top: " + parts.join("; ") + ". Crate prizes are in-game cards, Coins and Scrap only.";
+  }
+  // A clean rarity-odds table -- same visual as the Lucky Draw Drop Rates panel.
+  function oddsTableNode(title, sub, rows, foots) {
+    var rowNodes = rows.map(function (r) {
+      return h("div", { class: "rrow rr-" + r.k }, [
+        h("span", { class: "dot" }),
+        h("span", { class: "k", text: r.k }),
+        h("span", { class: "track" }, [h("b", { style: "width:" + Math.max(4, r.pct) + "%" })]),
+        h("span", { class: "v", text: pctStr(r.pct) }),
+      ]);
+    });
+    var footNodes = (foots || []).filter(Boolean).map(function (f) { return h("div", { class: "rfoot", text: f }); });
+    return h("div", { class: "aks-rates" }, [
+      h("div", { class: "rh" }, [h("span", { class: "t", text: title }), h("span", { class: "n", text: sub })]),
+    ].concat(rowNodes, footNodes));
+  }
+  // The "View drop rates" affordance -- visible, before-purchase, never buried.
+  function oddsLinkBtn(kind) {
+    return h("button", {
+      class: "aks-oddsbtn", type: "button",
+      "aria-label": "View drop rates and odds before buying",
+      title: "See the exact percentage odds for every rarity before you buy",
+      onclick: function () { showOddsModal(kind); },
+    }, [h("span", { class: "i", text: "i" }), "View drop rates"]);
+  }
+  // Attach the odds affordance to a secHead() title row (the .aks-sec node).
+  function attachOddsToHead(headNodes, kind) {
+    try { if (headNodes && headNodes[0]) headNodes[0].appendChild(oddsLinkBtn(kind)); } catch (_) {}
+    return headNodes;
+  }
+  // The disclosure panel -- mirrors the shop's reveal/detail modal style.
+  function showOddsModal(kind) {
+    var ov = h("div", { class: "aks-reveal aks-odds" });
+    function closeOv() { ov.classList.remove("show"); setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 220); }
+    var panels = [];
+    if (kind === "draw") {
+      var d = state.draw || demoDraw();
+      var order = ["Mythic", "Legendary", "Epic", "Rare", "Common"];
+      var rows = order.map(function (r) { return { k: r, pct: ((d.odds && d.odds[r]) || 0) * 100 }; });
+      panels.push(oddsTableNode("Lucky Draw Odds", "per pull", rows, [
+        "Mythic odds climb after pull " + d.soft_pity_start + " and are guaranteed by pull " + d.hard_pity_mythic + ". A Legendary or better lands at least every " + d.legendary_floor + " pulls.",
+        "Prizes are in-game cards for your crew only -- never cashable, never a tradeable NFT.",
+      ]));
+    } else if (kind === "scrapcrate") {
+      var srows = STASH.tiers.map(function (t) { return { k: t.k, pct: t.pct }; });
+      panels.push(oddsTableNode("The Stash -- Rip Odds", "per rip", srows, [
+        "Every rip pays out. Scraps = a Scrap and Coin handful; Haul adds a Rare-floor card; Big Score adds an Epic-floor card plus Bones; The Big One drops a Key, Bones and a Legendary-or-better card.",
+        "Pay with Coins or Bones only -- never Gems. Crate cards are in-game value only and level on the same capped HP/DMG curve -- never pay-to-win.",
+      ]));
+    } else {
+      var od = crateRarityOdds();
+      panels.push(oddsTableNode("Crate Card Odds", "per card", od.rows, [
+        crateFloorsNote(),
+        od.live ? "Read live from the game's real drop table." : "Standard published odds.",
+      ]));
+    }
+    var card = h("div", { class: "aks-odds-card" }, [
+      h("div", { class: "aks-odds-head" }, [
+        h("div", { class: "aks-odds-title", text: "Drop Rates & Odds" }),
+        h("div", { class: "aks-odds-kicker", text: "Exact chances, shown before you buy" }),
+      ]),
+    ].concat(panels, [
+      h("div", { class: "rv-foot" }, [h("button", { class: "aks-btn wide", text: "Got it", onclick: closeOv })]),
+    ]));
+    ov.appendChild(card);
+    ov.onclick = function (ev) { if (ev.target === ov) closeOv(); };   // tap the backdrop to close
+    document.body.appendChild(ov);
+    requestAnimationFrame(function () { ov.classList.add("show"); });
+  }
+
   function doDraw(n, cost) {
     recomputeCfg();   // AK-SHOPFIX item 2
     if (!cfg.online) {
@@ -732,7 +919,8 @@
     var g = h("div", { class: "rv-grid" });
     results.forEach(function (r) {
       var c = cardById(r.card_id) || { name: r.name, rarity: r.rarity };
-      var card = h("div", { class: "rv-card " + rarClass(r.rarity) });
+      // AK-25D: reveal cards get the extruded-photo face + tilt (rvpop pop-in + rarity glow stay).
+      var card = h("div", { class: "rv-card ak-3d-face " + rarClass(r.rarity) });
       var srcs = artCandidates(c); var i = 0;
       var img = h("img", { alt: r.name || "" });
       img.onerror = function () {
@@ -752,7 +940,7 @@
       if (lr && lr.tagline) capKids.push(h("div", { class: "rv-tag", text: "“" + oneLineTag(lr.tagline) + "”" }));
       if (!r.dupe && lr && lr.bio) capKids.push(h("div", { class: "rv-bio", text: lr.bio }));
       card.appendChild(h("div", { class: "cap" }, capKids));
-      g.appendChild(card);
+      g.appendChild(wrap3d(card));
     });
     ov.appendChild(g);
     if (opts && opts.chips && opts.chips.length) {           // AK-SCRAP: chest haul chips (coins/scrap/keys)
@@ -778,6 +966,35 @@
     gold:    { title: "Gold Crate",    desc: "4 cards + 200-300 coins + 2 Epic scrap. One drop floors at Epic." },
     diamond: { title: "Diamond Crate", desc: "5 cards + 350-500 coins + 4 Epic scrap. Epic floor x2, 5% Mythic shot, +1 Key back." },
   };
+  // AK-CINEMATIC 2026-07-02 (shop crates): the chest_open MP4 stinger, sandwiched
+  // BEFORE the reward/card reveal -- tap-to-skip, error-safe, 6.5s cap. Same IIFE
+  // shape as game.html showResult's AK-CINEMATIC. A missing mp4 fires error -> onDone
+  // runs immediately, so the reveal can never be blocked.
+  function chestStinger(onDone, opts) {
+    // AK-JUICE 2026-07-17: per-tier CODED chest open (systems/juice.js), replacing the single
+    // chest_open.mp4. Shows the tier chest art (ASSET_BASE-relative, was only a 40px thumb), holds
+    // longer by tier, stings by the true top rarity. No video. Tap to rush. Degrades to an instant
+    // reveal if juice or a tier is unavailable.
+    try {
+      var tier = opts && opts.tier;
+      if (global.AK_JUICE && AK_JUICE.chestSequence && tier) {
+        var wrap = document.createElement("div");
+        wrap.style.cssText = "position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%,#1b1712,#000 70%);";
+        var img = document.createElement("img"); img.src = ASSET_BASE + "ui/chest_" + tier + ".jpg"; img.alt = "";
+        img.style.cssText = "max-width:60%;max-height:60%;will-change:transform;filter:drop-shadow(0 0 34px rgba(212,175,55,.45));";
+        wrap.appendChild(img); document.body.appendChild(wrap);
+        var done = false, cancel = null;
+        var fin = function () { if (done) return; done = true; if (cancel) { try { cancel(); } catch (_e) {} } try { wrap.remove(); } catch (_e) {} try { onDone(); } catch (_o) {} };
+        wrap.addEventListener("pointerdown", fin);
+        cancel = AK_JUICE.chestSequence({ tier: tier, rarity: (opts && opts.rarity) || "Common", el: img, onOpen: function () {
+          try { img.style.transition = "transform .24s ease-out,opacity .24s"; img.style.transform = "scale(1.4)"; img.style.opacity = "0"; } catch (_e) {}
+          setTimeout(fin, 240);
+        }});
+      } else {
+        try { onDone(); } catch (_o) {}
+      }
+    } catch (_e) { try { onDone(); } catch (_o) {} }
+  }
   function openLocalChest(tier, useKey) {
     // AK-SHOPFIX item 4: local spend, never awaits the server; full try/catch so
     // a thrown error can never freeze the crate UI mid-open. openChest is ONE
@@ -788,8 +1005,10 @@
       var pool = allCards().map(function (c) { return { id: c.id, name: c.name, rarity: c.rarity }; });
       var r = e.openChest(tier, { pool: pool, useKey: !!useKey, perks: (global.AK && global.AK.PERKS) || null });
       if (!r || !r.ok) { toast(humanErr(r || {}), "bad"); render(); return; }
-      showChestReveal(r);
-      render();
+      render();                                       // counts/keys refresh under the stinger right away
+      var _rk = ["Common", "Rare", "Epic", "Legendary", "Mythic"], _ti = 0;
+      (r.cards || []).forEach(function (c) { var i = _rk.indexOf(c && (c.rarity || c.rar)); if (i > _ti) _ti = i; });
+      chestStinger(function () { showChestReveal(r); }, { tier: tier, rarity: _rk[_ti] }); // AK-JUICE: per-tier stinger BEFORE the card reveal
     } catch (err) { toast("Could not open crate -- try again.", "bad"); try { render(); } catch (_) {} }
   }
   function showChestReveal(r) {
@@ -825,14 +1044,17 @@
     cimg.onerror = function () { cimg.remove(); cbox.appendChild(h("div", { class: "crate", text: "▣" })); };
     cimg.src = ASSET_BASE + "shop/earned_" + tier + ".png";
     cbox.appendChild(cimg);
-    return h("div", { class: "aks-chest aks-card earned tier-" + tier }, [
+    // AK-25D: earned Street Crates get the extruded-photo 2.5D + tilt, matching
+    // the Gem Crates path; the tier-tinted breathing glow on the art comes from
+    // shop.css (.aks-chest .aks-art::after + .aks-chest.earned tier colours).
+    return wrap3d(h("div", { class: "aks-chest aks-card earned ak-3d-face ak-3d-shadow tier-" + tier }, [
       cbox,
       h("div", { class: "aks-meta" }, [
         h("div", { class: "aks-name", text: meta.title }),
         h("div", { class: "aks-desc", text: meta.desc }),
         h("div", { class: "aks-row wrap" }, btnRow),
       ]),
-    ]);
+    ]));
   }
   function earnedChestsSection() {
     var e = econ();
@@ -842,6 +1064,7 @@
     var keys = p.keys | 0;
     var nodes = secHead("Street Crates",
       "Earned in matches -- open FREE right here. Bigger wins = bigger tiers (sweep under the clock for Diamond). Keys crack an owned crate without spending it.");
+    attachOddsToHead(nodes, "chest");   // AK-ODDS: randomized crate -> show exact card odds before opening
     if (keys > 0) nodes.push(h("div", { class: "aks-keysline" }, [
       h("span", { class: "dot" }), keys + (keys === 1 ? " Key" : " Keys") + " ready",
     ]));
@@ -851,8 +1074,10 @@
   function chestsView() {
     var chests = state.products.filter(function (p) { return p.kind === "chest"; });
     var owned = {}; ((state.player && state.player.chests) || []).forEach(function (x) { owned[x.chest_id] = x.qty; });
-    var nodes = earnedChestsSection();   // AK-KEYS: earned crates first
-    nodes = nodes.concat(secHead("Gem Crates", "Fixed-contents crates grant exactly what they say. Want odds-based rewards? Rip the Lucky Draw."));
+    var nodes = scrapCrateSection().concat(earnedChestsSection());   // AK-STASH: variable-ratio crate headlines, then AK-KEYS earned crates
+    var gemHead = secHead("Gem Crates", "Fixed-contents crates grant exactly what they say. Want odds-based rewards? Rip the Lucky Draw.");
+    attachOddsToHead(gemHead, "chest");   // AK-ODDS: gem random crates route to the Draw -- surface the odds here too
+    nodes = nodes.concat(gemHead);
     nodes.push(grid(chests.map(function (p) {
       var have = owned[p.sku] || 0, soon = p.is_random;
       var meta = [
@@ -875,10 +1100,12 @@
       cimg.onerror = function () { cimg.remove(); cbox.appendChild(h("div", { class: "crate", text: soon ? "▤" : "▣" })); };
       cimg.src = ASSET_BASE + "shop/" + p.sku + ".png";
       cbox.appendChild(cimg);
-      return h("div", { class: "aks-chest aks-card" + (soon ? " gated" : "") }, [
+      // AK-25D: crate tiles get the extruded-photo 2.5D + tilt; tier-tinted glow
+      // on earned crates comes from shop.css (.aks-chest.earned .aks-art::after).
+      return wrap3d(h("div", { class: "aks-chest aks-card ak-3d-face ak-3d-shadow" + (soon ? " gated" : "") }, [
         cbox,
         h("div", { class: "aks-meta" }, meta),
-      ]);
+      ]));
     })));
     return nodes;
   }
@@ -1095,10 +1322,20 @@
     function deckTab() {
       var g = deckGet();
       if (!g.cards) return [h("div", { class: "gd-note", text: "No active 11-card deck yet -- build one in the game's Deck Lab, then manage it here." })];
+      // AK-CARDPICK 2026-06-30: the 11 deck slots render as the REAL card art
+      // (cardPickTile reuses artBox) instead of plain-text rows. Tap any slot to
+      // swap this card in -- same deckSwap() logic, premium visual presentation.
+      var byName = deckByName();
       var inDeck = g.cards.indexOf(c.name) >= 0;
-      var n = [h("div", { class: "gd-sub", text: inDeck ? "In your active deck" : "Not in your active deck -- tap a slot below to swap " + c.name + " in" })];
-      n.push(h("div", { class: "gd-decklist" }, g.cards.map(function (nm, i) {
-        return h("button", { class: "gd-deckcard" + (nm === c.name ? " me" : ""), text: nm, onclick: function () { if (nm === c.name) return; if (deckSwap(i, c.name)) { toast(c.name + " swapped in for " + nm, "good"); refresh(); } else toast("Could not edit deck", "bad"); } });
+      var n = [h("div", { class: "gd-sub", text: inDeck ? "In your active deck" : "Not in your active deck -- tap a card below to swap " + c.name + " in" })];
+      n.push(pickGrid(g.cards.map(function (nm, i) {
+        var dc = byName[nm] || { name: nm, rarity: "Common" };
+        var me = (nm === c.name);
+        return cardPickTile(dc, {
+          selected: me, label: dc.name, sub: me ? "this card" : (dc.rarity || ""),
+          title: me ? (c.name + " (already in this slot)") : ("Swap " + c.name + " in for " + nm),
+          onclick: me ? null : function () { if (deckSwap(i, c.name)) { toast(c.name + " swapped in for " + nm, "good"); refresh(); } else toast("Could not edit deck", "bad"); },
+        });
       })));
       return n;
     }
@@ -1233,14 +1470,16 @@
     ]));
     nodes.push(h("div", { class: "aks-hgrid" }, list.map(function (H) {
       var eq = hp.selected === H.id;
-      return h("div", { class: "aks-hcard full r-Legendary" + (eq ? " eq" : ""), style: "--acc:" + (H.accent || "#D4AF37"), onclick: function () { handlerDetail(H); } }, [
+      // AK-25D: commander cards get extruded-photo 2.5D + tilt; their gold shimmer
+      // sweep (.aks-hcard.full::after) + accent glow already live in shop.css.
+      return wrap3d(h("div", { class: "aks-hcard full r-Legendary ak-3d-face ak-3d-shadow" + (eq ? " eq" : ""), style: "--acc:" + (H.accent || "#D4AF37"), onclick: function () { handlerDetail(H); } }, [
         handlerArtFull(H),
         h("div", { class: "aks-hcap" }, [
           h("div", { class: "aks-hnm", text: H.name }),
           h("div", { class: "aks-hsp", text: H.special.name }),
         ]),
         eq ? h("div", { class: "aks-hbadge", text: "EQUIPPED" }) : null,
-      ]);
+      ]));
     })));
     return nodes;
   }
@@ -1433,7 +1672,8 @@ function deckMutate(fn) {
       nodes = nodes.concat(secHead(branch.charAt(0).toUpperCase() + branch.slice(1), spec[branch] ? ("Locked: " + specPathName(branch, spec[branch])) : "Choose one path."));
       nodes.push(h("div", { class: "aks-grid" }, (SPEC_PATHS[branch] || []).map(function (node) {
         var chosen = spec[branch] === node.id;
-        return h("div", { class: "aks-card " + (chosen ? "r-Legendary aks-up" : "r-Rare") }, [
+        // AK-25D: perk-path cards get the extruded-photo 2.5D + tilt.
+        return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + (chosen ? "r-Legendary aks-up" : "r-Rare") }, [
           h("div", { class: "aks-meta" }, [
             h("div", { class: "aks-name", text: node.name }),
             h("div", { class: "aks-desc", text: node.blurb }),
@@ -1441,9 +1681,490 @@ function deckMutate(fn) {
               chosen ? h("span", { class: "aks-owned", text: "✓ LOCKED" })
                 : h("button", { class: "aks-btn", text: spec[branch] ? ("Switch -" + SPEC_RESPEC_COST + "c") : "Lock In", disabled: lvl < SPEC_UNLOCK ? "true" : null, onclick: function () { pickSpec(branch, node.id); } }) ])
           ])
-        ]);
+        ]));
       })));
     });
+    return nodes;
+  }
+
+  // ==========================================================================
+  // AK-SHIELD 2026-06-26 -- THE WATCH: raid-protection shields (defense, NOT power)
+  // Buy a TIMED shield with soft-currency (coins -- the match-earned pocket) and
+  // rival clans CANNOT raid your block while it holds. Sets p.raid.shieldUntil to
+  // a future timestamp -- the SAME field the raid system reads:
+  //   systems/raid.js shieldActive() -> raidOf(p).shieldUntil > now()
+  //   economy.js zero-state -> p.raid = { shieldUntil:0, lastRaid:0, revenge:[] }
+  // This grants ZERO combat advantage -- it only keeps you off the war map.
+  // Mirrors raid.js buyShield()/setShield(): a longer shield EXTENDS, a shorter
+  // one NEVER shortens an active shield; coins deduct atomically + clamped >=0 in
+  // ONE mutateProfile (zero-state stays byte-identical -- nothing new persisted).
+  // exposes: window.AKShield (the integration pass wires a "shield up" button on
+  // the world map / raid-defense screen straight to AKShield.buy / .status).
+  // ==========================================================================
+  var SHIELD_HOUR_MS = 3600000;
+  // Gritty-street product names (canon: guarding = THE WATCH). Coins = the
+  // soft-currency protection sink. Protection, never power.
+  var SHIELD_TIERS = [
+    { id: "lay_low",  name: "Lay Low",      hrs: 8,  coins: 300,  rarity: "Rare",      blurb: "Pull the shutters for 8h. No crew touches your block." },
+    { id: "boarded",  name: "Boarded Up",   hrs: 24, coins: 700,  rarity: "Epic",      blurb: "Board the doors for a full day. The Watch holds -- nobody raids." },
+    { id: "off_grid", name: "Off the Grid", hrs: 72, coins: 1500, rarity: "Legendary", blurb: "Ghost the whole block for 3 days. Off every rival's map." },
+  ];
+  function shieldNow() { return Date.now(); }
+  function shieldProfile() { return localProfile() || {}; }
+  function shieldUntil() { var p = shieldProfile(); return (p.raid && (p.raid.shieldUntil | 0)) || 0; }
+  function shieldMsLeft() { return Math.max(0, shieldUntil() - shieldNow()); }
+  function shieldActiveS() { return shieldMsLeft() > 0; }
+  function shieldFmtDur(ms) {
+    if (ms <= 0) return "0m";
+    var hh = Math.floor(ms / SHIELD_HOUR_MS), mm = Math.floor((ms % SHIELD_HOUR_MS) / 60000);
+    return (hh ? hh + "h " : "") + mm + "m";
+  }
+  // Apply a shield tier with coins. Mirrors systems/raid.js buyShield(): extend
+  // from max(now, current) so a shield NEVER shortens an active one.
+  function shieldBuy(tierId) {
+    var tier = null;
+    for (var i = 0; i < SHIELD_TIERS.length; i++) { if (SHIELD_TIERS[i].id === tierId) { tier = SHIELD_TIERS[i]; break; } }
+    if (!tier) return false;
+    var e = econ();
+    if (!e || !e.mutateProfile) { toast("Economy still loading -- try again.", "bad"); return false; }
+    var have = (shieldProfile().coins | 0);
+    if (have < tier.coins) { toast("Need " + fmt(tier.coins) + " coins (have " + fmt(have) + ") -- win matches + crack crates.", "bad"); return false; }
+    e.mutateProfile(function (p) {
+      if (!p.raid || typeof p.raid !== "object") p.raid = { shieldUntil: 0, lastRaid: 0, revenge: [] };
+      var cur = p.raid.shieldUntil | 0;
+      var nextUntil = Math.max(cur, shieldNow()) + tier.hrs * SHIELD_HOUR_MS;
+      p.raid.shieldUntil = Math.max(cur, nextUntil);   // never SHORTEN an active shield
+      p.coins = Math.max(0, (p.coins | 0) - tier.coins);
+    });
+    try { if (global.AKAccount && global.AKAccount.pushNow) global.AKAccount.pushNow(); } catch (_) {}
+    toast(tier.name + " up -- safe for " + tier.hrs + "h.", "good");
+    try { render(); } catch (_) {}
+    return true;
+  }
+  function shieldStatusNode() {
+    var active = shieldActiveS();
+    var msg = active ? ("SHIELDED -- safe for " + shieldFmtDur(shieldMsLeft())) : "EXPOSED -- no shield up. Rival clans can raid your block.";
+    return h("div", { class: "aks-banner" }, [
+      h("span", { class: "pill " + (active ? "good" : "bad"), text: active ? "● Shield Up" : "○ Exposed" }),
+      h("span", { class: "muted", text: msg }),
+    ]);
+  }
+  function shieldTile(tier) {
+    var afford = (shieldProfile().coins | 0) >= tier.coins;
+    var active = shieldActiveS();
+    return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(tier.rarity) }, [
+      h("div", { class: "aks-meta" }, [
+        h("div", { class: "aks-name", text: tier.name }),
+        h("div", { class: "aks-sub", text: tier.hrs + "h protection // The Watch" }),
+        h("div", { class: "aks-desc", text: tier.blurb }),
+        h("div", { class: "aks-row" }, [
+          h("div", { class: "aks-price" }, [h("span", { class: "dot" }), fmt(tier.coins), h("small", { text: "coins" })]),
+          h("button", {
+            class: "aks-btn", text: active ? "Extend" : "Shield Up", disabled: afford ? null : "true",
+            title: afford ? (active ? "Add " + tier.hrs + "h to your shield" : "Go dark for " + tier.hrs + "h") : "Not enough coins",
+            onclick: function () { shieldBuy(tier.id); },
+          }),
+        ]),
+      ]),
+    ]));
+  }
+  function shieldView() {
+    var nodes = secHead("The Watch", "Lay your block low. A shield keeps rival clans OFF your turf -- they cannot raid you while it holds. Pure defense, no edge in battle. Pay with coins you earn on the streets. A longer shield extends; it never cuts an active one short.");
+    nodes.push(shieldStatusNode());
+    nodes.push(grid(SHIELD_TIERS.map(shieldTile)));
+    nodes.push(h("div", { class: "aks-foot" }, [
+      h("b", { text: "Shields are protection, not power." }),
+      " They keep you off the war map for the duration -- nothing more. Raid a rival or fortify with wood + stone to defend the hard way.",
+    ]));
+    return nodes;
+  }
+
+  // ==========================================================================
+  // AK-FENCE-DAILY 2026-06-27 (CAPTIVATION P2) -- THE FENCE: an 8-hour rotating
+  // DEAL SET + a live countdown + a FIRST-BUY-OF-DAY bonus (the Marvel Snap 8h
+  // rollover, our flavour). THREE marked-down card steals, deterministic by the
+  // LOCAL-PT clock (NO client RNG -- byte-identical for everyone in the same 8h
+  // window), pay with the SCRAP you earn on the streets. The first deal you grab
+  // each PT day pays a soft bonus. PARITY: soft-currency (scrap) only, never
+  // gems; cards level on a curve (HP/DMG, capped by Town Hall) so a marked-down
+  // dog is NEVER pay-to-win. Anchored to LOCAL PT via AK_ECON.PT_OFFSET_MS /
+  // ptDayIndex (the SAME world clock seasons.js + the floating-Fence model ride).
+  // Zero-state stays byte-identical: the only persisted field is p.fence
+  // .dealBonusDay, written lazily on the first purchase (coexists with the
+  // floating-price model's p.fence.fills -- never clobbers it).
+  // exposes: window.AKFence (the integration pass wires a lobby "Fence" chip /
+  // world-map deal-table straight to AKFence.open / .deals / .buy / .status).
+  // ==========================================================================
+  var FENCE_WINDOW_MS = 8 * 3600000;                 // 8h rotation -> 3 deal sets a day
+  var FENCE_SLOTS = 3;                                // a DEAL SET is three steals
+  var FENCE_DISCOUNTS = [0.20, 0.35, 0.55];           // slot markdown -- slot 2 is the headline steal
+  var FENCE_STRIDE = 17;                              // spread the picks across the catalog (coprime-ish)
+  var FENCE_BASE_SCRAP = { Common: 40, Rare: 80, Epic: 200, Legendary: 500, Mythic: 1000 };  // fallback price if a card carries no .scrap
+  var FENCE_FIRST_BUY = { coins: 250, bones: 8 };     // FIRST-BUY-OF-DAY bonus (soft only)
+  var fenceTimer = null;                              // single 1s countdown ticker (self-clears off-DOM)
+
+  function fenceClearTimer() { if (fenceTimer) { try { clearInterval(fenceTimer); } catch (_) {} fenceTimer = null; } }
+  function fencePtOffset() { var e = econ(); return (e && typeof e.PT_OFFSET_MS === "number") ? e.PT_OFFSET_MS : (8 * 3600000); }
+  function fenceWindowIndex(now) { now = now || Date.now(); return Math.floor((now - fencePtOffset()) / FENCE_WINDOW_MS); }
+  // ms until the current 8h window flips (boundaries fall at PT 00:00 / 08:00 / 16:00).
+  function fenceWindowEndsMs(now) { now = now || Date.now(); return ((fenceWindowIndex(now) + 1) * FENCE_WINDOW_MS) + fencePtOffset() - now; }
+  function fencePtDay(now) { var e = econ(); now = now || Date.now(); return (e && e.ptDayIndex) ? e.ptDayIndex(now) : Math.floor((now - fencePtOffset()) / 86400000); }
+  function fenceFmtCd(ms) {
+    if (!(ms > 0)) ms = 0;
+    var s = Math.floor(ms / 1000), hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60;
+    function p2(n) { return (n < 10 ? "0" : "") + n; }
+    return p2(hh) + ":" + p2(mm) + ":" + p2(ss);
+  }
+  // deterministic, stable catalog order (by card number then name) so the same
+  // 8h window yields the same set for everyone -- no client RNG.
+  function fenceSortedPool() {
+    var pool = allCards().filter(function (c) { return c && c.name && c.rarity; });
+    pool.sort(function (a, b) {
+      var an = String(a.num || a.id || a.cardNumber || a.name), bn = String(b.num || b.id || b.cardNumber || b.name);
+      return an < bn ? -1 : an > bn ? 1 : 0;
+    });
+    return pool;
+  }
+  function fenceDealCards(now) {
+    var pool = fenceSortedPool(), n = pool.length;
+    if (!n) return [];
+    var w = fenceWindowIndex(now), out = [], used = {};
+    for (var i = 0; i < FENCE_SLOTS && out.length < n; i++) {
+      var idx = (((w * FENCE_SLOTS + i * FENCE_STRIDE) % n) + n) % n, guard = 0;
+      while (used[idx] && guard < n) { idx = (idx + 1) % n; guard++; }
+      used[idx] = 1; out.push(pool[idx]);
+    }
+    return out;
+  }
+  function fenceBaseScrap(card) {
+    return (typeof card.scrap === "number" && card.scrap > 0) ? (card.scrap | 0) : (FENCE_BASE_SCRAP[card.rarity] || 40);
+  }
+  function fenceDealPrice(card, slot) {
+    var base = fenceBaseScrap(card), disc = FENCE_DISCOUNTS[slot] || 0.20;
+    return { base: base, price: Math.max(1, Math.round(base * (1 - disc))), disc: Math.round(disc * 100) };
+  }
+  function fenceBonusClaimedToday() {
+    var p = localProfile() || {};
+    return !!(p.fence && p.fence.dealBonusDay === fencePtDay());
+  }
+  // grant the once-per-PT-day FIRST-BUY bonus (soft only). Returns the reward or
+  // null if already claimed today. Adds to the SAME p.fence object the floating-
+  // price model uses (distinct key -> no clobber); never touches p.fence.fills.
+  function fenceGrantFirstBuyBonus() {
+    var e = econ(); if (!e || !e.mutateProfile) return null;
+    var day = fencePtDay(), got = null;
+    e.mutateProfile(function (p) {
+      if (!p.fence || typeof p.fence !== "object") p.fence = {};
+      if (p.fence.dealBonusDay === day) return;          // already paid this PT day
+      p.fence.dealBonusDay = day;
+      p.coins = Math.max(0, (p.coins | 0) + FENCE_FIRST_BUY.coins);
+      p.bones = Math.max(0, (p.bones | 0) + FENCE_FIRST_BUY.bones);
+      got = { coins: FENCE_FIRST_BUY.coins, bones: FENCE_FIRST_BUY.bones };
+    });
+    return got;
+  }
+  function fenceBuy(slot) {
+    slot = slot | 0;
+    var e = econ();
+    if (!e || !e.buyCardWithScrap) { toast("Economy still loading -- try again.", "bad"); return false; }
+    var card = fenceDealCards()[slot];
+    if (!card) { toast("That deal just rotated -- refreshing the table.", "bad"); try { render(); } catch (_) {} return false; }
+    var dp = fenceDealPrice(card, slot), have = bal("scrap_" + card.rarity);
+    if (have < dp.price) { toast("Need " + fmt(dp.price) + " " + card.rarity + " Scrap (have " + fmt(have) + ") -- win matches + crack crates.", "bad"); return false; }
+    var r = e.buyCardWithScrap({ name: card.name, rarity: card.rarity, scrap: dp.price });
+    if (!r || !r.ok) { toast(humanErr(r || {}), "bad"); try { render(); } catch (_) {} return false; }
+    var bonus = fenceGrantFirstBuyBonus();
+    try { if (global.AKAccount && global.AKAccount.pushNow) global.AKAccount.pushNow(); } catch (_) {}
+    if (bonus) toast("Snagged " + card.name + " (-" + fmt(dp.price) + " " + card.rarity + " Scrap). FIRST DEAL TODAY: +" + fmt(bonus.coins) + " coins, +" + bonus.bones + " bones.", "ok");
+    else toast("Snagged " + card.name + " (-" + fmt(dp.price) + " " + card.rarity + " Scrap).", "ok");
+    try { render(); } catch (_) {}
+    return true;
+  }
+  function fenceDealTile(card, slot) {
+    var dp = fenceDealPrice(card, slot), afford = bal("scrap_" + card.rarity) >= dp.price;
+    var headline = slot === (FENCE_SLOTS - 1);
+    var stamp = h("div", {
+      style: "position:absolute;top:8px;left:8px;z-index:3;padding:3px 8px;border-radius:8px;font:800 12px/1 system-ui,sans-serif;letter-spacing:.04em;color:#1a1205;background:linear-gradient(135deg,#f7e08a,#cf9b22);box-shadow:0 2px 10px rgba(207,155,34,.45)",
+      text: "-" + dp.disc + "% OFF",
+    });
+    var priceNode = h("div", { class: "aks-price scrap" }, [
+      h("span", { class: "dot" }),
+      h("s", { style: "opacity:.55;margin-right:6px;font-weight:600", text: fmt(dp.base) }),
+      h("b", { text: fmt(dp.price) }),
+      h("small", { text: card.rarity + " scrap" }),
+    ]);
+    var btn = h("button", {
+      class: "aks-btn" + (headline ? " hot" : ""), text: afford ? "Grab" : "Need Scrap", disabled: afford ? null : "true",
+      title: afford ? "Buy this dog at the marked-down Fence price" : "Win matches + crack crates for " + card.rarity + " Scrap",
+      onclick: function () { fenceBuy(slot); },
+    });
+    return cardFrame(card, {
+      cls: headline ? "aks-up" : "",
+      topStamp: stamp,
+      descNode: h("div", { class: "aks-desc", text: "Fence markdown -- " + dp.disc + "% off this window. " + (card.desc || "") }),
+      priceNode: priceNode,
+      btnNode: btn,
+    });
+  }
+  // ==========================================================================
+  // AK-FENCE-LORE 2026-07-09 (bible 10.4, money is lore) -- THE FENCE is a
+  // PLACE with a keeper, and some of what sits on the back shelf is not for
+  // sale yet. The card catalog carries no lore flags, so these are VISUAL-ONLY
+  // shelf rows (no price, no buy path, no currency of any kind -- zero gem-law
+  // surface): dimmed manga tease lines gated on the SAME canon signals the
+  // chronicle reader uses (AKStory.stage().idx for storyChapter,
+  // AK_ECON.repRank(p).index for repRank -- mirrors chronicles.js). On
+  // shop.html AKStory is absent -> the chapter gate reads 0 -> the shelf stays
+  // locked (fail closed, matching chronicles.js). Meeting a gate only
+  // brightens the row and swaps the tease for the keeper's line; the stock
+  // itself ships with a later story wave. Every noun below is canon (Marker's
+  // missing ledger page / the split-night purse / Goldie's blank trophy --
+  // all seeded in AK_STORIES + the bible's Payoff Register).
+  // ==========================================================================
+  var FENCE_LORE = [
+    { id: "ledger_page", name: "THE LEDGER PAGE", gate: { storyChapter: 2 }, gateLabel: "STORY CHAPTER 2",
+      tease: "One page, torn from a pit boss's book, the night two brothers stopped talking. Some blades carry debts. Come back with a name.",
+      unlockedLine: "The keeper slides it half out of the drawer. 'You've been in the pits. Now we can talk.'" },
+    { id: "split_purse", name: "THE SPLIT-NIGHT PURSE", gate: { repRank: 3 }, gateLabel: "BLOCK REP RANK 3",
+      tease: "A purse two tellings still fight over. One brother swears it walked. The Fence swears it never left the table. This is the table.",
+      unlockedLine: "'Heavy, ain't it. Gets heavier the longer you hold it. Not for sale. Yet.'" },
+    { id: "blank_trophy", name: "THE BLANK TROPHY", gate: { storyChapter: 3 }, gateLabel: "STORY CHAPTER 3",
+      tease: "No name on it. There WAS a name on it. Ask the rooftops what happens to names.",
+      unlockedLine: "'Goldie keeps its twin polished across town. Somebody on this block is going to earn whose it is.'" }
+  ];
+  // Gate check -- guarded reads only; missing module = locked (fail closed).
+  function fenceLoreGateMet(gate) {
+    try {
+      if (gate.storyChapter != null) {
+        var at = 0;
+        if (global.AKStory && global.AKStory.stage) { var st = global.AKStory.stage(); at = (st && (st.idx | 0)) || 0; }
+        if (at < gate.storyChapter) return false;
+      }
+      if (gate.repRank != null) {
+        var idx = 0, e = econ();
+        if (e && e.repRank) { var r = e.repRank(localProfile() || {}); idx = (r && (r.index | 0)) || 0; }
+        if (idx < gate.repRank) return false;
+      }
+      return true;
+    } catch (_) { return false; }
+  }
+  function fenceLoreRow(entry) {
+    var open = fenceLoreGateMet(entry.gate);
+    return h("div", {
+      class: "aks-row",
+      style: "gap:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,0.06);align-items:flex-start;" + (open ? "" : "opacity:.5;filter:saturate(.5)"),
+    }, [
+      h("div", { style: "flex:1" }, [
+        h("div", { class: "aks-name", text: entry.name }),
+        h("div", { class: "aks-desc", style: "font-style:italic", text: open ? entry.unlockedLine : entry.tease }),
+      ]),
+      h("span", {
+        class: "pill " + (open ? "good" : "bad"),
+        style: "white-space:nowrap",
+        text: open ? "IN THE BACK" : "LOCKED -- " + entry.gateLabel,
+      }),
+    ]);
+  }
+  function fenceLoreShelf() {
+    return h("div", { class: "aks-card" }, [
+      h("div", { class: "aks-name", text: "The Back Shelf" }),
+      h("div", { class: "aks-sub", text: "Not everything the Fence holds is priced. Some stock waits on a story." }),
+    ].concat(FENCE_LORE.map(fenceLoreRow)));
+  }
+  function fenceView() {
+    fenceClearTimer();                                 // never stack tickers across re-renders
+    var nodes = secHead("The Fence",
+      "The back-alley deal table. Three steals, marked down hard, rotating every 8 hours -- come back at dawn, midday and dusk for a fresh set. Pay with the Scrap you earn on the streets. The first deal you grab each day pays a bonus.");
+    if (!allCards().length) { nodes.push(emptyCard("The Fence is restocking -- catalog still loading.")); return nodes; }
+    var bonusDone = fenceBonusClaimedToday();
+    var cdEl = h("b", { text: fenceFmtCd(fenceWindowEndsMs()) });
+    nodes.push(h("div", { class: "aks-banner" }, [
+      h("span", { class: "pill " + (bonusDone ? "good" : "bad"), text: bonusDone ? "● Bonus claimed" : "○ Daily bonus live" }),
+      h("span", { class: "muted" }, ["New deals in ", cdEl]),
+      h("span", { class: "muted", text: bonusDone
+        ? "Daily bonus banked -- resets at PT midnight."
+        : ("First deal today pays +" + fmt(FENCE_FIRST_BUY.coins) + " coins, +" + FENCE_FIRST_BUY.bones + " bones.") }),
+    ]));
+    var deals = fenceDealCards();
+    nodes.push(grid(deals.map(function (card, i) { return fenceDealTile(card, i); })));
+    try { nodes.push(fenceLoreShelf()); } catch (_) {}   // AK-FENCE-LORE: cosmetic shelf, never blocks the deals
+    nodes.push(h("div", { class: "aks-foot" }, [
+      h("b", { text: "Soft-currency only." }),
+      " Fence deals cost Scrap you earn in play -- never Gems. A marked-down dog still levels on the same HP/DMG curve, capped by your Town Hall, so the Fence is a head start, never pay-to-win.",
+    ]));
+    // 1s ticker -- updates one text node, self-clears the instant it leaves the
+    // DOM (tab switch / shop close), and re-renders to restock when the set flips.
+    fenceTimer = setInterval(function () {
+      if (!cdEl.isConnected) { fenceClearTimer(); return; }
+      var left = fenceWindowEndsMs();
+      cdEl.textContent = fenceFmtCd(left);
+      if (left <= 0 && activeTab === "fence") { try { render(); } catch (_) {} }
+    }, 1000);
+    return nodes;
+  }
+
+  // ==========================================================================
+  // AK-STASH 2026-06-27 (CAPTIVATION P9) -- THE STASH: a VARIABLE-RATIO soft-
+  // currency crate with a juicy tap-to-crack REVEAL. Every rip pays out, but the
+  // SIZE of the haul is variable (the dopamine -- the big score hides in the
+  // noise). PARITY: pay with the SOFT currency you earn -- Coins OR Bones, NEVER
+  // gems; rewards are scrap / coins / bones / a card / a Key -- all in-game value,
+  // never raw power (cards level on the curve, capped by Town Hall). Odds are
+  // DISCLOSED up front (oddsLinkBtn -> showOddsModal("scrapcrate")) per the
+  // existing odds work. The variable roll uses Math.random (the SAME established
+  // loot pattern as economy.openChest -- a soft, disclosed, non-competitive
+  // reveal, not a parity-breaking RNG) and grants through ONE atomic
+  // AK_ECON.mutateProfile (deduct + payout never persist a half state). No new
+  // profile fields -> zero-state stays byte-identical.
+  // exposes: window.AKCrate (integration pass wires a world-map / lobby "rip the
+  // stash" affordance to AKCrate.open / .rip / .price / .odds).
+  // ==========================================================================
+  var STASH = {
+    coins: 250,                                        // soft price A -- the match-earned pocket
+    bones: 12,                                         // soft price B -- the alt soft currency (never gems)
+    // VARIABLE-RATIO outcome tiers (DISCLOSED, sum 100). One rip rolls ONE tier.
+    tiers: [
+      { id: "scraps",  k: "Scraps",  pct: 58 },
+      { id: "haul",    k: "Haul",    pct: 27 },
+      { id: "score",   k: "Score",   pct: 12 },
+      { id: "jackpot", k: "Jackpot", pct: 3 },
+    ],
+  };
+  function stashRi(lo, hi) { return lo + Math.floor(Math.random() * (hi - lo + 1)); }
+  function stashRoll() {
+    var x = Math.random() * 100, acc = 0, tier = STASH.tiers[0];
+    for (var i = 0; i < STASH.tiers.length; i++) { acc += STASH.tiers[i].pct; if (x < acc) { tier = STASH.tiers[i]; break; } }
+    return tier;
+  }
+  function stashPayout(tier) {
+    switch (tier.id) {
+      case "haul":    return { coins: stashRi(80, 160),  scrap: { Common: stashRi(6, 12), Rare: stashRi(2, 5) }, cardFloor: "Rare" };
+      case "score":   return { coins: stashRi(120, 240), scrap: { Rare: stashRi(3, 6), Epic: stashRi(1, 3) }, bones: stashRi(3, 6), cardFloor: "Epic" };
+      case "jackpot": return { coins: stashRi(200, 400), scrap: { Epic: stashRi(2, 4) }, bones: stashRi(8, 15), keys: 1, cardFloor: "Legendary" };
+      default:        return { coins: stashRi(40, 90),   scrap: { Common: stashRi(4, 8), Rare: stashRi(0, 2) } };
+    }
+  }
+  function stashPickCard(rar) {
+    var cards = allCards(); if (!cards.length) return null;
+    var pool = cards.filter(function (c) { return c && c.name && c.rarity === rar; });
+    if (!pool.length) pool = cards.filter(function (c) { return c && c.name; });
+    if (!pool.length) return null;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  function stashRip(payWith) {
+    var e = econ();
+    if (!e || !e.mutateProfile) { toast("Economy still loading -- try again.", "bad"); return false; }
+    payWith = (payWith === "bones") ? "bones" : "coins";
+    var price = (payWith === "bones") ? STASH.bones : STASH.coins;
+    var p0 = localProfile() || {}, have = (payWith === "bones") ? (p0.bones | 0) : (p0.coins | 0);
+    if (have < price) {
+      toast(payWith === "bones"
+        ? ("Need " + price + " Bones (have " + (p0.bones | 0) + ") -- earn them every match.")
+        : ("Need " + fmt(price) + " Coins (have " + fmt(p0.coins | 0) + ") -- win matches + crack crates."), "bad");
+      return false;
+    }
+    var tier = stashRoll(), pay = stashPayout(tier), cardPick = null;
+    if (pay.cardFloor) {
+      var rar = (e.rollCardRarity) ? e.rollCardRarity(pay.cardFloor, 0, Math.random) : pay.cardFloor;
+      cardPick = stashPickCard(rar) || stashPickCard(pay.cardFloor);
+    }
+    var revealCards = [];
+    try {
+      e.mutateProfile(function (p) {
+        // DEDUCT the soft price (clamped >= 0)
+        if (payWith === "bones") p.bones = Math.max(0, (p.bones | 0) - price);
+        else p.coins = Math.max(0, (p.coins | 0) - price);
+        // GRANT coins / bones / keys / scrap
+        if (pay.coins) p.coins = Math.max(0, (p.coins | 0) + pay.coins);
+        if (pay.bones) p.bones = Math.max(0, (p.bones | 0) + pay.bones);
+        if (pay.keys)  p.keys  = Math.max(0, (p.keys | 0) + pay.keys);
+        if (pay.scrap) { if (!p.scrap || typeof p.scrap !== "object") p.scrap = {}; for (var r in pay.scrap) { if (pay.scrap[r] > 0) p.scrap[r] = Math.max(0, (p.scrap[r] | 0) + pay.scrap[r]); } }
+        // GRANT the card copy in the SAME atomic write (dupe -> scrap, like openChest)
+        if (cardPick && cardPick.name) {
+          if (!p.copies || typeof p.copies !== "object") p.copies = {};
+          if (!Array.isArray(p.owned)) p.owned = [];
+          var dupe = p.owned.indexOf(cardPick.name) >= 0, sc = 0;
+          if (dupe) {
+            sc = (e.SCRAP_DUPE && e.SCRAP_DUPE[cardPick.rarity]) || 5;
+            if (!p.scrap || typeof p.scrap !== "object") p.scrap = {};
+            p.scrap[cardPick.rarity] = Math.max(0, (p.scrap[cardPick.rarity] | 0) + sc);
+          } else { p.owned.push(cardPick.name); }
+          p.copies[cardPick.name] = (p.copies[cardPick.name] | 0) + 1;
+          revealCards.push({ card_id: cardPick.id, name: cardPick.name, rarity: cardPick.rarity, dupe: dupe, scrap: sc });
+        }
+      });
+    } catch (_) { toast("Could not rip the stash -- try again.", "bad"); try { render(); } catch (_e) {} return false; }
+    try { if (global.AKAccount && global.AKAccount.pushNow) global.AKAccount.pushNow(); } catch (_) {}
+    stashReveal(tier, pay, revealCards);
+    try { render(); } catch (_) {}
+    return true;
+  }
+  // The juicy REVEAL: a sealed crate the player taps to crack (suspense beat),
+  // then the polished payout (cards + chips) via the shared showReveal(). No
+  // per-frame work; a 2.6s failsafe auto-cracks so it can never hang.
+  function stashReveal(tier, pay, cards) {
+    var chips = [];
+    if (pay.coins) chips.push({ cls: "coins", text: "+" + fmt(pay.coins) + " Coins" });
+    if (pay.scrap) ["Common", "Rare", "Epic", "Legendary", "Mythic"].forEach(function (r) { if (pay.scrap[r] > 0) chips.push({ cls: "scrap", text: "+" + fmt(pay.scrap[r]) + " " + r + " Scrap" }); });
+    if (pay.bones) chips.push({ cls: "keys", text: "+" + pay.bones + " Bones" });
+    if (pay.keys)  chips.push({ cls: "keys", text: "+" + pay.keys + " Key" });
+    var title = (tier.id === "jackpot") ? "JACKPOT -- THE BIG ONE"
+      : (tier.id === "score") ? "BIG SCORE"
+        : (tier.id === "haul") ? "LOADED HAUL"
+          : "STASH CRACKED";
+    var ov = h("div", { class: "aks-reveal" }), cracked = false;
+    function crack() {
+      if (cracked) return; cracked = true;
+      ov.classList.remove("show");
+      setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); showReveal(cards, { title: title, chips: chips }); }, 200);
+    }
+    var crate = h("div", { style: "width:148px;height:148px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 26px rgba(207,155,34,.7));cursor:pointer;user-select:none;transition:transform .12s ease" });
+    var cimg = h("img", { alt: "The Stash", style: "max-width:100%;max-height:100%;object-fit:contain" });
+    cimg.onerror = function () { cimg.remove(); crate.appendChild(h("div", { style: "font:800 92px/1 system-ui,sans-serif;color:#cf9b22;text-shadow:0 0 18px rgba(207,155,34,.85)", text: "▣" })); };
+    cimg.src = ASSET_BASE + "shop/scrap_crate.png";
+    crate.appendChild(cimg);
+    crate.onpointerdown = function () { crate.style.transform = "scale(.9)"; };
+    crate.onpointerup = function () { crate.style.transform = "scale(1)"; };
+    crate.onclick = crack;
+    ov.appendChild(h("div", { style: "display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px 10px" }, [
+      h("div", { class: "rv-title", text: "THE STASH" }),
+      crate,
+      h("div", { class: "muted", text: "Tap to rip it open." }),
+    ]));
+    ov.onclick = function (ev) { if (ev.target === ov) crack(); };
+    document.body.appendChild(ov);
+    requestAnimationFrame(function () { ov.classList.add("show"); });
+    setTimeout(function () { if (!cracked && ov.isConnected) crack(); }, 2600);   // failsafe -- never hangs
+  }
+  function stashCrateArt() {
+    var box = h("div", { class: "aks-art" });
+    var img = h("img", { alt: "The Stash", loading: "lazy" });
+    img.onerror = function () { img.remove(); box.appendChild(h("div", { class: "crate", text: "▣" })); };
+    img.src = ASSET_BASE + "shop/scrap_crate.png";
+    box.appendChild(img);
+    return box;
+  }
+  // The Stash hero -- headlines the Crates tab so the variable-ratio crate is the
+  // first thing the player sees. Two soft-currency rip buttons (Coins / Bones).
+  function scrapCrateSection() {
+    var p = localProfile() || {};
+    var coins = p.coins | 0, bones = p.bones | 0;
+    var canCoins = coins >= STASH.coins, canBones = bones >= STASH.bones;
+    var nodes = secHead("The Stash",
+      "A sealed street crate -- rip it for a VARIABLE haul. Most rips pay Scrap and Coins; rarer rips drop a card, Bones, even a Key. Pay with what you earn -- Coins or Bones, never Gems. Odds shown up front.");
+    attachOddsToHead(nodes, "scrapcrate");             // AK-ODDS: disclose the rip odds before any buy
+    nodes.push(wrap3d(h("div", { class: "aks-chest aks-card earned ak-3d-face ak-3d-shadow tier-diamond r-Epic" }, [
+      stashCrateArt(),
+      h("div", { class: "aks-meta" }, [
+        h("div", { class: "aks-name", text: "The Stash" }),
+        h("div", { class: "aks-sub", text: "Variable-ratio crate // soft-currency only" }),
+        h("div", { class: "aks-desc", text: "Mystery haul -- the big score hides in the noise, and that is the rush. In-game value only, never pay-to-win." }),
+        h("div", { class: "aks-row wrap" }, [
+          h("button", { class: "aks-btn", text: "Rip -- " + fmt(STASH.coins) + " Coins", disabled: canCoins ? null : "true", title: canCoins ? "Crack it with Coins" : "Win matches + crack crates for Coins", onclick: function () { stashRip("coins"); } }),
+          h("button", { class: "aks-btn ghost", text: "Rip -- " + STASH.bones + " Bones", disabled: canBones ? null : "true", title: canBones ? "Crack it with Bones" : "Earn Bones every match", onclick: function () { stashRip("bones"); } }),
+        ]),
+      ]),
+    ])));
     return nodes;
   }
 
@@ -1476,6 +2197,8 @@ var dripCache = { loaded: false, tried: false, rotation: [], prices: {}, resets:
 var dripOwned = {};                                       // id -> 1 (server-synced, mirrored to ak_cos_owned)
 var dripEquip = { styleAll: null, board: null, skins: {}, emotes: [] };
 var dripSub = "shop";                                     // "shop" | "locker"
+var dripSkinCard = null;                                  // AK-CARDPICK: card-art tile the player tapped in the per-card skin picker
+var dripCosCard = null;                                   // AK-WARDROBE: card-name the player is dressing in the cosmetic paper-doll (default lead $BCARDD)
 var dripLoading = false;
 
 function dripMe() { try { return global.AKAccount && global.AKAccount.user && global.AKAccount.user(); } catch (_) { return null; } }
@@ -1509,14 +2232,15 @@ function dripArt(c) {
 }
 function dripTile(id, btn) {
   var c = DRIP_CATALOG[id]; if (!c) return null;
-  return h("div", { class: "aks-card " + rarClass(c.rarity) }, [
+  // AK-25D: cosmetic tiles get the extruded-photo 2.5D + tilt.
+  return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(c.rarity) }, [
     dripArt(c),
     h("div", { class: "aks-meta" }, [
       h("div", { class: "aks-name", text: c.name }),
       h("div", { class: "aks-sub", text: c.type.toUpperCase() + " // " + c.rarity }),
       h("div", { class: "aks-row" }, [h("span"), btn]),
     ]),
-  ]);
+  ]));
 }
 function dripBuy(id, btn) {
   var c = DRIP_CATALOG[id]; if (!c) return;
@@ -1546,6 +2270,125 @@ function dripAssignSkin(cardName, styleId) {
   toast(DRIP_CATALOG[styleId].name + " on " + cardName, "good"); render();
 }
 function dripClearSkin(cardName) { delete dripEquip.skins[cardName]; dripLsSet("ak_skins", JSON.stringify(dripEquip.skins)); render(); }
+
+// ---- AK-WARDROBE 2026-07-03: cosmetic paper-doll (the last Wave 7 lane) ------
+// A pure browser + equip UI + live preview over the modular-parts engine that
+// already lives in drip.js. AKDrip.cosmeticCatalog/cardOverlays/equipCosmetic/
+// unequip is the single source of truth -- nothing here re-catalogs parts. FULLY
+// GUARDED: an absent AKDrip cosmetics API hides the Wardrobe sub-tab and the Drip
+// surface degrades to the unchanged skins Locker. Equip is a local pref (mirrors
+// the skins path); ownership gating lives in cardOverlays, so the live preview
+// shows exactly what rides onto the battlefield.
+function dripKit() { try { return global.AKDrip || null; } catch (_) { return null; } }
+function dripCosOn() {
+  var k = dripKit();
+  return !!(k && typeof k.cosmeticCatalog === "function" && typeof k.cardOverlays === "function"
+            && typeof k.equipCosmetic === "function" && typeof k.unequip === "function");
+}
+// Robust part-art paths: the shop embeds at game-root (index.html) OR runs
+// standalone at game/shop/, and the on-disk files are slot-prefixed
+// (assets/cosmetics/head_crown_gold.png). Build ASSET_BASE-relative candidates
+// first (correct in both contexts + matches disk), then the API's own path last.
+function dripCosSrcs(o) {
+  var out = [];
+  if (o && o.slot && o.id) out.push(ASSET_BASE + "cosmetics/" + o.slot + "_" + o.id + ".png");
+  if (o && o.id) out.push(ASSET_BASE + "cosmetics/" + o.id + ".png");
+  if (o && o.img) out.push(o.img);
+  return out;
+}
+function dripCosImg(o, cls) {
+  var srcs = dripCosSrcs(o), idx = 0;
+  var img = h("img", { class: cls || null, alt: (o && o.name) || "", loading: "lazy" });
+  img.onerror = function () { if (idx < srcs.length) img.src = srcs[idx++]; else { img.onerror = null; img.style.visibility = "hidden"; } };
+  if (srcs.length) img.src = srcs[idx++]; else img.style.visibility = "hidden";
+  return img;
+}
+// Which part id is equipped in <slot> on <cardName>, read straight from the same
+// localStorage store drip.js writes -- accurate for equip STATE even when the
+// part is not yet owned (cardOverlays is what gates the actual battlefield draw).
+function dripCosSlotOf(cardName, slot) {
+  try { var all = JSON.parse(dripLs("ak_cos_equip") || "{}") || {}; var per = cardName && all[cardName]; return (per && per[slot]) || null; } catch (_) { return null; }
+}
+function dripCosToggle(cardName, part) {
+  var k = dripKit(); if (!k || !part) return;
+  if (dripCosSlotOf(cardName, part.slot) === part.id) {
+    try { k.unequip(cardName, part.slot); } catch (_) {}
+    toast(part.name + " unequipped", "good");
+  } else {
+    var ok = true; try { ok = k.equipCosmetic(cardName, part.slot, part.id); } catch (_) { ok = false; }
+    if (ok === false) { toast("Could not equip " + part.name, "bad"); return; }
+    toast(part.name + " on " + cardName, "good");
+  }
+  render();
+}
+// LIVE PREVIEW: the SAME square the engine composites on. Base portrait via
+// artBox (forced square), then the owned+equipped parts from AKDrip.cardOverlays()
+// layered at their dx/dy/scale (all fractions of the square), back-to-front as
+// returned. Guarded so a missing overlay API just returns the bare portrait.
+function dripCosPreview(card) {
+  var box = artBox(card);
+  box.style.aspectRatio = "1 / 1"; box.style.height = "auto"; box.style.borderRadius = "14px";
+  var k = dripKit(); if (!k || typeof k.cardOverlays !== "function") return box;
+  var parts = []; try { parts = k.cardOverlays(card) || []; } catch (_) { parts = []; }
+  parts.forEach(function (o) {
+    if (!o || o.scale == null) return;
+    var s = Math.max(0, Math.min(1, +o.scale || 0));
+    var img = dripCosImg(o, "aks-cos-layer");
+    img.style.left = ((o.dx - s / 2) * 100) + "%";
+    img.style.top = ((o.dy - s / 2) * 100) + "%";
+    img.style.width = (s * 100) + "%";
+    img.style.height = (s * 100) + "%";
+    box.appendChild(img);
+  });
+  return box;
+}
+function dripCosPartTile(part, cardKey) {
+  var equipped = dripCosSlotOf(cardKey, part.slot) === part.id;
+  var priceTxt = (part.currency === "gems" ? "◆ " : "💰 ") + fmt(part.price);
+  var thumb = h("div", { class: "aks-cos-thumb" }, [dripCosImg(part, null)]);
+  var btn = h("button", { class: "aks-btn" + (equipped ? "" : " ghost"), text: equipped ? "✓ Equipped" : "Equip", onclick: function () { dripCosToggle(cardKey, part); } });
+  return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(part.rarity) }, [
+    thumb,
+    h("div", { class: "aks-meta" }, [
+      h("div", { class: "aks-name", text: part.name }),
+      h("div", { class: "aks-sub", style: (part.color ? ("color:" + part.color) : null), text: part.slot.toUpperCase() + " // " + part.rarity }),
+      h("div", { class: "aks-row" }, [h("span", { class: "muted", text: priceTxt }), btn]),
+    ]),
+  ]));
+}
+function dripCosmeticsSection() {
+  var nodes = secHead("Wardrobe", "Dress your dogs in modular drip -- crowns, shades, chains, cigars, jackets + hand pieces. Owned parts ride onto the battlefield; in-game value only, never pay-to-win.");
+  if (!dripCosOn()) { nodes.push(emptyCard("The wardrobe engine is not loaded here.")); return nodes; }
+  var cat = []; try { cat = dripKit().cosmeticCatalog() || []; } catch (_) { cat = []; }
+  if (!cat.length) { nodes.push(emptyCard("No cosmetic parts in the catalog yet.")); return nodes; }
+  // Which dog are we dressing? Default the lead card $BCARDD (0001).
+  var lead = cardById("0001");
+  var leadName = (lead && lead.name) || "$BCARDD";
+  var cards = dripMyCards(); if (!cards.length) cards = [leadName];
+  if (dripCosCard == null || cards.indexOf(dripCosCard) < 0) dripCosCard = (cards.indexOf(leadName) >= 0 ? leadName : cards[0]);
+  var byName = deckByName();
+  var dressed = byName[dripCosCard] || lead || { name: dripCosCard, rarity: "Mythic" };
+  var cardKey = dressed.name || dripCosCard;               // equip + preview key the SAME string (cardOverlays keys on name)
+  // LIVE PREVIEW (square composite, refreshes on every equip via render()).
+  nodes.push(h("div", { class: "aks-cos-preview" }, [dripCosPreview(dressed)]));
+  // Card picker (which dog to dress) -- reuse the tappable card-art grid.
+  if (cards.length > 1) {
+    nodes = nodes.concat(secHead("Whose Drip", "Tap a dog to dress -- the preview + equip toggles below apply to it."));
+    nodes.push(pickGrid(cards.map(function (nm) {
+      var dc = byName[nm] || { name: nm, rarity: "Common" };
+      return cardPickTile(dc, { selected: (nm === dripCosCard), label: dc.name, sub: (nm === dripCosCard ? "dressing" : (dc.rarity || "")), title: "Dress " + dc.name, onclick: function () { dripCosCard = nm; render(); } });
+    })));
+  }
+  // Parts grouped by slot (first-seen slot order straight from the catalog).
+  var order = []; cat.forEach(function (p) { if (order.indexOf(p.slot) < 0) order.push(p.slot); });
+  order.forEach(function (slot) {
+    var parts = cat.filter(function (p) { return p.slot === slot; });
+    if (!parts.length) return;
+    nodes.push(h("div", { class: "aks-cos-slot", text: slot.toUpperCase() }));
+    nodes.push(grid(parts.map(function (p) { return dripCosPartTile(p, cardKey); })));
+  });
+  return nodes;
+}
 
 // ---- The Drop (rotating cosmetic store) ----
 function dripShopSection() {
@@ -1581,14 +2424,32 @@ function dripLockerSection() {
     })));
     var cards = dripMyCards();
     if (cards.length) {
-      nodes = nodes.concat(secHead("Per-Card", "Overrides the squad skin for one dog."));
-      var cardSel = h("select", { style: DRIP_SEL_STYLE }, cards.map(function (n) { return h("option", { value: n, text: n }); }));
+      nodes = nodes.concat(secHead("Per-Card", "Overrides the squad skin for one dog. Tap a card, pick a skin, then equip."));
+      // AK-CARDPICK 2026-06-30: the card chooser is now a tappable card-art grid
+      // (cardPickTile reuses artBox), not a <select> of names. Tap a card to
+      // select it; the skin dropdown + Equip apply to that card via dripAssignSkin().
+      var byName = deckByName();
+      if (dripSkinCard == null || cards.indexOf(dripSkinCard) < 0) dripSkinCard = cards[0];
+      nodes.push(pickGrid(cards.map(function (nm) {
+        var dc = byName[nm] || { name: nm, rarity: "Common" };
+        var on = (nm === dripSkinCard);
+        var cur = dripEquip.skins[nm];
+        return cardPickTile(dc, {
+          selected: on, label: dc.name,
+          sub: (cur && DRIP_CATALOG[cur]) ? DRIP_CATALOG[cur].name : (on ? "selected" : (dc.rarity || "")),
+          title: "Pick " + dc.name + " to skin",
+          onclick: function () { dripSkinCard = nm; render(); },
+        });
+      })));
       var styleSel = h("select", { style: DRIP_SEL_STYLE }, skins.map(function (id) { return h("option", { value: id, text: DRIP_CATALOG[id].name }); }));
-      var go = h("button", { class: "aks-btn", text: "Equip to this card", onclick: function () { dripAssignSkin(cardSel.value, styleSel.value); } });
-      nodes.push(h("div", { class: "aks-row", style: "flex-wrap:wrap;gap:8px" }, [cardSel, styleSel, go]));
+      var go = h("button", { class: "aks-btn", text: "Equip to " + dripSkinCard, onclick: function () { dripAssignSkin(dripSkinCard, styleSel.value); } });
+      nodes.push(h("div", { class: "aks-row", style: "flex-wrap:wrap;gap:8px;margin-top:8px" }, [styleSel, go]));
       var assigned = Object.keys(dripEquip.skins).filter(function (cn) { return dripEquip.skins[cn] && DRIP_CATALOG[dripEquip.skins[cn]] && dripOwned[dripEquip.skins[cn]]; });
       assigned.forEach(function (cn) {
-        nodes.push(h("div", { class: "aks-row", style: "border-bottom:1px solid rgba(255,255,255,0.06);padding:6px 2px" }, [
+        var ac = byName[cn] || { name: cn, rarity: "Common" };       // card-art thumb so the assigned list reads visual, not plain text
+        var thumb = artBox(ac); thumb.style.cssText += ";width:34px;height:46px;flex:0 0 34px;aspect-ratio:auto;border-radius:6px";
+        nodes.push(h("div", { class: "aks-row", style: "border-bottom:1px solid rgba(255,255,255,0.06);padding:6px 2px;gap:9px;align-items:center" }, [
+          thumb,
           h("span", { style: "flex:1", text: cn + " → " + DRIP_CATALOG[dripEquip.skins[cn]].name }),
           h("button", { class: "aks-btn ghost", style: "padding:4px 10px", text: "clear", onclick: function () { dripClearSkin(cn); } }),
         ]));
@@ -1617,10 +2478,13 @@ function dripLockerSection() {
 }
 
 function dripSubTabs() {
-  return h("div", { class: "aks-deckslots" }, [
+  var tabs = [
     h("button", { class: "aks-slotpill" + (dripSub === "shop" ? " on" : ""), text: "The Drop", onclick: function () { dripSub = "shop"; render(); } }),
     h("button", { class: "aks-slotpill" + (dripSub === "locker" ? " on" : ""), text: "Locker", onclick: function () { dripSub = "locker"; render(); } }),
-  ]);
+  ];
+  // AK-WARDROBE: paper-doll cosmetics pill -- only when the drip.js parts engine is present.
+  if (dripCosOn()) tabs.push(h("button", { class: "aks-slotpill" + (dripSub === "cosmetics" ? " on" : ""), text: "Wardrobe", onclick: function () { dripSub = "cosmetics"; render(); } }));
+  return h("div", { class: "aks-deckslots" }, tabs);
 }
 
 function dripView() {
@@ -1649,6 +2513,7 @@ function dripView() {
   }
   var nodes = [dripSubTabs()];
   if (dripSub === "locker") return nodes.concat(dripLockerSection());   // Locker works from cached ak_cos_owned, no server needed
+  if (dripSub === "cosmetics") return dripCosOn() ? nodes.concat(dripCosmeticsSection()) : nodes.concat(dripLockerSection());   // AK-WARDROBE: paper-doll (local, no server); absent engine -> skins Locker unchanged
   if (!dripCache.loaded) {
     if (dripCache.tried) {
       nodes = nodes.concat(secHead("The Drop", "Could not reach The Drop."));
@@ -1691,6 +2556,7 @@ function dripView() {
     msgs: { world: [], crew: [] }, chans: {}, presence: { world: 0, crew: 0 },
     loaded: false, subscribed: false,
     donations: null, donLoaded: false, showDonForm: false,
+    war: null, warBattles: null, warLoaded: false,
     showCreate: false, listBox: null, mlist: null, worldLabel: null, crewLabel: null,
   };
   // shared Supabase client + identity (mirror social.js sbc()/me())
@@ -1698,6 +2564,8 @@ function dripView() {
   function crewMe() { try { return (global.AKAccount && global.AKAccount.user && global.AKAccount.user()) || null; } catch (_) { return null; } }
   function crewMyId() { var u = crewMe(); return (u && u.id) || null; }
   function crewMyName() { try { return (localStorage.getItem("ak_name") || "Stray").slice(0, 24); } catch (_) { return "Stray"; } }
+  // AK-CHAT-RESKIN: per-crew accent colour drives the bubble's --crew var.
+  function crewColor(fac) { return ({ boneguard_crew: "#e8d8a0", zoomie_syndicate: "#5fd3ff", leashbreak_tactix: "#ff8a5f", k9_circuitry: "#9d8bff" })[fac] || "#c9a84c"; }
   function crewMyOwned() { try { var p = localProfile(); return (p && p.owned) || []; } catch (_) { return []; } }
   function crewInpStyle() { return "width:100%;box-sizing:border-box;background:rgba(0,0,0,0.35);border:1px solid rgba(201,168,76,0.25);color:#fff;border-radius:9px;padding:10px;margin:5px 0;font-size:14px;outline:none"; }
   function crewReRender() { if (activeTab === "crew2") render(); }
@@ -1728,6 +2596,22 @@ function dripView() {
   function crewLoadDonations() {
     crewS.donLoaded = true;
     crewCall("ak-crew", { action: "don-list" }).then(function (r) { crewS.donations = (r && r.requests) || []; crewReRender(); });
+  }
+  // AK-CREWWARS 2026-07-12: load the DEPLOYED-but-idle ak_crew_wars / ak_war_battles
+  // rail via ak-crew {action:'war-status'}. The edge function does not expose a war
+  // action yet (see the Lucrex handoff note in social.js: needs war-status / war-start
+  // / war-battle) so crewCall() resolves {ok:false,error:'unknown action'} today and the
+  // war card degrades to the honest "wars open soon" state. Fully guarded + offline-
+  // degrading (crewCall returns {ok:false,error:'offline'} with no client). When
+  // war-status ships returning {ok,war,battles} the same card lights up, no shape change.
+  function crewLoadWar() {
+    crewS.warLoaded = true;
+    crewCall("ak-crew", { action: "war-status" }).then(function (r) {
+      crewS.war = (r && r.ok) ? (r.war || null) : null;
+      crewS.warBattles = (r && r.ok && Array.isArray(r.battles)) ? r.battles : [];
+      crewS.warErr = (r && r.ok) ? null : ((r && r.error) || "offline");
+      crewReRender();
+    }, function () { crewS.war = null; crewS.warBattles = []; crewS.warErr = "offline"; crewReRender(); });
   }
   function crewLoadHistory(scope) {
     crewCall("ak-chat", { action: "history", scope: scope }).then(function (r) {
@@ -1793,12 +2677,13 @@ function dripView() {
     // signed out -> sign-in card (matches every other shop tab's degrade)
     if (!crewMe()) {
       var out = secHead("Crew HQ", "Crews (clans), World + Crew chat, and card donations. Sign in with Google to start or join a crew.");
-      out.push(h("div", { class: "aks-card" }, [
+      // AK-25D: crew sign-in panel gets the extruded-photo 2.5D + tilt.
+      out.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, [
         h("div", { class: "aks-sub", text: "Sign in with Google to start or join a crew, chat with the world, and donate cards to your crewmates." }),
         h("div", { class: "aks-row", style: "margin-top:10px" }, [
           h("button", { class: "aks-btn", text: "SIGN IN WITH GOOGLE", onclick: function () { try { if (global.AKAccount && global.AKAccount.signIn) global.AKAccount.signIn(); else promptSignIn(); } catch (_) { promptSignIn(); } } }),
         ]),
-      ]));
+      ])));
       return out;
     }
     if (!crewS.loaded) crewRefresh();
@@ -1817,7 +2702,8 @@ function dripView() {
   // ---- Crew HQ (home) -------------------------------------------------------
   function crewHomeNodes(nodes) {
     var c = crewS.crew;
-    nodes.push(h("div", { class: "aks-card" }, [
+    // AK-25D: crew identity/header panel gets the extruded-photo 2.5D + tilt.
+    nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, [
       h("div", { class: "aks-row", style: "gap:10px" }, [
         h("div", { style: "width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(201,168,76,0.14);border:1px solid rgba(201,168,76,0.3)", text: "🐶" }),
         h("div", { style: "flex:1" }, [
@@ -1830,7 +2716,7 @@ function dripView() {
         h("button", { class: "aks-btn", style: "flex:1", text: "💬 Crew Chat", onclick: function () { crewS.scope = "crew"; crewS.tab = "chat"; render(); } }),
         h("button", { class: "aks-btn ghost", text: "Leave", onclick: crewDoLeave }),
       ]),
-    ]));
+    ])));
     crewDonationNodes(nodes);
     var rosterRows = crewS.members.map(function (m) {
       var nm = m.user_id === crewMyId() ? (crewMyName() + " (you)") : (m.name || ("Stray " + String(m.user_id).slice(0, 4)));
@@ -1840,11 +2726,60 @@ function dripView() {
         h("span", { class: "aks-sub", text: m.role || "member" }),
       ]);
     });
-    nodes.push(h("div", { class: "aks-card" }, [h("div", { class: "aks-sub", style: "margin-bottom:6px", text: "CREW (" + crewS.members.length + " · " + crewS.presence.crew + " online)" })].concat(rosterRows)));
-    nodes.push(h("div", { class: "aks-card" }, [
-      h("div", { class: "aks-sub", style: "margin-bottom:4px", text: "CREW WARS" }),
-      h("div", { class: "aks-sub", text: "Wars open with 2v2 (Phase 2). Stack trophies now -- your wins will tally for the crew." }),
+    // AK-25D: the crew roster + Crew Wars panels get the extruded-photo 2.5D + tilt
+    // (matches the crew identity header above).
+    nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, [h("div", { class: "aks-sub", style: "margin-bottom:6px", text: "CREW (" + crewS.members.length + " · " + crewS.presence.crew + " online)" })].concat(rosterRows))));
+    crewWarNodes(nodes);
+  }
+
+  // ---- CREW WARS (async crew-vs-crew trophy tally; wired, degrades to idle) --
+  function crewWarStartBtn() {
+    var start = h("button", { class: "aks-btn", style: "margin-top:8px;padding:6px 10px", text: "Find a War" });
+    start.onclick = function () {
+      start.disabled = true;
+      crewCall("ak-crew", { action: "war-start" }).then(function (rr) {
+        if (rr && rr.ok) { toast("War matchmaking started.", "good"); crewS.warLoaded = false; crewReRender(); }
+        else { toast((rr && rr.error === "unknown action") ? "Crew Wars go live soon." : ((rr && rr.error) || "Not yet."), "bad"); start.disabled = false; }
+      });
+    };
+    return start;
+  }
+  function crewWarNodes(nodes) {
+    if (!crewS.warLoaded) crewLoadWar();
+    var kids = [h("div", { class: "aks-sub", style: "margin-bottom:4px", text: "CREW WARS" })];
+    if (!crewS.warLoaded) { kids.push(h("div", { class: "gd-note", text: "Loading war board..." })); nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, kids))); return; }
+    var w = crewS.war;
+    if (!w) {
+      // idle: server has no war action yet, or no active war -> the honest "coming" state
+      kids.push(h("div", { class: "aks-sub", text: "Wars open with async crew-vs-crew (Phase 2). Stack trophies now -- your raid wins tally for the crew the moment wars go live." }));
+      // leader-only Start, and only when the rail actually answered (deployed but idle),
+      // not when we are simply offline -- keeps the button honest.
+      if (crewS.role === "leader" && crewS.warErr && crewS.warErr !== "offline") kids.push(crewWarStartBtn());
+      nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, kids)));
+      return;
+    }
+    var us = (w.our_score | 0), them = (w.their_score | 0);
+    var myTag = (crewS.crew && crewS.crew.tag) ? ("[" + crewS.crew.tag + "]") : "US";
+    kids.push(h("div", { class: "aks-row", style: "gap:10px;align-items:center;margin:6px 0" }, [
+      h("div", { style: "flex:1;text-align:center" }, [
+        h("div", { class: "aks-name", text: String(us) }),
+        h("div", { class: "aks-sub", text: myTag }),
+      ]),
+      h("div", { class: "aks-sub", text: "vs" }),
+      h("div", { style: "flex:1;text-align:center" }, [
+        h("div", { class: "aks-name", text: String(them) }),
+        h("div", { class: "aks-sub", text: w.opponent_tag ? ("[" + w.opponent_tag + "]") : (w.opponent_name || "THEM") }),
+      ]),
     ]));
+    var battles = Array.isArray(crewS.warBattles) ? crewS.warBattles.slice(0, 12) : [];
+    if (!battles.length) kids.push(h("div", { class: "gd-note", text: "No battles logged yet. Raid to score for the crew." }));
+    else battles.forEach(function (b) {
+      kids.push(h("div", { class: "aks-row", style: "gap:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,0.06)" }, [
+        h("span", { class: "aks-sub", style: "flex:1", text: (b.attacker_name || "Crewmate") + (b.stars != null ? (" -- " + b.stars + "star") : "") }),
+        h("span", { class: "aks-sub", text: b.for_us ? myTag : "THEM" }),
+      ]));
+    });
+    nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, kids)));
   }
 
   // ---- donations ------------------------------------------------------------
@@ -1876,7 +2811,8 @@ function dripView() {
         btn,
       ]));
     });
-    nodes.push(h("div", { class: "aks-card" }, kids));
+    // AK-25D: the donations panel gets the extruded-photo 2.5D + tilt.
+    nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" }, kids)));
   }
   function crewDonReqForm() {
     var owned = crewMyOwned();
@@ -1902,7 +2838,7 @@ function dripView() {
   function crewDoLeave() {
     if (!confirm("Leave " + (crewS.crew && crewS.crew.name) + "?")) return;
     crewCall("ak-crew", { action: "leave" }).then(function (r) {
-      if (r.ok) { crewS.crew = null; crewS.members = []; crewUnsub("crew"); toast("Left the crew.", "ok"); crewS.loaded = false; crewRefresh(); }
+      if (r.ok) { crewS.crew = null; crewS.members = []; crewUnsub("crew"); toast("Left the crew.", "ok"); crewS.loaded = false; crewS.warLoaded = false; crewS.war = null; crewRefresh(); }
       else toast(r.error || "Could not leave.", "bad");
     });
   }
@@ -1980,11 +2916,11 @@ function dripView() {
     var cTab = h("div", { class: "gd-tab" + (crewS.scope === "crew" ? " on" : ""), text: inCrew ? ("CREW · " + crewS.presence.crew + " on") : "CREW (none)", onclick: function () { if (!inCrew) { toast("Join a crew first.", "bad"); return; } crewS.scope = "crew"; render(); } });
     crewS.worldLabel = wTab; crewS.crewLabel = cTab;
     nodes.push(h("div", { class: "gd-tabs" }, [wTab, cTab]));
-    var mlist = h("div", { style: "max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin:8px 0;padding:2px" });
+    var mlist = h("div", { class: "akc-list", style: "max-height:46vh;overflow-y:auto;margin:8px 0;padding:2px" });
     crewS.mlist = mlist;
     nodes.push(mlist);
     crewPaintMsgs();
-    var input = h("input", { maxlength: "200", type: "text", placeholder: crewS.scope === "crew" ? "Message your crew..." : "Message the world...", style: "flex:1;background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.3);color:#fff;border-radius:20px;padding:10px 14px;font-size:14px;outline:none" });
+    var input = h("input", { class: "akc-input", maxlength: "200", type: "text", placeholder: crewS.scope === "crew" ? "Message your crew..." : "Message the world..." });
     input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); crewSendChat(input); } });
     var send = h("button", { class: "aks-btn", text: "Send", onclick: function () { crewSendChat(input); } });
     nodes.push(h("div", { class: "aks-row", style: "gap:8px;margin-top:4px" }, [input, send]));
@@ -1995,13 +2931,23 @@ function dripView() {
     var arr = (crewS.msgs[crewS.scope] || []).slice(-80);
     clear(mlist);
     if (!arr.length) { mlist.appendChild(h("div", { class: "gd-note", text: "No messages yet. Start the conversation." })); return; }
+    // gold shimmer only on the genuinely-new last message (not on every repaint)
+    var lastId = arr.length ? arr[arr.length - 1].id : null;
+    var freshId = (lastId != null && lastId !== crewS._lastSeenId) ? lastId : null;
+    crewS._lastSeenId = lastId;
+    var myId = crewMyId(), myNm = crewMyName();
     arr.forEach(function (m) {
-      var nameKids = [h("b", { style: "color:#c9a84c", text: m.name || "Stray" })];
-      if (m.faction && CREW_FNAME[m.faction]) nameKids.push(h("span", { style: "color:#8a8a96;font-size:10px;margin-left:6px", text: CREW_FNAME[m.faction] }));
-      mlist.appendChild(h("div", { style: "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:7px 9px;font-size:13px;line-height:1.35;word-break:break-word" }, [
-        h("div", null, nameKids),
-        h("div", { text: m.body || "" }),
-      ]));
+      var mine = (m.user_id && myId && m.user_id === myId) || (!m.user_id && (m.name || "Stray") === myNm);
+      var accent = crewColor(m.faction);
+      var hd = [h("span", { class: "akc-nm", text: m.name || "Stray" })];
+      if (m.faction && CREW_FNAME[m.faction]) hd.push(h("span", { class: "akc-ft", text: CREW_FNAME[m.faction] }));
+      var bub = h("div", { class: "akc-bub" }, [
+        h("div", { class: "akc-hd" }, hd),
+        h("div", { class: "akc-bd", text: m.body || "" }),
+      ]);
+      var av = h("span", { class: "akc-av", text: "🐾" }); // paw -- dog-gang flavour
+      var cls = "akc-row" + (mine ? " mine" : "") + (m.id != null && m.id === freshId ? " fresh" : "");
+      mlist.appendChild(h("div", { class: cls, style: "--crew:" + accent }, [av, bub]));
     });
     mlist.scrollTop = mlist.scrollHeight;
   }
@@ -2072,6 +3018,60 @@ function dripView() {
       else { toast(r && r.error ? r.error : "Could not unlock.", "bad"); }
     });
   }
+  // ====================================================================
+  // AK-PASS-LORE 2026-07-09 (bible 10.4) -- the Alley Pass IS the Chronicle
+  // of Seasons: milestone tiers carry a chapter tease line referencing the
+  // current season's issue-run flavor, and REACHING a milestone fires ONE
+  // guarded chronicle teaser toast. Cosmetic text only -- no rewards, no
+  // currency, no gem-law surface; the server pass contract is untouched.
+  // The season word comes from AKSeasons.currentName() WHEN PRESENT
+  // (seasons.js is not loaded on shop.html -> the neutral fallback reads
+  // the same); the toast tail mentions the reader only if AK_CHRONICLES is
+  // actually loaded. Teased milestones persist per-season in localStorage
+  // (in-memory fallback) so the toast fires once, not every render.
+  // ====================================================================
+  var PASS_LORE_MILESTONES = {
+    10: "a torn page from {SEASON} -- the block's own telling of how this run started.",
+    20: "a witness page from {SEASON} -- somebody up on the roofline saw who really held the line.",
+    25: "a page from the season chronicle -- {SEASON} starts naming its heavy hitters.",
+    30: "the season finale page -- how {SEASON} ends is yours to keep.",
+    50: "a page nobody was supposed to keep -- {SEASON} left it behind anyway.",
+  };
+  function passSeasonWord() {
+    try {
+      var n = global.AKSeasons && global.AKSeasons.currentName && global.AKSeasons.currentName();
+      if (n) return String(n);
+    } catch (_) {}
+    return "THE SEASON CHRONICLE";
+  }
+  function passLoreLine(t) {
+    var tpl = PASS_LORE_MILESTONES[t];
+    return tpl ? ("Tier " + t + ": " + tpl.replace("{SEASON}", passSeasonWord())) : null;
+  }
+  var passLoreTeased = {};                     // in-memory once-per-session fallback
+  function passLoreSeen(k) {
+    if (passLoreTeased[k]) return true;
+    try { if (global.localStorage && localStorage.getItem(k)) return true; } catch (_) {}
+    return false;
+  }
+  function passLoreMark(k) {
+    passLoreTeased[k] = 1;
+    try { if (global.localStorage) localStorage.setItem(k, "1"); } catch (_) {}
+  }
+  function passLoreMaybeToast(tier, season) {
+    var ms = Object.keys(PASS_LORE_MILESTONES).map(Number).sort(function (a, b) { return a - b; });
+    var seasonKey = passSeasonWord(), newest = null;
+    for (var i = 0; i < ms.length; i++) {
+      var m = ms[i]; if (m > tier) break;
+      var k = "ak_pass_lore_s" + (season || 1) + "_" + seasonKey + "_" + m;
+      if (!passLoreSeen(k)) { newest = m; passLoreMark(k); }
+    }
+    if (newest == null) return;
+    var hasReader = false;
+    try { hasReader = !!(global.AK_CHRONICLES && global.AK_CHRONICLES.open); } catch (_) {}
+    toast("CHRONICLE PAGE EARNED -- " + passLoreLine(newest) +
+      (hasReader ? " Read it in the Block Chronicles." : " The page is waiting for you on the block."), "good");
+  }
   function passView() {
     // signed out -> gd-native sign-in CTA (like the shop's other gated tabs)
     if (!passMe()) {
@@ -2108,11 +3108,17 @@ function dripView() {
     var nodes = secHead("Alley Pass -- Season " + (P.season || 1),
       "Every match levels your pass. Free lane is yours -- Premium doubles the haul. Claim each tier you've reached.");
 
+    // AK-PASS-LORE: reaching a chapter milestone tees up ONE chronicle teaser
+    // toast (guarded; cosmetic only -- claims and rewards are untouched).
+    try { passLoreMaybeToast(tier, P.season || 1); } catch (_) {}
+
     // XP + premium header (gold-glass card; reuses the .copies bar for the XP fill)
     var premCta = premium
       ? h("span", { class: "aks-owned", text: "✓ PREMIUM ACTIVE" })
       : h("button", { class: "aks-btn gold gem-cost", text: "Unlock Premium - 800", onclick: passUnlockPremium });
-    nodes.push(h("div", { class: "aks-card r-Legendary aks-up" }, [
+    // AK-25D: the season XP / premium header gets the extruded-photo 2.5D + tilt
+    // (matches passTierTile); the r-Legendary rarity glow keeps winning the cascade.
+    nodes.push(wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow r-Legendary aks-up" }, [
       h("div", { class: "aks-meta" }, [
         h("div", { class: "aks-row" }, [
           h("div", { class: "aks-name", text: "Tier " + tier + " / " + maxTier }),
@@ -2124,7 +3130,7 @@ function dripView() {
           premCta,
         ]),
       ]),
-    ]));
+    ])));
 
     // 30-tier track -- one gd card per tier, free + prem lane rows
     if (!track.free || !track.free.length) { nodes.push(emptyCard("Track unavailable -- reload the shop.")); return nodes; }
@@ -2134,13 +3140,24 @@ function dripView() {
     return nodes;
   }
   function passTierTile(t, curTier, premium, track, cf, cp) {
-    return h("div", { class: "aks-card" + (t === curTier + 1 ? " r-Legendary aks-up" : " r-Rare") }, [
-      h("div", { class: "aks-meta" }, [
-        h("div", { class: "aks-name", text: "Tier " + t + (t === curTier + 1 ? "  (next)" : (t <= curTier ? "  ✓" : "")) }),
-        passLaneRow(t, "free", curTier, premium, track, cf, cp),
-        passLaneRow(t, "prem", curTier, premium, track, cf, cp),
-      ]),
-    ]);
+    // AK-25D: each pass tier tile gets the extruded-photo 2.5D + tilt; the "next"
+    // tier's r-Legendary lift + gold shimmer come from shop.css.
+    var rows = [
+      h("div", { class: "aks-name", text: "Tier " + t + (t === curTier + 1 ? "  (next)" : (t <= curTier ? "  ✓" : "")) }),
+      passLaneRow(t, "free", curTier, premium, track, cf, cp),
+      passLaneRow(t, "prem", curTier, premium, track, cf, cp),
+    ];
+    // AK-PASS-LORE: milestone tiers carry the season-chronicle tease line
+    // (dimmed until reached; pure flavor text, never a claimable).
+    var lore = passLoreLine(t);
+    if (lore) rows.push(h("div", {
+      class: "aks-desc",
+      style: "margin-top:6px;font-style:italic;" + (t <= curTier ? "opacity:.9" : "opacity:.5"),
+      text: "CHRONICLE -- " + lore,
+    }));
+    return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow" + (t === curTier + 1 ? " r-Legendary aks-up" : " r-Rare") }, [
+      h("div", { class: "aks-meta" }, rows),
+    ]));
   }
   function passLaneRow(t, lane, curTier, premium, track, cf, cp) {
     var reward = (track[lane] || [])[t - 1];
@@ -2240,7 +3257,8 @@ function hitQuestCard(q) {
   if (q.claimed) btn = h("button", { class: "aks-btn ghost", disabled: "true", text: "✓ Done" });
   else if (q.claimable) { btn = h("button", { class: "aks-btn", text: "Claim" }); btn.onclick = function () { hitClaim(q, btn); }; }
   else btn = h("button", { class: "aks-btn ghost", disabled: "true", text: q.progress + "/" + q.target });
-  return h("div", { class: "aks-card " + rarClass(done ? "Legendary" : "Epic") }, [
+  // AK-25D: quest cards get the extruded-photo 2.5D + tilt.
+  return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(done ? "Legendary" : "Epic") }, [
     h("div", { class: "aks-meta" }, [
       h("div", { class: "aks-row" }, [
         h("div", { style: "flex:1" }, [
@@ -2253,7 +3271,7 @@ function hitQuestCard(q) {
       copiesBar(q.progress | 0, target, done ? "Legendary" : "Epic"),
       h("div", { class: "gd-note", text: q.progress + " / " + q.target }),
     ]),
-  ]);
+  ]));
 }
 
 // the tab body
@@ -2482,6 +3500,9 @@ function hitView() {
           // bridge so server-chest grants land as real local copies for upgrades.
           profileSync([], r.grants.coins || 0, r.grants.scrap || null, r.grants.chests || null);
           grantServerCards(r.grants.cards || []);
+          // AK-CINEMATIC: gem-crate opens get the same stinger before the reward lands on screen
+          chestStinger(function () { toast(okMsg, "ok"); load(); });
+          return;
         }
         toast(okMsg, "ok"); load();
       }
@@ -2546,10 +3567,10 @@ function hitView() {
     ensureRoot();
     // deep-link: shop.html#handlers / #draw / #cards ... opens straight to that tab
     try { var hh = (location.hash || "").replace(/^#/, "").split("&")[0];
-      if (["deck", "gems", "cards", "draw", "chests", "upgrade", "codex2", "handlers", "street", "drip2", "crew2", "pass2", "hit2"].indexOf(hh) >= 0) { activeTab = hh; soloTab = true; } } catch (_) {}
+      if (["deck", "gems", "cards", "fence", "draw", "chests", "upgrade", "codex2", "handlers", "street", "drip2", "crew2", "pass2", "hit2", "watch2"].indexOf(hh) >= 0) { activeTab = hh; soloTab = true; } } catch (_) {}
     root.removeAttribute("hidden");
     try { if (window.AKLoops) AKLoops.play("shop"); } catch (_e) {}
-    ensureCatalog().then(ensureEconomy).then(load);   // AK-SCRAP: shared economy first
+    ensureCatalog().then(ensureEconomy).then(ensureDrip).then(load);   // AK-SCRAP: shared economy first, then the cosmetics engine
     confirmPendingGems();
   }
   // Stripe success redirect lands back here with #gems-ok=<session_id>.
@@ -2570,7 +3591,7 @@ function hitView() {
       else { toast(humanErr(r), "bad"); }
     }).catch(function () { toast("Could not confirm purchase -- it will retry next visit.", "bad"); });
   }
-  function close() { if (root) root.setAttribute("hidden", ""); try { if (window.AKLoops) AKLoops.pause("shop"); } catch (_e) {} }
+  function close() { fenceClearTimer(); if (root) root.setAttribute("hidden", ""); try { if (window.AKLoops) AKLoops.pause("shop"); } catch (_e) {} }
 
   global.AKShop = {
     open: open, close: close,
@@ -2579,38 +3600,56 @@ function hitView() {
     _state: function () { return state; },
   };
 
-  /* AK-3D tilt shim -- one delegated pointer handler for ALL .ak-3d scenes.
-     Writes --ak-rx/--ak-ry (deg) onto the inner .ak-3d-tilt; CSS does the rest. */
-  (function(){
-    if (window.__akTilt) return; window.__akTilt = true;
-    if (matchMedia('(hover:none),(pointer:coarse)').matches) return;     // static tilt only
-    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
-    var MAX = 9, raf = 0, pend = null;
-    function apply(){
-      raf = 0; if(!pend) return;
-      var t = pend.tilt, r = pend.rect;
-      var nx = (pend.x - r.left)/r.width  - .5;     // -0.5 .. 0.5
-      var ny = (pend.y - r.top )/r.height - .5;
-      t.style.setProperty('--ak-ry', ( nx*2*MAX).toFixed(2)+'deg');
-      t.style.setProperty('--ak-rx', (-ny*2*MAX + 3).toFixed(2)+'deg');  // +3 = tabletop bias
-      pend = null;
-    }
-    document.addEventListener('pointermove', function(e){
-      if (e.pointerType === 'touch') return;
-      var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
-      var t = s.querySelector('.ak-3d-tilt'); if(!t) return;
-      s.classList.add('ak-3d-live');
-      pend = { tilt:t, rect:s.getBoundingClientRect(), x:e.clientX, y:e.clientY };
-      if(!raf) raf = requestAnimationFrame(apply);
-    }, {passive:true});
-    document.addEventListener('pointerout', function(e){
-      var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
-      if (s.contains(e.relatedTarget)) return;          // pointer still inside the scene
-      s.classList.remove('ak-3d-live');
-      var t = s.querySelector('.ak-3d-tilt');
-      if(t){ t.style.removeProperty('--ak-rx'); t.style.removeProperty('--ak-ry'); }   // eases back to rest
-    }, {passive:true});
-  })();
+  // AK-SHIELD: raid-protection surface for the integration pass. The world map /
+  // raid-defense screen wires a "shield up" affordance to AKShield.buy(tierId) and
+  // reads AKShield.status() for the live shield banner. Writes p.raid.shieldUntil
+  // (the field systems/raid.js shieldActive() reads). Protection, never power.
+  global.AKShield = {
+    buy: shieldBuy,                                                  // (tierId) -> bool
+    tiers: function () { return SHIELD_TIERS.map(function (t) { return Object.assign({}, t); }); },
+    status: function () { return { active: shieldActiveS(), until: shieldUntil(), msLeft: shieldMsLeft(), label: shieldFmtDur(shieldMsLeft()) }; },
+    open: function () { activeTab = "watch2"; try { open({}); } catch (_) {} },
+  };
+
+  // AK-FENCE-DAILY: the 8h rotating deal table for the integration pass. The
+  // lobby / world-map wires a "Fence" chip to AKFence.open(), reads AKFence
+  // .status() for the live countdown + first-buy-bonus state, and can render the
+  // current set from AKFence.deals() or fire a buy with AKFence.buy(slot).
+  // Soft-currency (scrap) only -- never gems, never pay-to-win.
+  global.AKFence = {
+    open: function () { activeTab = "fence"; try { open({}); } catch (_) {} },
+    deals: function () {
+      var now = Date.now();
+      return fenceDealCards(now).map(function (c, i) {
+        var dp = fenceDealPrice(c, i);
+        return { slot: i, card: c.name, id: c.id, rarity: c.rarity, base: dp.base, price: dp.price, discount: dp.disc };
+      });
+    },
+    buy: fenceBuy,                                                  // (slot) -> bool
+    status: function () {
+      var ms = fenceWindowEndsMs();
+      return {
+        windowMs: FENCE_WINDOW_MS, windowIndex: fenceWindowIndex(), msLeft: ms, label: fenceFmtCd(ms),
+        bonusClaimedToday: fenceBonusClaimedToday(), bonus: { coins: FENCE_FIRST_BUY.coins, bones: FENCE_FIRST_BUY.bones },
+      };
+    },
+  };
+
+  // AK-STASH: the variable-ratio soft crate for the integration pass. A world-map
+  // / lobby "rip the stash" affordance wires to AKCrate.rip(payWith), shows the
+  // price from AKCrate.price() and the DISCLOSED odds from AKCrate.odds().
+  global.AKCrate = {
+    open: function () { activeTab = "chests"; try { open({}); } catch (_) {} },   // The Stash headlines the Crates tab
+    rip: stashRip,                                                  // (payWith "coins"|"bones") -> bool
+    price: function () { return { coins: STASH.coins, bones: STASH.bones }; },
+    odds: function () { return STASH.tiers.map(function (t) { return { tier: t.k, pct: t.pct }; }); },
+  };
+
+  /* AK-3D tilt shim de-duped to shared ../ak_25d.js (Section A, 2026-06-20).
+     shop.html loads ak_25d.js BEFORE shop.js; the shim is guarded by
+     window.__akTilt so behaviour is identical (one delegated pointer handler
+     writing --ak-rx/--ak-ry onto every .ak-3d scene). window.AK25D.apply is
+     also available for non-wrap3d surfaces. */
 
   // AK-SHOPFIX item 2: re-config + re-render the moment auth state changes, so
   // a player who signs in mid-session never gets the "log in" nag.

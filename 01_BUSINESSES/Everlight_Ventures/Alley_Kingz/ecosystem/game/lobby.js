@@ -105,6 +105,27 @@
       "#ak-tabbar .ak-playtab span{font-size:22px;line-height:1}",
       ".ak-curico{width:17px;height:17px;border-radius:4px;object-fit:cover;margin-right:3px;vertical-align:middle;box-shadow:0 0 0 1px rgba(201,168,76,.4)}",
       ".ak-dot{position:absolute;top:0;right:8px;min-width:16px;height:16px;border-radius:9px;background:#e0413f;color:#fff;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 0 0 2px #0a0a10}",
+      // AK-25D 2026-06-20: shared "life feel" polish for the lobby chrome. The shimmer/glow/float
+      // keyframes + .ak25-* classes live in ak_25d.css (loaded by game.html before this file); these
+      // rules add the press-feel + a brand-glow halo behind the title + clean per-icon shimmer clip +
+      // keep the now-.ak-3d-wrapped icon-row tiles from shrinking. Compositor-only (transform/opacity);
+      // reduced-motion is handled by ak_25d.css (and the title halo below).
+      "#ak-title{position:relative}",
+      "#ak-title::before{content:'';position:absolute;left:50%;top:48%;width:min(80%,300px);height:96px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(232,197,90,.34),rgba(232,197,90,.06) 58%,transparent 72%);filter:blur(7px);z-index:-1;pointer-events:none;opacity:.42;animation:ak25Breath 5.6s ease-in-out infinite;will-change:opacity}",
+      "@media(prefers-reduced-motion:reduce){#ak-title::before{animation:none;opacity:.32}}",
+      // make the tab-bar icon shimmer clip into a clean rounded tile (overflow:hidden needs a block box)
+      "#startscreen.ak-relayout #ak-tabbar .mt-ico.ak25-shimmer{display:inline-block;border-radius:8px}",
+      // press-feel: tiles, currency chips + the round PLAY badge dip on tap (touch + mouse)
+      "#startscreen.ak-relayout #ak-iconrow .mode-tile,#startscreen.ak-relayout #ak-tabbar .mode-tile{transition:transform .12s ease}",
+      "#startscreen.ak-relayout #ak-iconrow .mode-tile:active{transform:translateY(2px) scale(.94)}",
+      "#startscreen.ak-relayout #ak-tabbar .mode-tile:active{transform:translateY(2px) scale(.93)}",
+      ".ak-cur{transition:transform .12s ease}",
+      ".ak-cur:active{transform:translateY(1px) scale(.96)}",
+      "#ak-tabbar .ak-playtab{transition:transform .14s ease}",
+      "#ak-tabbar .ak-playtab:active{transform:translateY(2px) scale(.95)}",
+      // icon-row tiles are wrapped in .ak-3d scenes -> give the row room for the extruded bottom face + keep no-shrink scroll
+      "#startscreen.ak-relayout #ak-iconrow{padding-bottom:12px}",
+      "#startscreen.ak-relayout #ak-iconrow>.ak-3d{flex:0 0 auto}",
     ].join("");
     document.head.appendChild(st);
   }
@@ -123,13 +144,14 @@
 
     // top bar: brand + auth chip (moved) + currency
     var auth = $("ak-auth");
-    var gems = mk("span", { class: "ak-cur", id: "ak-gems", onclick: function () { location.href = "shop/shop.html"; } }, [mk("img", { class: "ak-curico", src: "assets/ui/cur_gems.jpg", alt: "" }), mk("b", { id: "ak-gems-n", text: "--" })]);
-    var goldc = mk("span", { class: "ak-cur", id: "ak-gold", onclick: function () { tapBtn("shopbtn"); } }, [mk("img", { class: "ak-curico", src: "assets/ui/cur_gold.jpg", alt: "" }), mk("b", { id: "ak-gold-n", text: String(gold()) })]);
+    var gems = mk("span", { class: "ak-cur ak25-shimmer", id: "ak-gems", onclick: function () { location.href = "shop/shop.html"; } }, [mk("img", { class: "ak-curico", src: "assets/ui/cur_gems.jpg", alt: "" }), mk("b", { id: "ak-gems-n", text: "--" })]);
+    var goldc = mk("span", { class: "ak-cur ak25-shimmer", id: "ak-gold", onclick: function () { tapBtn("shopbtn"); } }, [mk("img", { class: "ak-curico", src: "assets/ui/cur_gold.jpg", alt: "" }), mk("b", { id: "ak-gold-n", text: String(gold()) })]);
     var topbar = mk("div", { id: "ak-topbar" }, [mk("span", { class: "ak-brand", text: "ALLEY KINGZ" }), mk("span", { class: "ak-spacer" }), auth || null, gems, goldc]);
 
     // AK-DOGHERO: the dog photo IS the hero (full-bleed backdrop) -> a light gold title
     // overlay sits on it instead of a carousel box, so the photo stays big + dominant.
-    var hero = mk("div", { id: "ak-title" }, [
+    // AK-25D: gentle idle float (transform-only) + a breathing gold brand-glow halo (#ak-title::before).
+    var hero = mk("div", { id: "ak-title", class: "ak25-float" }, [
       mk("h1", { class: "ak-h1", text: "ALLEY KINGZ" }),
       mk("p", { class: "ak-tag", text: "Run the pack. Rule the streets." }),
     ]);
@@ -137,11 +159,14 @@
     // pass strip
     var passFill = mk("div", { class: "fill", style: "width:0%" });
     var passNx = mk("span", { class: "nx", text: "" });
-    var passStrip = mk("div", { id: "ak-passstrip", onclick: function () { tapBtn("passbtn"); } }, [mk("span", { class: "lab", id: "ak-pass-lab", text: "ALLEY PASS" }), mk("div", { class: "bar" }, passFill), passNx]);
+    var passStrip = mk("div", { id: "ak-passstrip", class: "ak25-shimmer ak25-glow", onclick: function () { tapBtn("passbtn"); } }, [mk("span", { class: "lab", id: "ak-pass-lab", text: "ALLEY PASS" }), mk("div", { class: "bar" }, passFill), passNx]);
 
     // icon row: secondary surfaces (keep ids + listeners)
     var iconRow = mk("div", { id: "ak-iconrow" });
-    ["deckbtn", "shopbtn", "mapbtn", "cratesbtn", "profilebtn", "akcodexbtn", "skillsbtn", "handlerbtn", "dc-claim"].forEach(function (id) { var b = $(id); if (b) { if (!b.classList.contains("mode-tile")) b.classList.add("mode-tile"); iconRow.appendChild(b); } });
+    // AK-25D: secondary mode tiles become extruded-photo 2.5D scenes (raised "card" feel). AK25D.apply is
+    // idempotent + inserts the .ak-3d>.ak-3d-tilt>.ak-3d-face scene in the tile's place (ids/listeners kept).
+    // Guarded: if the shared shim is absent the tile stays flat-but-correct (graceful fallback).
+    ["deckbtn", "shopbtn", "mapbtn", "cratesbtn", "profilebtn", "akcodexbtn", "skillsbtn", "handlerbtn", "dc-claim"].forEach(function (id) { var b = $(id); if (b) { if (!b.classList.contains("mode-tile")) b.classList.add("mode-tile"); iconRow.appendChild(b); if (global.AK25D && global.AK25D.apply) { try { global.AK25D.apply(b); } catch (_e) {} } } });
 
     // stage: the big PLAY pillar (the real #playbtn, re-parented)
     var stage = mk("div", { id: "ak-stage" }); var playBtn = $("playbtn"); if (playBtn) stage.appendChild(playBtn);
@@ -157,9 +182,13 @@
     var tabbar = mk("div", { id: "ak-tabbar" });
     var leftWrap = mk("div", { style: "display:flex;flex:1;justify-content:space-around" });
     var rightWrap = mk("div", { style: "display:flex;flex:1;justify-content:space-around" });
-    ["dripbtn", "crewbtn"].forEach(function (id) { var b = $(id); if (b) leftWrap.appendChild(b); });
-    ["passbtn", "questsbtn"].forEach(function (id) { var b = $(id); if (b) rightWrap.appendChild(b); });
-    var playTab = mk("button", { class: "ak-playtab", type: "button", "aria-label": "Play", onclick: function () { try { window.AK && AK.sfx && AK.sfx("tap"); } catch (_e) {} tapBtn("playbtn"); } }, []);
+    // AK-25D: tab-bar buttons get the gold shimmer sweep on their icon (not the button -- keeps the
+    // red-dot badge from being clipped by overflow:hidden) + a press-dip (CSS :active above).
+    function akTabShimmer(b) { if (!b) return; var ic = b.querySelector(".mt-ico,.sb-ico"); if (ic) ic.classList.add("ak25-shimmer"); }
+    ["dripbtn", "crewbtn"].forEach(function (id) { var b = $(id); if (b) { leftWrap.appendChild(b); akTabShimmer(b); } });
+    ["passbtn", "questsbtn"].forEach(function (id) { var b = $(id); if (b) { rightWrap.appendChild(b); akTabShimmer(b); } });
+    // AK-25D: the round PLAY badge (photo face) gets the breathing gold glow rim + shimmer sweep (clipped to the circle).
+    var playTab = mk("button", { class: "ak-playtab ak25-glow ak25-shimmer", type: "button", "aria-label": "Play", onclick: function () { try { window.AK && AK.sfx && AK.sfx("tap"); } catch (_e) {} tapBtn("playbtn"); } }, []);
     if (playBtn) playBtn.style.display = "none";   // AK-ART: hide the long generic "Play Now" bar. Reuse the ref captured at L147 -- it was re-parented OUT of the live DOM into `stage`, so $("playbtn") returns null here and the hide silently no-ops. Small custom badge proxies the click.
     tabbar.appendChild(leftWrap); tabbar.appendChild(playTab); tabbar.appendChild(rightWrap);
 

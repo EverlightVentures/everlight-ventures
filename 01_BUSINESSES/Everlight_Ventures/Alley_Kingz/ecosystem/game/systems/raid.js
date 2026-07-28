@@ -24,12 +24,13 @@
  * falsy-default `raid:{}` field via AK_ECON. Headless-safe (bails with no
  * AK_SYSTEMS; every storage touch goes through AK_ECON's try/catch kernel).
  *
- * SERVER (SPEC ONLY -- see the structured return; do NOT deploy here):
- *   edge fn `ak-raid` (serve bot-base snapshots, resolve raid loot + surgical
- *   damage, push revenge entries, sell gem shields) + table `ak_bot_bases` +
- *   the snapshot seed. Loot delivered through the live `ak_grants` pattern
- *   (same as ak-crew donations -> AKSocial.claimGrants). All server calls below
- *   are clearly marked // TODO-SERVER and degrade gracefully today.
+ * SERVER (LIVE -- edge fn `ak-raid` is deployed on project mfghdobptredxxhbjwyz):
+ *   serves REAL players' published bases first + bot-base snapshots (`targets`),
+ *   upserts the caller's own base (`publish-base`), settles + caps raid loot and
+ *   pushes 24h revenge rows (`resolve`), drains the revenge inbox (`revenge`), sells
+ *   gem shields (`buy-shield`), validates crew reinforcements (`reinforce`). Loot is
+ *   delivered through the live `ak_grants` pattern (same as ak-crew donations ->
+ *   AKSocial.claimGrants). Every server call degrades gracefully offline/signed-out.
  * ========================================================================== */
 (function (global) {
   'use strict';
@@ -46,11 +47,11 @@
   // ---- the 5-tier shield ladder (CoC choice-architecture). gold OR gems ONLY.
   // gems>0 tiers are SERVER-settled (gems are server-only); gold tiers settle here.
   var SHIELDS = [
-    { id: 'street',   name: 'Street Cover',  hrs: 2,  gold: 300,  gems: 0,   glyph: 'X', line: 'Lookouts on the corner. 2 hours of quiet.' },
-    { id: 'crew',     name: 'Crew Watch',    hrs: 8,  gold: 1200, gems: 0,   glyph: 'W', line: 'The crew posts a watch. 8 hours safe.' },
-    { id: 'iron',     name: 'Iron Curtain',  hrs: 12, gold: 2600, gems: 0,   glyph: 'I', line: 'Roll the gates down. A full workday of peace.' },
-    { id: 'fortress', name: 'Fortress Dome', hrs: 16, gold: 0,    gems: 80,  glyph: 'D', line: 'Dome the whole block. 16 hours. Gems only.' },
-    { id: 'panic',    name: 'Panic Button',  hrs: 24, gold: 0,    gems: 160, glyph: 'P', line: 'Vacation lockout. 24 hours untouchable. Gems only.' }
+    { id: 'street',   name: 'Street Cover',  hrs: 2,  gold: 300,  gems: 0,   glyph: 'X', icon: 'assets/icons/def_street.png',   line: 'Lookouts on the corner. 2 hours of quiet.' },
+    { id: 'crew',     name: 'Crew Watch',    hrs: 8,  gold: 1200, gems: 0,   glyph: 'W', icon: 'assets/icons/def_crew.png',     line: 'The crew posts a watch. 8 hours safe.' },
+    { id: 'iron',     name: 'Iron Curtain',  hrs: 12, gold: 2600, gems: 0,   glyph: 'I', icon: 'assets/icons/def_iron.png',     line: 'Roll the gates down. A full workday of peace.' },
+    { id: 'fortress', name: 'Fortress Dome', hrs: 16, gold: 0,    gems: 80,  glyph: 'D', icon: 'assets/icons/def_fortress.png', line: 'Dome the whole block. 16 hours. Gems only.' },
+    { id: 'panic',    name: 'Panic Button',  hrs: 24, gold: 0,    gems: 160, glyph: 'P', icon: 'assets/icons/def_panic.png',    line: 'Vacation lockout. 24 hours untouchable. Gems only.' }
   ];
 
   // ---- the 4 crews/factions (crew, NEVER clan) + real-card pools BY NAME -----
@@ -79,7 +80,7 @@
   ];
 
   // ---- module-local runtime (never persisted) --------------------------------
-  var M = { wasNight: false, scout: null, scoutTimer: 18, beacon: null, opening: false, booted: false };
+  var M = { wasNight: false, scout: null, scoutTimer: 18, beacon: null, opening: false, booted: false, published: false, lastPublish: 0 };
 
   // ==========================================================================
   // helpers
@@ -155,12 +156,50 @@
   function callAkRaid(body) {
     var sb = sbc();
     if (!sb) return Promise.resolve({ ok: false, error: 'offline' });
-    // TODO-SERVER: edge fn `ak-raid` is SPEC-ONLY today -- this invoke returns an
-    // error until it is deployed, and every caller below degrades gracefully.
+    // edge fn `ak-raid` is LIVE/deployed (project mfghdobptredxxhbjwyz): targets /
+    // publish-base / resolve / revenge / buy-shield / reinforce / claim-grants. When
+    // signed-out or the network fails, sbc() is null (handled above) or the invoke
+    // rejects -> every caller degrades to its offline/local fallback.
     return sb.functions.invoke('ak-raid', { body: body }).then(function (r) {
       if (r.error) return { ok: false, error: (r.error && r.error.message) || 'error' };
       return r.data || { ok: false, error: 'empty' };
     }, function (e) { return { ok: false, error: String((e && e.message) || e) }; });
+  }
+  function signedIn() { try { return !!(global.AKAccount && global.AKAccount.user && global.AKAccount.user()); } catch (_) { return false; } }
+
+  // PUBLISH the player's OWN base snapshot to ak-raid so REAL rivals can raid it.
+  // Sends the cheap, non-PII fields the player has on hand: trophies + the 5
+  // producer-building levels (from p.prod) + a derived tier + THE REAL DEFENSE the
+  // owner actually posted -- roster = the 4 posted defenders (AK_DEFENSE.posts, canon
+  // card names, no PII) and def_score = AK_DEFENSE.defenseScore. So a raided real base
+  // fights back with the owner's OWN dogs, not a server-auto roster. The SERVER still
+  // picks the canon crew name + caps soft-currency loot (a tampered client can't
+  // inflate its bounty). AK_DEFENSE absent (bare page / not loaded) -> roster:[] +
+  // def_score:0 and the server auto-staffs exactly as before. Throttled to once /
+  // 10 min per session; signed-in only (a bot fallback covers signed-out players).
+  function publishMyBase(ctx) {
+    try {
+      if (!sbc() || !signedIn()) return;
+      var t = now(); if (M.lastPublish && (t - M.lastPublish) < 10 * 60 * 1000) return;
+      var p = profile(ctx); if (!p) return;
+      var prod = p.prod || {};
+      var buildings = BLD.map(function (b) { var e = prod[b.id]; return { id: b.id, name: b.name, lvl: clamp((e && e.lvl) | 0 || 1, 1, 10) }; });
+      var tr = (p.trophies | 0) || 0;
+      var tier = tr >= 1200 ? 3 : tr >= 600 ? 2 : 1;
+      // the REAL posted defenders + block defense number (guarded -- AK_DEFENSE may be absent)
+      var roster = [], defScore = 0;
+      try {
+        if (global.AK_DEFENSE) {
+          if (AK_DEFENSE.posts) roster = (AK_DEFENSE.posts(p) || []).map(function (q) { return q && q.cardName; }).filter(Boolean);
+          if (AK_DEFENSE.defenseScore) defScore = AK_DEFENSE.defenseScore(p) | 0;
+        }
+      } catch (_d) { roster = []; defScore = 0; }
+      M.lastPublish = t;
+      callAkRaid({ action: 'publish-base', trophies: tr, tier: tier, buildings: buildings, roster: roster, def_score: defScore }).then(function (r) {
+        if (r && r.ok && r.published) M.published = true;
+        else M.lastPublish = 0;       // let a later attempt retry if the publish failed
+      });
+    } catch (_) {}
   }
 
   // ==========================================================================
@@ -199,8 +238,32 @@
   // ==========================================================================
   function launchRaid(ctx, base, isRevenge) {
     if (ctx.econ) ctx.econ.mutateProfile(function (p) { if (!p.raid) p.raid = { shieldUntil: 0, lastRaid: 0, revenge: [] }; p.raid.lastRaid = now(); });
-    // TODO-SERVER: ak-raid action:'resolve' awards surgical loot via ak_grants
-    // (revenge = +50%). The match itself already pays the live chest/loot path.
+    // WALK-TO-RAID: route through the SCOUT / walk-on scene when present so the
+    // raider WALKS the enemy block (their walls/buildings/core, laid out) before
+    // the hit. AK_RAIDSCENE.enrich attaches a real procedural layout/coreHp/reward
+    // to the war-map bot, then launch() seeds the battler from target.layout
+    // (mode:'raid'). The match still pays the live chest/loot path on top of reward.
+    if (global.AK_RAIDSCENE && global.AK_RAIDSCENE.launch) {
+      var target = global.AK_RAIDSCENE.enrich ? global.AK_RAIDSCENE.enrich(base, ctx) : base;
+      // stamp the server base id + revenge flag so modes.js's raid win can settle
+      // loot SERVER-AUTHORITATIVELY via ak-raid {action:'resolve'} (the client +50%
+      // below is the OFFLINE fallback only; the server applies its own +50%).
+      if (target) { if (base.id) target.id = base.id; target._revenge = !!isRevenge; }
+      if (isRevenge && target && target.reward) {                 // revenge = +50% loot (24h revenge bonus)
+        var rw = target.reward;
+        ['gold', 'scrap', 'wood', 'stone', 'metal'].forEach(function (k) { if (rw[k]) rw[k] = Math.round(rw[k] * 1.5); });
+      }
+      global.AK_RAIDSCENE.launch(target, ctx);
+      return;
+    }
+    // fallback (raidscene not loaded): straight into the battler (legacy path).
+    // Seed the handoff ourselves so modes.js can still resolve loot server-side
+    // (the frozen ctx.battle.launch only forwards mode/city/level/nemesis).
+    try {
+      base._revenge = !!isRevenge;
+      global.AK_RAID_TARGET = base;
+      if (typeof localStorage !== 'undefined') localStorage.setItem('ak_raid_target', JSON.stringify(base));
+    } catch (_e) {}
     ctx.battle.launch({
       mode: 'raid', city: base.city, level: base.level, diffOffset: base.diffOffset,
       nemesis: nemesisFor(ctx, base),
@@ -231,16 +294,45 @@
     var grd = g.createLinearGradient(0, 0, 0, h); grd.addColorStop(0, 'rgba(201,168,76,0.06)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = grd; g.fillRect(0, 0, w, h);
   }
+  // AK-DEEMOJI: cached canvas icon loader -- draw the PNG when loaded, else the letter glyph.
+  // Cached by path so onFrame never allocates a new Image (60fps-safe); a 404 marks the
+  // path dead (null) so callers fall straight back to the bracketed letter.
+  var _icoCache = {};
+  function icoImg(path) {
+    if (!path || typeof Image === 'undefined') return null;
+    if (_icoCache.hasOwnProperty(path)) return _icoCache[path];
+    var im = new Image(); _icoCache[path] = im;
+    im.onerror = function () { _icoCache[path] = null; };
+    im.src = path;
+    return im;
+  }
 
   // ==========================================================================
   // OVERLAY 1 -- THE WAR MAP (raid targets / shield / revenge)
   // ==========================================================================
   function openWarMap(ctx) {
     var view = 'raid';                     // 'raid' | 'shield' | 'revenge' | 'intel'
-    var targets = genTargets(ctx);         // local snapshot now; server refresh below
+    var targets = genTargets(ctx);         // local procedural fallback; server refresh below
     var intelBase = null, ui = [];
-    // TODO-SERVER: prefer the server snapshot (ak_bot_bases) when ak-raid is live
+    // make sure my base is published so others can hit it (cheap, throttled, signed-in only)
+    try { publishMyBase(ctx); } catch (_e) {}
+    // prefer the LIVE server snapshot: REAL players' bases lead, bots backfill.
     callAkRaid({ action: 'targets' }).then(function (r) { if (r && r.ok && Array.isArray(r.bases) && r.bases.length) targets = r.bases; });
+    // pull any server-pushed 24h revenge entries into the local revenge list. Each is
+    // stamped real:true so defense.js folds it into the "while you were gone" report
+    // (a REAL rival hit your block, not a ghost). The ak-raid revenge action DRAINS the
+    // inbox server-side, so this stores them locally once; defense.js reads the same
+    // p.raid.revenge, race-safe (whoever pulls first stores, both fold from local).
+    if (sbc() && signedIn()) callAkRaid({ action: 'revenge' }).then(function (r) {
+      if (r && r.ok && Array.isArray(r.revenge) && r.revenge.length && ctx.econ) {
+        ctx.econ.mutateProfile(function (p) {
+          if (!p.raid || typeof p.raid !== 'object') p.raid = { shieldUntil: 0, lastRaid: 0, revenge: [] };
+          if (!Array.isArray(p.raid.revenge)) p.raid.revenge = [];
+          var seen = {}; p.raid.revenge.forEach(function (e) { if (e && e.id) seen[e.id] = 1; });
+          r.revenge.forEach(function (e) { if (e && (!e.id || !seen[e.id])) { e.real = true; p.raid.revenge.push(e); } });
+        });
+      }
+    });
 
     ctx.overlay.open({
       id: 'raid_warmap',
@@ -324,7 +416,14 @@
       SHIELDS.forEach(function (s, i) {
         var ry = y + 36 + i * (rowH + 8), rx = pad, rw = W - pad * 2;
         g.save(); roundRect(g, rx, ry, rw, rowH, 12); g.fillStyle = 'rgba(255,255,255,0.04)'; g.fill(); g.restore();
-        txt(g, '[' + s.glyph + ']  ' + s.name, rx + 12, ry + 22, '800 14px system-ui', '#fff');
+        // AK-DEEMOJI: PNG icon when painted, else the bracketed letter glyph (graceful fallback)
+        var im = icoImg(s.icon);
+        if (im && im.complete && im.naturalWidth > 0) {
+          var isz = 22; g.save(); try { g.drawImage(im, rx + 12, ry + 6, isz, isz); } catch (_e) {} g.restore();
+          txt(g, s.name, rx + 12 + isz + 8, ry + 22, '800 14px system-ui', '#fff');
+        } else {
+          txt(g, '[' + s.glyph + ']  ' + s.name, rx + 12, ry + 22, '800 14px system-ui', '#fff');
+        }
         txt(g, s.line, rx + 12, ry + 42, '500 10px system-ui', '#8a8a96');
         var cost = s.gold ? (s.gold + ' gold') : (s.gems + ' gems');
         button(g, ui, rx + rw - 122, ry + 11, 110, 34, cost, function (api) { buyShield(ctx, s); }, { primary: !!s.gold, fs: 12 });
@@ -339,7 +438,9 @@
         txt(g, '(server pushes a 24h revenge entry when you get raided offline)', pad, y + 50, '500 10px system-ui', '#6a6a76');
         return;
       }
-      // TODO-SERVER: ak-raid pushes {name,faction,tier,at} into raid.revenge on an offline loss.
+      // LIVE: real attackers arrive two ways -- ak-raid {action:'revenge'} (a REAL
+      // rival raided your published base; pulled above + folded by defense.js, real:true)
+      // and defense.js resolveIncoming (the offline ghost sim arms {name,faction,tier,at}).
       var rowH = 64;
       rev.forEach(function (e, i) {
         var ry = y + 24 + i * (rowH + 8), rx = pad, rw = W - pad * 2;
@@ -406,6 +507,18 @@
         if (st.rewardGold) ctx.currency.grant('gold', st.rewardGold);
         if (st.rewardBones) ctx.currency.grant('bones', st.rewardBones);
         if (!claimed && ctx.econ) ctx.econ.mutateProfile(function (pp) { if (!pp.raid) pp.raid = { shieldUntil: 0, lastRaid: 0, revenge: [] }; pp.raid.defenseNight = nightId; pp.raid.lastDefenseAt = now(); });
+        // AK-DUTYWIRE 2026-07-18: THE WATCH SHIFT. missions.js exposes AKDuties.
+        // reportWatchShift (the daily "Stand a Watch shift" + the weekly "Stand 8 Watch
+        // shifts" ladders) and it had ZERO call sites repo-wide, so those duties could
+        // never be claimed. Holding the Lot through every wave IS the shift you stand --
+        // guard.js is a persistent defense LAYOUT with no completion event, this is the
+        // only thing in the game a player starts, stands, and finishes. Gated on
+        // win === true so RETREAT (which routes through endDefense(false)) and a core
+        // wipe never score, on st.over so it fires once per siege and never per frame,
+        // and on !claimed so it reuses the SAME once-per-night-cycle anti-farm window
+        // the loot already uses -- replaying a night pays nothing and credits nothing.
+        // Guarded: a missing AKDuties is a silent no-op, never a throw in the frame.
+        if (!claimed) { try { var D = global.AKDuties; if (D && typeof D.reportWatchShift === 'function') D.reportWatchShift(1); } catch (_e) {} }
       }
       // a loss leaves you exposed -- the WAR MAP nudges a shield buy next time.
     }
@@ -581,8 +694,16 @@
       });
       M.wasNight = isNight();
       M.scoutTimer = 20 + Math.random() * 20;
+      // PUBLISH my base so REAL rivals can raid it (signed-in only; throttled).
+      try { publishMyBase(ctx); } catch (_e) {}
+      // re-publish when the player signs in mid-session (base becomes raidable)
+      try { global.addEventListener('ak-auth', function (e) { if (e && e.detail && e.detail.user) { M.lastPublish = 0; publishMyBase(ctx); } }); } catch (_e2) {}
+      // re-publish on a DEFENSE CHANGE (assign / clear / fortify) -- defense.js fires
+      // 'ak-defense-change' so a raided base reflects the defense the owner just set,
+      // not only the roster from session start. Throttle is bypassed (lastPublish=0).
+      try { global.addEventListener('ak-defense-change', function () { M.lastPublish = 0; publishMyBase(ctx); }); } catch (_e3) {}
       // expose a tiny bridge so a future hub button / debug can open the war room
-      global.AKRaid = { warMap: function () { openWarMap(ctx); }, defend: function () { openNightDefense(ctx); }, isNight: isNight };
+      global.AKRaid = { warMap: function () { openWarMap(ctx); }, defend: function () { openNightDefense(ctx); }, isNight: isNight, publishBase: function () { M.lastPublish = 0; publishMyBase(ctx); } };
     },
 
     onEnterBuilding: function (b, ctx) { return false; },   // raid owns NO interior

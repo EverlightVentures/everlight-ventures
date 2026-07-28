@@ -13,8 +13,11 @@
   <meta name="robots" content="noindex">
   <title>Alley Kingz // Chop Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="shop.css?v=1781486888">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- AK-25D: shared 2.5D "life feel" layer -- MUST load before shop.css so shop's
+       own .aks-card rules keep winning the cascade (zero regression on done cards). -->
+  <link rel="stylesheet" href="../ak_25d.css?v=1">
+  <link rel="stylesheet" href="shop.css?v=1782968342">
   <style>
     html,body{margin:0;height:100%;background:#050507}
     /* Lightweight launcher shown only when the overlay is closed (standalone use). */
@@ -29,6 +32,10 @@
 </head>
 <!-- data-akshop-standalone="1" tells shop.js to auto-open on load. -->
 <body data-akshop-standalone="1">
+  <!-- AK shop ambient video backdrop: menu_bg.mp4 (the only video asset) breathing behind the translucent shop panels -- the operator's "video feel" on the menus -->
+  <video id="shop-bg-vid" autoplay loop muted playsinline poster="../assets/ui/lobby_hero.png"><source src="../assets/ui/menu_bg.mp4" type="video/mp4"></video>
+  <style>#shop-bg-vid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:.22;pointer-events:none}</style>
+  <script>(function(){var v=document.getElementById('shop-bg-vid');if(v){try{v.muted=true;v.playsInline=true;var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(_e){}}})();</script>
   <!-- AK-BACK: standalone shop always offers the road home (operator 2026-06-12:
        "once I enter the chop shop there's no way for me to go back to the game") -->
   <a id="aks-backlink" href="../">&larr; BACK TO THE ALLEY</a>
@@ -56,19 +63,22 @@
   <!-- account layer: Google sign-in + cloud save + ak_player_id + anon key.
        Sets window.AK_SUPABASE_ANON_KEY and re-opens the shop ONLINE once the
        session restores. Signed out = labelled DEMO data, exactly as before. -->
-  <script src="../ak_account.js?v=1781486888"></script>
+  <script src="../ak_account.js?v=1782968342"></script>
 
   <!-- card catalog (window.AK_CARDS, 106 cards) -> drives real-art Card Shop + Draw -->
-  <script src="cards_catalog.js?v=1781486888"></script>
+  <script src="cards_catalog.js?v=1782968342"></script>
   <!-- AK-CARDX: canon stats (window.CANON_CARDS: hp/dmg/cost/range/ability) for the multi-tab card detail -->
-  <script src="../canon.js?v=1781486888"></script>
+  <script src="../canon.js?v=1782968342"></script>
   <!-- AK-LORE: taglines + bios (window.AK_LORE_GET); shop degrades cleanly if absent -->
-  <script src="../cards_lore.js?v=1781486888"></script>
+  <script src="../cards_lore.js?v=1782968342"></script>
   <!-- AK-HANDLER: commander roster (window.AK_HANDLERS) for the Handlers tab -->
-  <script src="../handlers_data.js?v=1781486888"></script>
-  <script src="../keywords_data.js?v=1781486888"></script>
+  <script src="../handlers_data.js?v=1782968342"></script>
+  <script src="../keywords_data.js?v=1782968342"></script>
   <!-- AK-PORT: social.js loaded for AKSocial.claimGrants (grant rail used by Pass/Hit/Crew tabs); its overlay never opens here -->
-  <script src="../social.js?v=1781486888"></script>
-  <script src="shop.js?v=1781486888"></script>
+  <script src="../social.js?v=1782968342"></script>
+  <!-- AK-25D: shared 2.5D tilt shim + window.AK25D.apply (de-duped from shop.js) -->
+  <script src="../ak_25d.js?v=1"></script>
+  <script src="../systems/juice.js?v=1782968342"></script>
+  <script src="shop.js?v=1782968342"></script>
 </body>
 </html>

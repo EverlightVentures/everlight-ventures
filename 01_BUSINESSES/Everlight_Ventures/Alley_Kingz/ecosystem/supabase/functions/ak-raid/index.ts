@@ -8,8 +8,11 @@
 // gem shield reads r.shieldUntil, the night defense fires reinforce).
 //
 // Actions:
-//   targets       -> the rotation window's 3 snapshot-as-bot rival bases (war map list)
-//   resolve       -> award surgical raid loot via ak_grants (+50% on revenge); anti-farm
+//   targets       -> rival bases for the war map: REAL players' published snapshots
+//                    lead (snapshot-as-bot), procedural bots backfill (degrade fallback)
+//   publish-base  -> upsert the caller's OWN base snapshot so others can raid it
+//   resolve       -> award surgical raid loot via ak_grants (+50% on revenge); anti-farm;
+//                    pushes a 24h revenge row when the base was a real player
 //   buy-shield    -> GEM-TIER shields ONLY (Fortress Dome 80 / Panic 160); gems server-only
 //   reinforce     -> validate crew + cooldown for night defense (returns defender count)
 //   revenge       -> the server-pushed 24h revenge inbox (merges into local p.raid.revenge)
@@ -31,6 +34,12 @@ const CORS = {
 
 // ---- HARD LAW guard: no $BCARDD / ALK / $-token ever appears on a loot line -------
 const TOKEN_RE = /\$|bcardd|alk/i;
+
+// ---- HARD LAW: Mythic dogs are NEVER fielded on defense. The tier ladder that
+// auto-staffs a base caps at Legendary, so an auto roster can never be Mythic; but a
+// REAL owner can post a Mythic they own, so an incoming defender roster is stripped
+// of these by name (the 4 canon Mythics; $BCARDD is also caught by TOKEN_RE).
+const MYTHIC_NAMES = new Set(["$bcardd", "jagged", "rosco", "crown foxhound"]);
 
 // ---- server-purchasable shields: GEM TIERS ONLY (parity: a gem buys a TIMER) -------
 // gold tiers (street/crew/iron) settle client-side; these mirror raid.js SHIELDS.
@@ -127,6 +136,24 @@ function shapeBase(row: any) {
     loot: row.loot || { gold: 0 }, city: row.city, level: row.level, diffOffset: row.diff_offset,
   };
 }
+// shape a REAL-PLAYER published base into the same war-map shape. id = the
+// player's user_id (resolve() recognizes it as a player base); snap_user_id set
+// so a successful raid pushes a 24h revenge row to that player.
+// deno-lint-ignore no-explicit-any
+function shapePlayerBase(row: any) {
+  return {
+    id: row.user_id, name: row.name, faction: row.faction, cls: row.cls, accent: row.accent,
+    tier: row.tier, trophies: row.trophies, roster: row.roster || [], buildings: row.buildings || [],
+    loot: row.loot || { gold: 0 }, city: row.city, level: row.level, diffOffset: row.diff_offset,
+    snap_user_id: row.user_id, real: true,
+  };
+}
+// FNV-1a -> a stable 32-bit seed from a string (uid -> deterministic faction/name)
+function seedFromStr(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -178,7 +205,48 @@ Deno.serve(async (req) => {
         }
         safe.push(shapeBase(row));
       }
-      return json({ ok: true, bases: safe });
+
+      // ---- mix in REAL-PLAYER published bases (snapshot-as-bot, the real deal) ----
+      // Freshest first, BANDED by trophy proximity for fairness (a whale never lands
+      // on a rookie), excluding the caller + any shielded victim. Up to 3 real bases
+      // lead the list; bots backfill. FALLBACK: if the band yields too few real bases,
+      // a second unbanded pass widens the pool so the list is never short. Signed-out /
+      // no-real-players degrades to pure bots client-side (raid.js keeps the fallback).
+      const TROPHY_BAND = 400;
+      // my trophies: client hint first, else my own published base, else null (=> no band).
+      let myTrophies: number | null =
+        (typeof body.trophies === "number" && Number.isFinite(body.trophies))
+          ? clamp(Math.floor(body.trophies as number), 0, 1000000) : null;
+      if (myTrophies === null) {
+        const { data: mine } = await admin.from("ak_player_bases").select("trophies").eq("user_id", uid).maybeSingle();
+        if (mine && typeof mine.trophies === "number") myTrophies = mine.trophies;
+      }
+      const realOut = [];
+      const takenIds = new Set<string>();
+      // pull freshest real bases (band optional), skip shielded + already-taken, cap 3
+      const pullReal = async (band: number | null) => {
+        if (realOut.length >= 3) return;
+        let q = admin.from("ak_player_bases").select("*").neq("user_id", uid);
+        if (band !== null && myTrophies !== null) {
+          q = q.gte("trophies", myTrophies - band).lte("trophies", myTrophies + band);
+        }
+        const { data: pbs } = await q.order("updated_at", { ascending: false }).limit(8);
+        if (!pbs || !pbs.length) return;
+        for (const pb of pbs) {
+          if (realOut.length >= 3) break;
+          if (takenIds.has(pb.user_id)) continue;
+          const { data: st } = await admin.from("ak_raid_state").select("shield_until").eq("user_id", pb.user_id).maybeSingle();
+          if (st && st.shield_until && new Date(st.shield_until).getTime() > nowMs) continue;  // skip shielded players
+          takenIds.add(pb.user_id);
+          realOut.push(shapePlayerBase(pb));
+        }
+      };
+      const banded = myTrophies !== null;
+      await pullReal(banded ? TROPHY_BAND : null);      // fair matches first
+      if (banded && realOut.length < 3) await pullReal(null);  // relax the band; never come back short
+      // real players lead; bots fill the rest (cap 6 so the war-map list stays tight)
+      const out = realOut.concat(safe).slice(0, 6);
+      return json({ ok: true, bases: out, real: realOut.length });
     }
 
     // ---- RESOLVE: award surgical raid loot via ak_grants (+50% on revenge) ---------
@@ -188,7 +256,14 @@ Deno.serve(async (req) => {
       const won = body.won === undefined ? true : !!body.won;   // default: a raid that calls resolve won
       if (!baseId) return json({ ok: false, error: "base_id required" }, 400);
 
-      const { data: base } = await admin.from("ak_bot_bases").select("*").eq("id", baseId).maybeSingle();
+      // look up the target: bot bases first, then a REAL-player published base
+      // (resolve recognizes a player base because base_id == that player's user_id).
+      // deno-lint-ignore no-explicit-any
+      let base: any = (await admin.from("ak_bot_bases").select("*").eq("id", baseId).maybeSingle()).data;
+      if (!base) {
+        const pb = (await admin.from("ak_player_bases").select("*").eq("user_id", baseId).maybeSingle()).data;
+        if (pb) base = { ...pb, id: pb.user_id, snap_user_id: pb.user_id, window_id: null };  // player base
+      }
       if (!base) return json({ ok: false, error: "base not found" }, 404);
 
       // mark that this player raided (anti-chain bookkeeping)
@@ -196,14 +271,22 @@ Deno.serve(async (req) => {
 
       if (!won) return json({ ok: true, looted: false, loot: { gold: 0, scrap: 0 } });
 
-      // anti-farm: loot a given base ONCE (replays still play for fun, pay nothing)
-      const { data: prior } = await admin.from("ak_raid_log").select("id").eq("raider_id", uid).eq("base_id", baseId).maybeSingle();
+      // anti-farm: loot a given base ONCE PER ROTATION WINDOW. Bot uuids only exist
+      // in one window (unchanged behavior); a real player's stable base id becomes
+      // re-raidable next window (Boom-Beach async cadence).
+      const winId = (base.window_id != null) ? Number(base.window_id) : Math.floor(Date.now() / WINDOW_MS);
+      const { data: prior } = await admin.from("ak_raid_log")
+        .select("id").eq("raider_id", uid).eq("base_id", baseId).eq("window_id", winId).maybeSingle();
       if (prior) return json({ ok: true, looted: false, loot: { gold: 0, scrap: 0 }, note: "already looted" });
 
       const loot = (base.loot || {}) as { gold?: number; scrap?: number; scrapR?: string };
-      const mult = isRevenge ? 1.5 : 1.0;
-      let gold = clamp(Math.round((loot.gold || 0) * mult), 0, LOOT_GOLD_CAP);
-      let scrap = clamp(Math.round((loot.scrap || 0) * mult), 0, LOOT_SCRAP_CAP);
+      // star multiplier mirrors the client tranche cumulative (1*=1.0 / 2*=1.5 / 3*=2.5);
+      // revenge stacks +50%. The hard caps below bound any tampered input (anti-cheat).
+      const stars = clamp(Math.floor(Number(body.stars) || 1), 1, 3);
+      const starMult = stars >= 3 ? 2.5 : stars >= 2 ? 1.5 : 1.0;
+      const mult = (isRevenge ? 1.5 : 1.0) * starMult;
+      const gold = clamp(Math.round((loot.gold || 0) * mult), 0, LOOT_GOLD_CAP);
+      const scrap = clamp(Math.round((loot.scrap || 0) * mult), 0, LOOT_SCRAP_CAP);
       let scrapR = String(loot.scrapR || "Rare");
       // HARD LAW: soft-currency loot only; never a $BCARDD/ALK line.
       if (TOKEN_RE.test(scrapR)) { scrapR = "Rare"; }
@@ -214,12 +297,12 @@ Deno.serve(async (req) => {
         { user_id: uid, kind: "gold", amount: gold, source: "raid", note: (isRevenge ? "Revenge raid: " : "Raid: ") + String(base.name).slice(0, 40) },
       ];
       if (scrap > 0) grants.push({ user_id: uid, kind: "scrap", rarity: scrapR, amount: scrap, source: "raid", note: "Raid scrap" });
-      // defense-in-depth: drop any grant whose note/rarity smuggled a token (cannot happen above, but assert)
-      const cleanGrants = grants.filter((g) => !TOKEN_RE.test(String(g.rarity || "")) && !TOKEN_RE.test(String(g.note || "")) || g.kind === "gold");
+      // defense-in-depth: drop any grant whose note/rarity smuggled a token (gold always allowed).
+      const cleanGrants = grants.filter((g) => g.kind === "gold" || (!TOKEN_RE.test(String(g.rarity || "")) && !TOKEN_RE.test(String(g.note || ""))));
       await admin.from("ak_grants").insert(cleanGrants);
 
       await admin.from("ak_raid_log").insert({
-        raider_id: uid, base_id: baseId, window_id: base.window_id, is_revenge: isRevenge,
+        raider_id: uid, base_id: baseId, window_id: winId, is_revenge: isRevenge,
         loot_gold: gold, loot_scrap: scrap, loot_scrapr: scrap > 0 ? scrapR : null,
       });
 
@@ -236,6 +319,65 @@ Deno.serve(async (req) => {
       }
 
       return json({ ok: true, looted: true, loot: { gold, scrap, scrapR }, revenge: revengePushed });
+    }
+
+    // ---- PUBLISH-BASE: upsert the caller's OWN base snapshot so others can raid it.
+    // Stores producer-building levels + trophies + crew; the server picks a CANON
+    // gang name (no PII) + auto-staffs a roster from the faction tier ladder + computes
+    // soft-currency loot (capped). Mirrors ak-crew's "client posts intent, server is
+    // the only writer" pattern. RLS denies any direct client write to ak_player_bases.
+    if (action === "publish-base") {
+      const seed = seedFromStr(uid);
+      const r = rng32(seed);
+      const crewFaction = await myFaction();
+      const f = (crewFaction && FACTIONS.find((x) => x.id === crewFaction)) || FACTIONS[seed % FACTIONS.length];
+      const tr = clamp(Math.floor(Number(body.trophies) || 0), 0, 1000000);
+      const tier = clamp(Math.floor(Number(body.tier) || (tr >= 1200 ? 3 : tr >= 600 ? 2 : 1)), 1, 3);
+      const name = f.gangs[seed % f.gangs.length];           // canon, stable per user
+      // DEFENDERS: field the owner's REAL posted dogs (the 4 defenders defense.js
+      // posted, sent as roster). Fall back to the server auto-staff (pickRoster) when
+      // the client sent nothing (AK_DEFENSE absent -> roster:[]) so a bare page behaves
+      // exactly as before. HARD LAW: strip any $BCARDD/ALK token and any Mythic name --
+      // an owner CAN post a Mythic they own, but a Mythic is NEVER fielded on defense.
+      let roster = pickRoster(f, tier, r);                    // default: server auto-staff (unchanged fallback)
+      const incoming: unknown[] = Array.isArray(body.roster) ? (body.roster as unknown[]) : [];
+      if (incoming.length) {
+        const seen = new Set<string>();
+        const cleaned = incoming
+          .map((n) => String(n || "").trim().slice(0, 40))     // names only, length-capped (no PII/injection)
+          .filter((n) => !!n && !TOKEN_RE.test(n) && !MYTHIC_NAMES.has(n.toLowerCase()))
+          .filter((n) => (seen.has(n) ? false : (seen.add(n), true)))  // dedupe, keep order
+          .slice(0, 4);                                        // at most the 4 posts
+        if (cleaned.length) roster = cleaned;                  // real dogs lead; else keep the auto-staff
+      }
+      // def_score (AK_DEFENSE.defenseScore -- the block's ONE defense number) is ACCEPTED
+      // + sanitized. It is NOT persisted: ak_player_bases has no def_score column and this
+      // change adds NO migration. Validated here (so the new field never 400s the upsert)
+      // and echoed back; ready for a future additive `def_score int` column (Lucrex ships it).
+      const defScore = clamp(Math.floor(Number(body.def_score) || 0), 0, 1000000);
+      // buildings: trust client-reported producer levels but sanitize; default to tier.
+      // deno-lint-ignore no-explicit-any
+      const reported: any[] = Array.isArray(body.buildings) ? body.buildings : [];
+      const buildings = BLD.map((b) => {
+        const src = reported.find((x) => x && x.id === b.id);
+        const lvl = clamp(Math.floor(Number(src && src.lvl) || tier), 1, 10);
+        return { id: b.id, name: b.name, lvl };
+      });
+      const lvlSum = buildings.reduce((s, b) => s + b.lvl, 0);
+      // loot computed SERVER-SIDE (soft-currency ONLY, capped). Never gems/$BCARDD/ALK.
+      const loot = {
+        gold: clamp(80 * tier + lvlSum * 6, 0, LOOT_GOLD_CAP),
+        scrap: clamp(tier >= 2 ? 2 * tier : 1, 0, LOOT_SCRAP_CAP),
+        scrapR: tier >= 3 ? "Epic" : "Rare",
+      };
+      await admin.from("ak_player_bases").upsert({
+        user_id: uid, name, faction: f.id, cls: f.cls, accent: f.accent,
+        tier, trophies: tr, roster, buildings, loot,
+        city: clamp(tier + 1, 0, 9), level: clamp(2 + tier * 2, 1, 10), diff_offset: tier - 1,
+        seed, updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+
+      return json({ ok: true, published: true, name, tier, def_score: defScore });
     }
 
     // ---- BUY-SHIELD: GEM tiers ONLY (gold tiers settle client-side) -----------------
