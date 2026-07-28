@@ -70,6 +70,34 @@ device can catch up by reading the mailbox.
 4. **Confirm to Rich:** "Session exported to AGENT_MAILBOX
    (`<derived-title>`, `<bytes>` bytes appended). Safe to exit."
 
+5. **Append any decisions to the decision log.** The mailbox records what
+   happened. `_state/DECISION_LOG.md` records *why* a fork went the way it did,
+   which is the only part that cannot be reconstructed by reading the repo later.
+
+   Log an entry for every choice in this session where a reasonable person could
+   have chosen differently. Skip mechanical steps. Use exactly this header shape,
+   because `session_brief.py` parses it:
+
+   ```
+   ## [YYYY-MM-DD HH:MM PT] Short decision name
+
+   **Context:** what forced a choice
+   **Options:** A / B / C
+   **Chose:** what was taken
+   **Why:** the actual reasoning, in plain language
+   **Gave up:** what the other option would have bought
+   **Revisit when:** the condition that should reopen this
+   ```
+
+   Only `**Why:**` is mandatory. Append, never edit past entries. If a prior
+   decision got reversed this session, write a new entry saying so.
+
+   If the session made no real decisions, say so and skip. An empty log is
+   honest; a padded one is noise.
+
+6. **Confirm both writes to Rich**, then note that `/brief` will load them at the
+   start of the next session.
+
 The script automatically queues a `file_replace` to peers via sync_queue,
 so the updated mailbox propagates to e5-mother + AceMagician on the next
 drain cycle.
