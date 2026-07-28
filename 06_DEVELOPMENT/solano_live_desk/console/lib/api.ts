@@ -69,6 +69,12 @@ export const postPresence = (client: string, lat: number, lon: number, active: b
   fetch(`/api/presence?client=${encodeURIComponent(client)}&lat=${lat}&lon=${lon}&active=${active}`, { method: "POST" })
     .then((r) => r.json()).catch(() => ({ ok: false }));
 export const getReports = () => j<{ reports: any[] }>("/api/reports").then((d) => d.reports || []);
+
+// EPIRB-style distress beacon (broadcasts position on repeat until cancelled).
+export const postBeacon = (client: string, lat: number | null, lon: number | null, note: string, active: boolean) =>
+  fetch(`/api/beacon?client=${encodeURIComponent(client)}${lat != null ? `&lat=${lat}` : ""}${lon != null ? `&lon=${lon}` : ""}${note ? `&note=${encodeURIComponent(note)}` : ""}&active=${active}`, { method: "POST" })
+    .then((r) => r.json()).catch(() => ({ active: false }));
+export const getBeacon = () => j<{ beacons: any[] }>("/api/beacon").then((d) => d.beacons || []);
 export const getSocial = (place: string) => j<{ posts: any[] }>(`/api/social?place=${encodeURIComponent(place)}`);
 export const getSocialHotspots = () => j<{ hotspots: any[]; updated: number }>("/api/social_hotspots");
 

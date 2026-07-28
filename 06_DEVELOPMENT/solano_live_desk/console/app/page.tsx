@@ -20,6 +20,7 @@ import FilterBar from "@/components/FilterBar";
 import Legend from "@/components/Legend";
 import CrashGuard from "@/components/CrashGuard";
 import ReportPanel from "@/components/ReportPanel";
+import DistressBeacon from "@/components/DistressBeacon";
 import { filterIncidents, EMPTY_FILTERS } from "@/lib/util";
 import type { Filters } from "@/lib/util";
 
@@ -444,6 +445,7 @@ export default function Home() {
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
       <CrashGuard pos={pos} />
       <ReportPanel pos={pos} />
+      <DistressBeacon pos={pos} />
     </main>
   );
 }

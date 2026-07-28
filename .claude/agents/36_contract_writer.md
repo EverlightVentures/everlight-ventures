@@ -1,3 +1,10 @@
+---
+name: 36_contract_writer
+description: "Contract Writer. Use to draft and assemble contract documents and agreement templates."
+model: sonnet
+color: gold
+---
+
 # Agent: contract_writer
 
 ## Identity

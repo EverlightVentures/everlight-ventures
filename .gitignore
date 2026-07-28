@@ -266,3 +266,33 @@ _state/moltbook/lucrex_learnings/
 
 # ---- SUPABASE CLI TEMP ----
 supabase/.temp/
+
+# ---- ALLEY KINGZ BINARY ASSET TREES (2026-07-28) ----
+# Discovered during the selective-commit pass: these untracked dirs total
+# ~1.5GB. A blind `git add` on the AK ecosystem would have tried to commit
+# all of it and failed GitHub's 100MB ceiling. Per the header of this file,
+# GitHub is logic/code/docs only; assets live on Nextcloud + e5.
+**/e5_art_backup/
+**/_bg_backup/
+**/_arttest/
+**/_ak_rollback_local/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/story/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/models/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/icons/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/sprites/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/portraits/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/avatar/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/bosses/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/vendor/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/cosmetics/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/interiors/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/hub/
+01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/_state/
+
+# ---- EMBEDDED GIT REPO (2026-07-28) ----
+# trading_agents has its own .git. Adding it as a plain path creates a
+# broken gitlink that clones as an empty dir. Track it as a real submodule
+# if it should live here, otherwise it stays independent.
+06_DEVELOPMENT/trading_agents/
+# Suffixed backups: *.bak.20260426_101356 etc (plain *.bak missed these)
+*.bak.*

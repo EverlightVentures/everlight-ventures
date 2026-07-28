@@ -101,7 +101,8 @@ create table if not exists public.ak_level_costs (
   from_level      integer not null check (from_level between 1 and 9),
   copies_required integer not null default 0,
   coins_required  bigint  not null default 0,
-  primary key (entity_type, rarity, from_level)
+  -- towers have NULL rarity; NULLS NOT DISTINCT keeps ON CONFLICT dedupe working
+  constraint ak_level_costs_uniq unique nulls not distinct (entity_type, rarity, from_level)
 );
 
 -- ============================================================================
@@ -243,11 +244,11 @@ drop policy if exists ak_inv_own   on public.ak_card_inventory;
 drop policy if exists ak_tower_own on public.ak_tower_levels;
 drop policy if exists ak_chest_own on public.ak_chest_inventory;
 drop policy if exists ak_tx_own    on public.ak_transactions;
-create policy ak_gc_own    on public.game_currencies    for select using (player_id = auth.uid()::text);
-create policy ak_inv_own   on public.ak_card_inventory  for select using (player_id = auth.uid()::text);
-create policy ak_tower_own on public.ak_tower_levels    for select using (player_id = auth.uid()::text);
-create policy ak_chest_own on public.ak_chest_inventory for select using (player_id = auth.uid()::text);
-create policy ak_tx_own    on public.ak_transactions    for select using (player_id = auth.uid()::text);
+create policy ak_gc_own    on public.game_currencies    for select using (player_id::text = auth.uid()::text);
+create policy ak_inv_own   on public.ak_card_inventory  for select using (player_id::text = auth.uid()::text);
+create policy ak_tower_own on public.ak_tower_levels    for select using (player_id::text = auth.uid()::text);
+create policy ak_chest_own on public.ak_chest_inventory for select using (player_id::text = auth.uid()::text);
+create policy ak_tx_own    on public.ak_transactions    for select using (player_id::text = auth.uid()::text);
 
 -- Service-role bypass (the edge function is the only writer) ----------------
 do $$

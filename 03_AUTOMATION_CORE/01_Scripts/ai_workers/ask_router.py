@@ -57,6 +57,32 @@ TOOLS = {
         "cmd": ["python3", "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/ai_workers/cx_terminal.py"],
         "desc": "code generation",
     },
+    "km": {
+        "name": "Kimi",
+        "cmd": [
+            "python3",
+            "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/ai_workers/kimi_delegate.py",
+            "--raw",
+            "--mode",
+            "explain",
+            "--output-format",
+            "text",
+        ],
+        "desc": "fast pragmatic coder",
+    },
+    "ad": {
+        "name": "Aider",
+        "cmd": [
+            "python3",
+            "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/ai_workers/aider_delegate.py",
+            "--raw",
+            "--mode",
+            "explain",
+            "--output-format",
+            "text",
+        ],
+        "desc": "git-native editor",
+    },
 }
 
 RESEARCH_PATTERNS = [

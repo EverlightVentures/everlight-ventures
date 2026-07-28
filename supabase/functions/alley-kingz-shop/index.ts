@@ -47,11 +47,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { SUPABASE_URL, corsHeaders, postSlack } from "../_shared/mod.ts";
 
 const GAME_ID = "alley-kingz"; // canonical AK namespace (matches live NOS rows)
-const DISCLAIMER =
-  "TEST MODE -- no real charges. Gems and all items are in-game value only.";
+const TEST_MODE = (Deno.env.get("AK_SHOP_TEST_MODE") ?? "true") !== "false";
+const DISCLAIMER = TEST_MODE
+  ? "TEST MODE -- no real charges. Gems and all items are in-game value only."
+  : "Gems are purchased through Stripe secure checkout. All items are in-game value only and have no cash value.";
 
 const STRIPE_KEY = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
-const TEST_MODE = (Deno.env.get("AK_SHOP_TEST_MODE") ?? "true") !== "false";
 const SERVICE_KEY = Deno.env.get("SB_SERVICE_ROLE_KEY") ?? "";
 
 // ---- Lucky Draw config (Lane A loot box: PAY + CHANCE + IN-GAME-ONLY prize) ----
@@ -88,7 +89,7 @@ const GEM_PER_COPY: Record<string, number> = {
 const PROMO_TZ_OFFSET_H = -8; // PT-ish; promos are coarse day-windows
 
 // Grand opening window. Move this date to extend or close the launch sale.
-const GRAND_OPENING_END = "2026-06-16T07:00:00Z"; // ~Mon 00:00 PT
+const GRAND_OPENING_END = "2026-06-12T00:00:00Z"; // CLOSED (operator 2026-06-12: first-day welcome sales only)
 
 type PKind = "gems" | "chest" | "consumable" | "cosmetic" | "pass" | "bundle";
 interface Promo {
@@ -142,40 +143,20 @@ function activePromos(p: PlayerCtx | null): Promo[] {
       kinds: Array.from(new Set<PKind>(["gems", ...emph])), percent: pct,
       ends_at: GRAND_OPENING_END, priority: 50 });
   }
-  // 2) HOLIDAY (all) -- date window, themed, biggest band on Black Friday.
-  for (const h of HOLIDAYS) {
-    if (md >= h.from && md <= h.to) {
-      const pct = pick(h.band, seedFor(h.label + ymd));
-      const emph = pick(ALL_KINDS, seedFor("hol" + ymd));
-      out.push({ id: "holiday", label: h.label, audience: "all",
-        kinds: Array.from(new Set<PKind>(["gems", "chest", emph])), percent: pct,
-        ends_at: now.getUTCFullYear() + "-" + h.to + "T07:00:00Z", priority: 70 });
-    }
-  }
-  // 3) WEEKEND (all) -- Fri/Sat/Sun, modest, rotating category + %.
-  const dow = now.getUTCDay();
-  if (dow === 5 || dow === 6 || dow === 0) {
-    const pct = pick([10, 15, 20], seedFor("wknd" + wk));
-    const emph = pick(ALL_KINDS, seedFor("wkndk" + wk));
-    out.push({ id: "weekend", label: "WEEKEND SPECIAL", audience: "all",
-      kinds: Array.from(new Set<PKind>(["gems", emph])), percent: pct,
-      ends_at: weekendEnd(now), priority: 30 });
-  }
-  // 4) WELCOME (new accounts, first 48h) -- strong first-purchase nudge.
+  // HOLIDAY promos DISABLED until operator re-enables (Black Friday etc kept in HOLIDAYS table)
+  // WEEKEND promos DISABLED (operator 2026-06-12: first-day welcome only)
+
+  // WELCOME -- the ONLY standing sale: the account's first 24 hours. After that
+  // the market is normal for everyone (operator 2026-06-12).
   if (p && p.created_at) {
     const ageH = (Date.now() - new Date(p.created_at).getTime()) / 3600000;
-    if (ageH >= 0 && ageH <= 48) {
-      out.push({ id: "welcome", label: "WELCOME -- FIRST DAY", audience: "new",
-        kinds: ["gems", "chest", "bundle"], percent: 25,
-        ends_at: new Date(new Date(p.created_at).getTime() + 48 * 3600000).toISOString(),
-        priority: 60 });
+    if (ageH >= 0 && ageH <= 24) {
+      const pct = pick([15, 20, 25], seedFor("wel" + ymd));
+      out.push({ id: "welcome", label: "FIRST DAY IN THE ALLEY", audience: "new",
+        kinds: ALL_KINDS, percent: pct,
+        ends_at: new Date(new Date(p.created_at).getTime() + 24 * 3600000).toISOString(),
+        priority: 40 });
     }
-  }
-  // 5) LOYALTY (grinders) -- tiered by lifetime transactions.
-  if (p && p.tx_count && p.tx_count >= 10) {
-    const pct = p.tx_count >= 40 ? 20 : p.tx_count >= 20 ? 15 : 10;
-    out.push({ id: "loyalty", label: "LOYAL PACK REWARD", audience: "loyal",
-      kinds: ["gems", "chest", "consumable"], percent: pct, ends_at: "", priority: 40 });
   }
   return out;
 }
@@ -433,6 +414,38 @@ Deno.serve(async (req: Request) => {
       });
       return reply({ ok: true, card_id: cardId, copies, level: inv?.level ?? 1,
         balances: cur });
+    }
+
+    // ---------------------------------------------------------- gem-buy-copy
+    // AK-GEMBUY: direct Gems -> +1 copy of an exact card. Deterministic (NO RNG),
+    // Lane A safe: gems were bought with real money, the copy is in-game value
+    // only. Price = GEM_PER_COPY by rarity (same table as top-off). The client
+    // grants the copy in the local crew; this action is the audited gem debit.
+    if (action === "gem-buy-copy") {
+      const cardId = String(body.card_id ?? "");
+      const { data: card } = await db
+        .from("ak_card_catalog").select("*").eq("card_id", cardId).maybeSingle();
+      if (!card || !card.active) return reply({ ok: false, error: "CARD_NOT_FOUND" }, 404);
+      const price = GEM_PER_COPY[card.rarity] ?? 0;
+      if (!price) return reply({ ok: false, error: "CARD_NOT_FOUND" }, 404);
+      const cur = await loadCurrencies(db, playerId);
+      if ((cur["gems"] ?? 0) < price) {
+        return reply({ ok: false, error: "INSUFFICIENT_GEMS", need: { gems: price }, have: { gems: cur["gems"] ?? 0 } }, 402);
+      }
+      await applyCurrencyDeltas(db, playerId, cur, { gems: -price });
+      const { data: inv } = await db
+        .from("ak_card_inventory").select("copies, level")
+        .eq("player_id", playerId).eq("card_id", cardId).maybeSingle();
+      const copies = (inv?.copies ?? 0) + 1;
+      await db.from("ak_card_inventory").upsert(
+        { player_id: playerId, card_id: cardId, copies, level: inv?.level ?? 1,
+          updated_at: new Date().toISOString() },
+        { onConflict: "player_id,card_id" });
+      await logTx(db, {
+        player_id: playerId, action: "gem-buy-copy", sku: cardId,
+        currency_deltas: { gems: -price }, card_deltas: { [cardId]: 1 },
+      });
+      return reply({ ok: true, card_id: cardId, price, copies, balances: cur });
     }
 
     // ------------------------------------------------------------- open-chest

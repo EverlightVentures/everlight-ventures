@@ -24,6 +24,7 @@ BIND="${EV_BIND:-${LUCREX_BIND:-127.0.0.1}}"
 APP_SRC="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/lucrex-os"          # editable source (sdcard)
 RUN_DIR="${LUCREX_RUN_DIR:-/root/.cache/lucrex-run}"                # native fs (symlinks work)
 PLACEHOLDER="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/serve_helpers/lucrex_placeholder"
+DECK="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/lucrex_command_deck"   # the crowned-Winner command deck (default)
 PIDFILE="/tmp/serve_lucrex.pid"
 LOGFILE="/tmp/serve_lucrex.log"
 
@@ -92,7 +93,20 @@ launch_placeholder() {   # branded "build pending" page, pure python, no node
   echo "started pid=$(cat "$PIDFILE") mode=placeholder  http://$BIND:$PORT/  (full app pending build-remote)"
 }
 
-start() {
+launch_deck() {   # the Lucrex Command Deck -- crowned-Winner terminal skin (Python stdlib, phone-safe)
+  [ -f "$DECK/blubber_server.py" ] || { echo "deck missing at $DECK"; exit 1; }
+  cd "$DECK" || exit 1
+  EV_BIND="$BIND" nohup python3 "$DECK/blubber_server.py" "$PORT" > "$LOGFILE" 2>&1 &
+  echo $! > "$PIDFILE"; sleep 0.6
+  echo "started pid=$(cat "$PIDFILE") mode=deck  http://$BIND:$PORT/  (Lucrex Command Deck)"
+}
+
+start() {   # DEFAULT: the crowned-Winner command deck
+  if is_running; then echo "already running (pid=$(cat "$PIDFILE")) on http://$BIND:$PORT/"; return 0; fi
+  launch_deck
+}
+
+start_next() {   # legacy opt-in: the Next.js app (build on e5), else the branded placeholder
   if is_running; then echo "already running (pid=$(cat "$PIDFILE")) on http://$BIND:$PORT/"; return 0; fi
   sync_src
   if [ -d "$RUN_DIR/.next" ] && [ -d "$RUN_DIR/node_modules/next" ]; then
@@ -115,12 +129,16 @@ stop() {
 status() {
   if is_running; then
     echo "running pid=$(cat "$PIDFILE") -- http://$BIND:$PORT/"
-    [ -d "$RUN_DIR/.next" ] && echo "  mode: full app (next start)" || echo "  mode: placeholder (build pending)"
+    if grep -q blubber_server "/proc/$(cat "$PIDFILE")/cmdline" 2>/dev/null; then
+      echo "  mode: command deck (crowned Winner)"
+    elif [ -d "$RUN_DIR/.next" ]; then echo "  mode: full app (next start)"
+    else echo "  mode: placeholder (build pending)"; fi
   else echo "not running"; fi
 }
 
 case "$cmd" in
   start)        start ;;
+  start-next)   start_next ;;
   build-remote) build_remote ;;
   placeholder)  stop 2>/dev/null; launch_placeholder ;;
   sync)         sync_src; echo "synced $APP_SRC -> $RUN_DIR" ;;
@@ -128,5 +146,5 @@ case "$cmd" in
   restart)      stop; start ;;
   status)       status ;;
   logs)         tail -50 "$LOGFILE" 2>/dev/null || echo "no log yet" ;;
-  *) echo "usage: $0 {start|build-remote|placeholder|sync|stop|restart|status|logs}"; exit 1 ;;
+  *) echo "usage: $0 {start|start-next|build-remote|placeholder|sync|stop|restart|status|logs}"; exit 1 ;;
 esac

@@ -18,8 +18,10 @@
 lockdown:
   tn_only: true
   set_at: "2026-05-18T20:00:00-07:00"
-  expires_at: "2026-06-17T20:00:00-07:00"
+  expires_at: "2026-09-30T20:00:00-07:00"
   set_by: "Rich (operator) -- session 2026-05-18 'lock TN until $10k'"
+  extended_at: "2026-06-11T11:00:00-07:00"
+  extended_by: "Rich (operator) via Lucrex 2026-06-11 -- TN is the built avenue, Chris is the buyer, focus on closing Deal 1. No expiry-based auto-lift; lift requires explicit operator instruction."
   reason: "Close Deal 1 with Chris @ Mid-South. All non-TN sends blocked at the gate."
   exception_states: []   # if you need to whitelist anything, add here. Empty = strict TN.
   slack_alert_channel: "#hive-alerts"

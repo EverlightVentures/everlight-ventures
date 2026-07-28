@@ -1,0 +1,181 @@
+# PHONE CRONTAB MANIFEST -- exported 2026-06-30 (READ-ONLY snapshot, no jobs modified)
+# Host: phone (Termux/proot). Doctrine conflict: feedback_oracle_only_crons says phone is NEVER a cron host.
+# Live daemon: cron PID 24419. Active non-comment lines below.
+# ---------------------------------------------------------------
+# ============================================================
+# EVERLIGHT HIVE CRONTAB -- All times UTC (PT = UTC-8 / PST)
+# ============================================================
+
+# --- BROKER OS ---
+# 4 AM PT (12:00 UTC)
+# DISABLED 2026-05-18 (bypass path): 0 12 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 broker_daily_orchestrator.py full >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/orchestrator.log 2>&1
+# 11 AM PT (19:00 UTC)
+# DISABLED 2026-05-18 (bypass path -- prime suspect for Atlanta rogue sends): 0 19 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 broker_daily_orchestrator.py outreach >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/orchestrator.log 2>&1
+# 5 PM PT (01:00 UTC)
+# DISABLED 2026-05-18 (bypass path): 0 1 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 broker_daily_orchestrator.py scout >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/orchestrator.log 2>&1
+# 9 PM PT (05:00 UTC)
+# DISABLED 2026-05-18 (bypass path): 0 5 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 broker_daily_orchestrator.py match >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/orchestrator.log 2>&1
+
+# --- REDDIT MONITOR ---
+*/30 8-23 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 reddit_monitor.py scan >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/reddit_monitor.log 2>&1
+*/30 0-3 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 reddit_monitor.py scan >> /mnt/sdcard/AA_MY_DRIVE/_logs/broker_ops/reddit_monitor.log 2>&1
+
+# --- GEAR DROP -- 5:05 PM PT (01:05 UTC) ---
+5 1 * * * python3 03_AUTOMATION_CORE/01_Scripts/daily_drop_orchestrator.py full >> _logs/gear_drops/cron.log 2>&1
+
+# ============================================================
+# WHOLESALE HIVE PIPELINE -- 3x daily
+# 7 AM PT (15:00 UTC) - Scout + Qualify + Match + Pitch
+0 15 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/wholesale_hive_pipeline.py --stage scout qualify match pitch >> _logs/wholesale_hive_pipeline.log 2>&1
+# 12 PM PT (20:00 UTC) - Outreach
+0 20 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/wholesale_hive_pipeline.py --stage outreach >> _logs/wholesale_hive_pipeline.log 2>&1
+# 4 PM PT (00:00 UTC) - Follow-up + Report
+0 0 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/wholesale_hive_pipeline.py --stage followup report >> _logs/wholesale_hive_pipeline.log 2>&1
+
+# --- REAL-TIME WHOLESALE ---
+# Reply checker -- every 2 min
+*/2 * * * * cd /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent && . /root/.config/everlight/secrets.env && bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/wholesale_cron_runner.sh rex_negotiator_2min python3 rex_negotiator.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/rex_negotiator.log 2>&1
+# Belfort sequence -- every hour
+0 * * * * cd /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent && . /root/.config/everlight/secrets.env && bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/wholesale_cron_runner.sh wholesale_hourly python3 rex_belfort_sequence.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/rex_7touch.log 2>&1
+# Lead recycler -- Sundays 8 AM PT (16:00 UTC)
+0 16 * * 0 cd /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent && python3 rex_lead_recycler.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/rex_recycle.log 2>&1
+
+# ============================================================
+# GOD MODE
+# CEO Brief -- 7 AM PT (15:00 UTC)
+0 15 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/ceo_daily_brief.py >> _logs/ceo_brief.log 2>&1
+# Hourly Status Pulse
+0 * * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/hourly_status_pulse.py >> _logs/hourly_pulse.log 2>&1
+# Health Monitor -- every 5 min
+*/5 * * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/hive_health_monitor.py --fix --quiet >> _logs/hive_health.log 2>&1
+# n8n tunnel keepalive -- every 2 min
+*/2 * * * * curl -s -o /dev/null http://localhost:5678/healthz || ssh -o ConnectTimeout=10 -f -N -L 5678:127.0.0.1:5678 -i /root/.ssh/oracle_key.pem opc@129.159.38.250 2>/dev/null
+# Blinko log ingest -- 3:30 AM PT (11:30 UTC)
+# RETIRED 2026-06-03 (zombie: SCPs from dead 129.159.38.250; superseded by blinko_queue_drain.py)
+# 30 11 * * * cd /mnt/sdcard/AA_MY_DRIVE && bash 03_AUTOMATION_CORE/01_Scripts/blinko_log_ingest.sh >> _logs/blinko_log_ingest.log 2>&1
+
+# BlinkoLite keepalive -- check every 5 min
+*/5 * * * * curl -s http://localhost:1111/health > /dev/null 2>&1 || nohup python3 /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.log 2>&1 &
+
+# Auto-deploy to Oracle -- every 10 min, only if files changed
+*/10 * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/deploy_to_oracle.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/deploy_oracle.log 2>&1
+*/1 * * * * /bin/bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/claude_bridge_guardian.sh
+# Hive Master Sync - every 10 min, keeps phone/Oracle/Supabase in sync
+*/10 * * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/hive_master_sync.py --quick >> _logs/hive_sync.log 2>&1
+
+# --- TRANSCRIPTS AUTO-SORT -- hourly --- 
+0 * * * * /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/auto_sort_transcripts.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/auto_sort_transcripts_cron.log 2>&1
+*/5 * * * * /root/.local/bin/mcp_tunnel.sh >/dev/null 2>&1
+*/5 * * * * /root/.local/bin/mcp_broker_os_local.sh >/dev/null 2>&1
+15 * * * * /root/.local/bin/mcp_fleet_health.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/mcp_fleet_health.log 2>&1
+*/3 * * * * /root/.local/bin/hive_dispatcher_supervisor.sh >/dev/null 2>&1
+
+# Weekly fresh FSBO + Craigslist pull -- Monday 3am PT (10am UTC)
+0 10 * * 1 cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/free_lead_sources.py --max-per-source 15 >> _logs/free_lead_sources.log 2>&1
+# Daily skip-trace best-effort (Radaris is least bot-guarded; TPS/FPS often 403)
+30 11 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/skip_trace_free.py --limit 20 --delay 12 >> _logs/skip_trace_free_cron.log 2>&1
+# Every 3 min -- check for new magnet_accept / reply events, post to Slack
+*/3 * * * * /usr/bin/python3 /root/.local/bin/magnet_slack_alerter.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/magnet_alerter.log 2>&1
+*/15 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/pipeline_snapshot.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/pipeline_snapshot.log 2>&1
+*/5 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/deal_thread_tracker.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/deal_thread_tracker.log 2>&1
+*/5 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/marcus_contract_handoff.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/marcus_handoff.log 2>&1
+*/10 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/confirm_call.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/confirm_call.log 2>&1
+*/3 * * * * /root/.local/bin/everlight_wholesale_supervisor.sh >/dev/null 2>&1
+
+# oracle_reachability_watchdog -- managed by install_oracle_watchdog.sh
+*/5 * * * * /usr/bin/env python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/oracle_reachability_watchdog.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/oracle_watchdog_cron.log 2>&1
+*/15 * * * * /usr/bin/env bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/oracle_arm_auto_grab.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/oracle_arm_cron.log 2>&1
+*/5 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/critical_email_monitor.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/critical_email_monitor.log 2>&1
+0 * * * * /usr/bin/env bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/phone_pull_321_from_drive.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/phone_pull_321_cron.log 2>&1
+0 * * * * /usr/bin/env bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/sdcard_sync_to_drive.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/sdcard_sync_cron.log 2>&1
+0 4 * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/gmail_calendar_to_drive.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/gmail_cal_cron.log 2>&1
+
+# Phone IMAP poller -- catches replies from Mikal/Chris/etc, fires next arc step
+# Every 2 min during 8am-9pm PT business window
+*/2 8-21 * * * cd /mnt/sdcard/AA_MY_DRIVE && source ~/.bashrc 2>/dev/null; python3 03_AUTOMATION_CORE/01_Scripts/phone_imap_poller.py --once >> _logs/inbound/poller.log 2>&1
+
+# Dashboards self-healing watchdog -- every minute, restart anything that died
+* * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh --quiet
+
+# --- MEMPHIS DAILY LEAD PIPELINE -- 3 AM PT (11:00 UTC)
+0 11 * * * python3 01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/daily_lead_pipeline.py >> _logs/daily_lead_pipeline.log 2>&1
+
+# --- DAILY BRIEF -- 6 AM PT (14:00 UTC)
+0 14 * * * python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/build_daily_brief.py --date today >> _logs/daily_brief.log 2>&1
+
+# Hive parity sync -- hourly: doctrine compile + agent/skill mirror + parity check
+0 * * * * cd /mnt/sdcard/AA_MY_DRIVE && bash 03_AUTOMATION_CORE/01_Scripts/hive_sync_v2.sh >> _logs/hive_sync_v2.log 2>&1
+# Hive drift -> Slack nightly 3 AM PT (10 UTC). Silent on green, weekly Mon heartbeat
+0 10 * * * cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/hive_drift_to_slack.py >> _logs/hive_drift.log 2>&1
+
+# --- DEVICE UPDATE RUNNER -- every 2 min, auto-installs queued tasks per device
+*/2 * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/device_update_runner.sh >> _logs/device_update_runner_cron.log 2>&1
+# Sync finisher -- auto-resume phone->PC Syncthing transfer to completion
+*/5 * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/sync_finisher.sh >/dev/null 2>&1
+
+# === Cron-redundancy watchdog (added 2026-05-15 after Streubel 2nd-strike) ===
+*/5 * * * * . /root/.config/everlight/secrets.env && python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_cron_redundancy.py watchdog wholesale_hourly >> /mnt/sdcard/AA_MY_DRIVE/_logs/cron_redundancy_watchdog.log 2>&1
+
+# --- MCP WATCHDOG + IT TRIAGE (added 2026-05-15) ---
+# Per HARD LAW feedback_fail_loud_with_it_auto_repair: every minute, mcp_watchdog
+# probes the 6 MCP ports, restarts dead ones, queues persistent failures for
+# IT triage. it_triage reads queue, runs playbooks, posts resolution/escalation
+# to #hive-alerts via branded_slack.
+* * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/mcp_watchdog.sh --quiet
+* * * * * python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/it_triage.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/it_triage.cron.log 2>&1
+
+# --- META WATCHDOG (added 2026-05-15, Constitutional Amendment XII) ---
+# Every 5 min, checks heartbeats of dashboards_watchdog + mcp_watchdog and the
+# PID of dashboards_keepalive. Respawns dead processes, alerts on 2nd strike.
+*/5 * * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/meta_watchdog.sh --quiet
+
+
+
+# moltbook: Wave-1 persona registration -- daily 08:45 UTC (idempotent; auto-noop once all 7 registered)
+45 8 * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook && /usr/bin/python3 moltbook_register.py --live --confirm >> /mnt/sdcard/AA_MY_DRIVE/_logs/moltbook/wave1_register.log 2>&1
+
+# moltbook: notifier realtime (every 3 min, offset 1 min from lucrex_engage) -- 2026-05-17
+1-59/3 * * * * cd /mnt/sdcard/AA_MY_DRIVE && /usr/bin/python3 03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_notifier.py --realtime >> _logs/moltbook/notifier.cron.log 2>&1
+
+# moltbook: notifier daily digest (16:00 + 17:00 UTC = 9-10am PT, DST-safe via idempotency latch) -- 2026-05-17
+0 16,17 * * * cd /mnt/sdcard/AA_MY_DRIVE && /usr/bin/python3 03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_notifier.py --digest >> _logs/moltbook/notifier.cron.log 2>&1
+# blinko: offline-first queue drainer -- pushes queued session notes to e5-mother when reachable -- wired 2026-05-24
+*/17 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/blinko_queue_drain.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/blinko_queue_drain.log 2>&1
+# moltbook: auto-migrate guard -- keeps engagement on e5-mother; full-migrates when mother returns, code-syncs otherwise -- wired 2026-05-24
+*/30 * * * * /bin/bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook/auto_migrate_moltbook_to_e5.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/moltbook/auto_migrate.log 2>&1
+
+# moltbook: phone HOT-STANDBY for Lucrex -- runs ONLY when e5-mother is unreachable (failover). wired 2026-05-25
+*/3 * * * * /bin/bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_standby.sh once
+22 * * * * /bin/bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_standby.sh proactive
+
+# moltbook: Lucrex original posts (broadcast) 2x/day -- phone STANDBY (runs only if mother down). 15:00 + 23:00 UTC = 7a/3p PT. wired 2026-05-25
+0 15,23 * * * /bin/bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_standby.sh post
+# DAILY TN DEAL ENGINE (assessor->tracked CRM->brain) -- Oracle-first/phone-fallback
+0 16 * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/tn_deal_engine.sh >/dev/null 2>&1
+# --- MARKETING BRIEF -- 6:30 AM PT (14:30 UTC)
+30 14 * * * python3 03_AUTOMATION_CORE/01_Scripts/marketing/marketing_daily_brief.py >> _logs/marketing_brief.log 2>&1
+# WHOLESALE PIPELINE CONDUCTOR -- phase state + needs-action sweep every 4h (dry-run; sends stay gated)
+15 */4 * * * python3 01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/pipeline_phase_manager.py --state >> _logs/pipeline_phase_state.log 2>&1; python3 01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/pipeline_phase_manager.py --sweep --dry-run >> _logs/pipeline_phase_sweep.log 2>&1
+# INBOX ROUTER -- label contacted-list replies into agent folders (signifier=we emailed them)
+*/10 8-21 * * * source ~/.bashrc 2>/dev/null; python3 01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/inbox_router.py --route >> _logs/inbox_router.log 2>&1
+# AUTO-RESPONDER -- fire armed reply-drafts the instant HALT lifts + address set (gated, no-op otherwise)
+*/30 8-21 * * * . /root/.config/everlight/secrets.env 2>/dev/null; python3 01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/auto_responder.py --fire >> _logs/auto_responder.log 2>&1
+# CRON CATCH-UP -- doze-resilient: run any stale daily wholesale job (anacron-style)
+*/20 * * * * python3 03_AUTOMATION_CORE/01_Scripts/cron_catchup.py >> _logs/cron_catchup.log 2>&1
+# WAKE-LOCK refresh -- keep crons firing (reduce Android doze)
+*/30 * * * * /data/data/com.termux/files/usr/bin/termux-wake-lock 2>/dev/null
+*/15 * * * * cd /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts && python3 inbound_sentinel.py --once --days 1 >> /mnt/sdcard/AA_MY_DRIVE/_logs/inbound/sentinel_cron.log 2>&1  # DRY-RUN soak -- NO --live until operator go-live
+0 14 * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/enrichment_sync.sh >> /mnt/sdcard/AA_MY_DRIVE/_logs/enrichment/cron.log 2>&1
+0 13 * * * rsync -ah --no-perms --no-times -e "ssh -i /root/.ssh/github_deploy -o BatchMode=yes" e5-mother:/home/ubuntu/everlight_wholesale/leads_db.json /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json >> /mnt/sdcard/AA_MY_DRIVE/_logs/enrichment/cron.log 2>&1  # 5 AM PT pull e5 osint results
+*/30 * * * * /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/kalshi_calibrate.sh
+* * * * * /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/kalshi_candle_phone.sh
+
+# blinko: daily audit+self-heal+verify -- writes history journal -- wired 2026-06-03
+45 12 * * * cd /mnt/sdcard/AA_MY_DRIVE && /usr/bin/python3 03_AUTOMATION_CORE/01_Scripts/blinko_queue_audit.py >> _logs/blinko_queue_audit.log 2>&1
+# BlinkoLite :2700 write-buffer keepalive -- check every 5 min -- wired 2026-06-03
+*/5 * * * * curl -s http://localhost:2700/health > /dev/null 2>&1 || BLINKO_PORT=2700 nohup python3 /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.log 2>&1 &
+
+# blinko: bidirectional phone<->e5 brain sync -- wired 2026-06-03
+*/20 * * * * /usr/bin/python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/blinko_sync.py >> /mnt/sdcard/AA_MY_DRIVE/_logs/blinko_sync.log 2>&1
+# Alley Kingz UNIFIED ART FACTORY -- one prioritized drainer (queue->cards->maps), ~12/day, free Leonardo -- wired 2026-06-07 (replaces the 2 separate art crons)
+15 17 * * * bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/art_factory_cron.sh

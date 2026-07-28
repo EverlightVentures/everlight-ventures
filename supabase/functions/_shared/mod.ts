@@ -8,7 +8,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 // --- Supabase ---
 
-export const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
+// Platform-aware: the edge runtime injects SUPABASE_URL for whichever project the
+// function is deployed to (AK project mfghdobptredxxhbjwyz vs casino jdqqmsmwmbsnlnstyavl).
+// Hardcoded fallback kept for local tooling only. AUTH_SEPARATION_DOCTRINE.md applies.
+export const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "https://jdqqmsmwmbsnlnstyavl.supabase.co";
 
 export function createSupabaseAdmin() {
   return createClient(

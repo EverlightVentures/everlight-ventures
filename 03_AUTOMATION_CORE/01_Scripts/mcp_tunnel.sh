@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# mcp_tunnel.sh -- supervise the SSH tunnel from phone to Oracle E5 for the MCP fleet.
-# Listens on 127.0.0.1:3101-3107 (minus 3104 which is phone-local for broker-os).
-# Auto-reconnects on disconnect. Idempotent: if another copy is running, this exits.
+# mcp_tunnel.sh -- supervise the SSH tunnel from phone to e5-mother for the MCP fleet.
+# Fleet moved from Oracle Micro (dead) to e5-mother 2026-07-14; retargeted to e5-mcp-tunnel.
+# Listens on 127.0.0.1:{3101,3102,3105,3106,3107,3108}. 3104 is phone-local (broker-os);
+# n8n (3103) is parked/dropped per operator. Auto-reconnects; idempotent.
 
 set -u
 
@@ -31,7 +32,7 @@ while true; do
       -N -T \
       -o ExitOnForwardFailure=no \
       -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
-      oracle-mcp-tunnel \
+      e5-mcp-tunnel \
       >>"$LOG" 2>&1
   rc=$?
   echo "$(date -Iseconds) ssh exited rc=$rc -- reconnecting in 8s" >>"$LOG"

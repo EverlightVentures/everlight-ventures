@@ -9,6 +9,7 @@ set -uo pipefail
 ROOT=/mnt/sdcard/AA_MY_DRIVE
 ENVF=$ROOT/03_AUTOMATION_CORE/03_Credentials/.env
 export LEONARDO_API_KEY=$(grep -m1 '^LEONARDO_API_KEY=' "$ENVF" 2>/dev/null | cut -d= -f2- | tr -d ' "\r')
+export CF_AI_TOKEN=$(grep -m1 '^CF_AI_TOKEN=' "$ENVF" 2>/dev/null | cut -d= -f2- | tr -d ' "\r')
 cd "$ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/art" || exit 1
 LOG=$ROOT/_logs/ak_art_factory_cron.log; mkdir -p "$ROOT/_logs"
 echo "=== $(date) AK unified art-factory batch ===" >> "$LOG"

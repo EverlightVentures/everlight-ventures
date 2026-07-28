@@ -15,7 +15,7 @@ from . import aircraft as air_mod
 from . import broadcaster
 from . import cameras as cams_mod
 from . import camera_dvr
-from . import config, correlate, decide as decide_mod, dvr, escape as escape_mod, evac, fema, news, notify, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import beacon, config, correlate, decide as decide_mod, dvr, escape as escape_mod, evac, fema, news, notify, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .hub import HUB
 from .feeds import feeds_for_county
 from .geo_county import county_for
@@ -238,6 +238,8 @@ def _warm_caches():
 async def _start_broadcaster():
     # The WebSocket push loop: diffs the store every 2s, pushes deltas to /ws.
     asyncio.create_task(broadcaster.broadcast_loop(_store_dir()))
+    # The EPIRB pulse: re-broadcasts active distress beacons on their interval.
+    asyncio.create_task(_beacon_repeater(_store_dir()))
 
 
 @app.websocket("/ws")
@@ -795,6 +797,58 @@ def get_reports():
     """Active community reports + gig-driver presence markers (non-expired)."""
     from . import reports
     return {"reports": reports.active(_store_dir())}
+
+
+def _broadcast_beacon(base, client, lat, lon, note):
+    """Fire a distress pulse on every channel we have (ntfy now, mesh best-effort)."""
+    maps = f"https://maps.google.com/?q={lat},{lon}" if lat is not None and lon is not None else ""
+    notify.ntfy_sender({
+        "threat_level": "EXTREME", "type": "DISTRESS BEACON", "geo_label": maps,
+        "distance_mi": None, "body": f"DISTRESS BEACON ACTIVE. {note}\nPosition: {maps}".strip(),
+    }, 5)
+    try:  # off-grid channel, best-effort (no-op until mesh send is wired to hardware)
+        from . import meshtastic_mesh
+        sender = getattr(meshtastic_mesh, "send_text", None)
+        if sender:
+            sender(f"SOS DISTRESS {lat},{lon} {note}"[:200])
+    except Exception:  # noqa: BLE001 - a beacon must never crash on a dead channel
+        pass
+
+
+async def _beacon_repeater(base):
+    """Autonomous EPIRB pulse: re-broadcast every active beacon on its interval, so
+    it keeps transmitting even if the operator's screen is off or the app is closed."""
+    while True:
+        try:
+            for b in beacon.due_for_broadcast(base):
+                _broadcast_beacon(base, b["client"], b.get("lat"), b.get("lon"), b.get("note", ""))
+                beacon.mark_broadcast(base, b["client"])
+        except Exception as e:  # noqa: BLE001
+            print(f"[beacon] repeater error: {e}", flush=True)
+        await asyncio.sleep(60)
+
+
+@app.post("/api/beacon")
+def beacon_ctl(client: str, lat: float | None = None, lon: float | None = None, note: str = "", active: bool = True):
+    """EPIRB-style distress beacon. Activating broadcasts your position on repeat
+    until you cancel. NOT a certified 406 MHz EPIRB (does not reach Coast Guard /
+    SARSAT); it pulses ntfy + the local mesh. active=false cancels + sends all-clear."""
+    base = _store_dir()
+    if not active:
+        beacon.cancel(base, client)
+        notify.ntfy_sender({"threat_level": "LOW", "type": "DISTRESS CANCELLED",
+                            "geo_label": "", "distance_mi": None, "body": "Distress beacon cancelled."}, 3)
+        return {"active": False}
+    st = beacon.activate(base, client, lat, lon, note)
+    _broadcast_beacon(base, client, lat, lon, note)  # first pulse now
+    beacon.mark_broadcast(base, client)
+    return st
+
+
+@app.get("/api/beacon")
+def beacon_get():
+    """All active distress beacons (for the map + the active-beacon banner)."""
+    return {"beacons": beacon.get(_store_dir())}
 
 
 @app.get("/api/spacewx")

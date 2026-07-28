@@ -136,6 +136,15 @@ def main():
     batch, batch_bytes, uploaded = [], 0, 0
     BUDGET = 600 * 1024   # tiny batches survive flaky phone uplinks (was 10MB)
 
+    def fresh_jwt():
+        # the upload JWT lives ~1h; slow links (phone radio) can outlast it
+        # mid-deploy (seen 2026-06-11: '403 Expired JWT' after long grinds).
+        nonlocal jwt
+        st2, r2 = http("GET", f"{API}/accounts/{acct}/pages/projects/{args.project}/upload-token", token)
+        if r2.get("success"):
+            jwt = r2["result"]["jwt"]
+            print("  (refreshed upload jwt)")
+
     def flush(batch):
         nonlocal uploaded
         if not batch:
@@ -145,7 +154,10 @@ def main():
             if resp.get("success"):
                 uploaded += len(batch)
                 return
-            print(f"  upload retry {attempt+1}: {st} {json.dumps(resp)[:200]}")
+            body_txt = json.dumps(resp)[:200]
+            print(f"  upload retry {attempt+1}: {st} {body_txt}")
+            if "Expired JWT" in body_txt or st in (401, 403):
+                fresh_jwt()
             time.sleep(2 + attempt * 2)
         raise SystemExit("FATAL: upload batch failed after retries")
 
@@ -176,6 +188,18 @@ def main():
             with open(sp, "r", encoding="utf-8") as fh:
                 add_field(special, fh.read())
             print(f"      + included {special}")
+    # _worker.js (Advanced Mode) goes as a FILE part with a module content type,
+    # exactly as wrangler sends it -- a plain field is silently ignored.
+    wp = os.path.join(os.path.abspath(args.dir), "_worker.js")
+    if os.path.isfile(wp):
+        with open(wp, "r", encoding="utf-8") as fh:
+            wsrc = fh.read()
+        parts.append(
+            f'--{boundary}\r\n'
+            f'Content-Disposition: form-data; name="_worker.js"; filename="_worker.js"\r\n'
+            f'Content-Type: application/javascript+module\r\n\r\n{wsrc}\r\n'
+        )
+        print("      + included _worker.js")
     bodytxt = "".join(parts) + f"--{boundary}--\r\n"
     body = bodytxt.encode("utf-8")
     st, resp = http("POST", f"{API}/accounts/{acct}/pages/projects/{args.project}/deployments",

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOS System Audit - Everlight Hive - 2026-06-30</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;600&display=swap');
+:root{--gold:#D4AF37;--dark:#0A0A0A;--panel:#141414;--panel2:#1c1c1c;--light:#E8E8E8;--mut:#9a9a9a;--green:#4caf50;--amber:#e8a33d;--red:#e05a4f;--line:#2a2a2a;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--dark);color:var(--light);font-family:'Inter',system-ui,sans-serif;line-height:1.55;font-size:15px;}
+.wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px;}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif;}
+h1{font-size:34px;margin:0 0 4px;font-weight:800;letter-spacing:.3px;}
+h2{font-size:23px;margin:42px 0 14px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:8px;font-weight:600;}
+.wordmark{color:var(--gold);letter-spacing:3px;font-size:12px;font-weight:600;font-family:'Inter';text-transform:uppercase;}
+.sub{color:var(--mut);font-size:13px;margin:2px 0 0;}
+.oneliner{background:linear-gradient(135deg,#1a1407,#0f0f0f);border:1px solid var(--gold);border-radius:12px;padding:18px 22px;margin:22px 0;font-family:'Playfair Display',serif;font-size:18px;font-style:italic;color:#f2e2b6;}
+.grade{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 12px;font-size:13px;color:var(--mut);margin-left:8px;}
+.grade b{color:var(--gold);font-size:15px;}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:13.5px;}
+th{text-align:left;color:var(--gold);font-weight:600;border-bottom:1px solid var(--line);padding:9px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.GREEN,.USING{background:rgba(76,175,80,.16);color:var(--green);border:1px solid rgba(76,175,80,.4);}
+.AMBER,.PARTIAL,.ALTERNATIVE{background:rgba(232,163,61,.16);color:var(--amber);border:1px solid rgba(232,163,61,.4);}
+.RED,.MISSING{background:rgba(224,90,79,.16);color:var(--red);border:1px solid rgba(224,90,79,.4);}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:12px 0;}
+.exec{background:var(--panel);border-left:3px solid var(--gold);border-radius:8px;padding:16px 20px;font-size:14.5px;color:#dcdcdc;}
+.proof{color:var(--mut);font-size:12.5px;}
+.fix{color:#cfe8cf;}
+.red-q{color:#f0b9b3;font-weight:600;}
+ol.recs{padding-left:20px;}
+ol.recs li{margin:8px 0;padding-left:4px;}
+.foot{color:var(--mut);font-size:12px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px;}
+.tag{color:var(--gold);}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#bdbdbd;}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;}
+.kpi div{flex:1;min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+.kpi b{display:block;font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);}
+.kpi span{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">&#9733; EVERLIGHT VENTURES / LUCREX</div>
+  <h1>AIOS System Audit</h1>
+  <p class="sub">The Everlight Hive : what's built vs. what's actively used &middot; Audit date 2026-06-30 &middot; 10 agents, 85 live tool calls, evidence-backed
+    <span class="grade">Red-team truth grade: <b>B</b></span>
+  </p>
+
+  <div class="oneliner">"The empire's storefronts are lit (Supabase live x2, Resend firing real outreach, sites all 200) but the engine room's on the wrong floor: 72 crons running off your PHONE against your own law, deploy-to-Oracle dark 35 days, the watchdog choking on open files, and Broker OS flatlined. Light's real; the wiring needs a king's hand."</div>
+
+  <div class="kpi">
+    <div><b>12</b><span>Built &amp; proven active</span></div>
+    <div><b>~18</b><span>Built but dark / unknown</span></div>
+    <div><b>8</b><span>RED items w/ fixes</span></div>
+    <div><b>3</b><span>Stack gaps (missing)</span></div>
+  </div>
+
+  <h2>Executive Summary : failures first</h2>
+  <div class="exec">
+    <p><b>The Cadence lane is the real problem.</b> The <b>phone is the primary cron host</b> (PID 24553, 72 active jobs), a direct violation of your own HARD LAW ("phone is NEVER a cron host"), and the memory note "phone crond not installed" is factually <i>false</i>. Three loops are broken: deploy-to-Oracle silent 35 days ("e5-mother unreachable"), the oracle watchdog crashing on file-descriptor exhaustion ("Too many open files"), and a cron still SSH-poking the <i>dead</i> mother 129.159.38.250 every 2 minutes. <b>Broker OS is confirmed dead</b> from its own live MCP: "Django not running", last match run "never", zero KPIs. A doctrine revenue lane producing nothing.</p>
+    <p><b>The wins are real, with hard proof pulled live this session:</b> Supabase has two projects ACTIVE_HEALTHY (main + alley-kingz), Resend's domain is verified and actually sent 10 wholesale outreach emails on 2026-06-22 (delivered + a few auto-suppressed = your bounce sweeper working), and every public surface serves HTTP 200 (everlightventures.io, alleykingz.online, alley-kingz.pages.dev). The local MCP backbone is 5/7 live and the comms pipeline is <b>proven firing</b>, not just code on disk.</p>
+    <p><b>Context is your strongest lane:</b> root + project CLAUDE.md, 142-line MEMORY index, 324 memory files, 120 voiced agent files, all refreshed 2026-06-09. <b>Capabilities is solid-but-leaky:</b> 26 of 120 agents have no YAML frontmatter, so they can't be invoked. Your usable agent count is <b>94, not 120</b>. Everything behind the e5/Oracle tailnet (Kalshi live orders, XLM bot, Blinko RAG) is unverifiable from this phone: not claimed active, just dark from here.</p>
+  </div>
+
+  <h2>The Four C's Scorecard</h2>
+  <table>
+    <tr><th style="width:120px">Pillar</th><th style="width:80px">Status</th><th>Specific gap</th></tr>
+    <tr><td><b>Context</b></td><td><span class="pill GREEN">GREEN</span></td><td>Strongest lane. CLAUDE.md x2, 142-line MEMORY index, 324 memory files, 120 voiced agents, roster + doctrine refreshed 2026-06-09. Soft spots: LIVING_PUNCHLIST.md 32 days stale; "63 agents" headcount contradicted three ways (79 roster emails / 120 files / 94 invocable).</td></tr>
+    <tr><td><b>Connections</b></td><td><span class="pill AMBER">AMBER</span></td><td>Backbone proven live: Supabase x2 healthy, Resend sent 10 real emails, site 200, 5/7 local MCP up. But Stripe MCP (3106) dead, <span class="mono">.mcp.json</span> git-untracked &amp; frozen 2026-04-23, Tailscale absent (e5/Oracle dark from phone), content_tools off its doctrine import path.</td></tr>
+    <tr><td><b>Capabilities</b></td><td><span class="pill AMBER">AMBER</span></td><td>Framework intact: 18 skills, 6 commands, 3 modes, a wired+compiling PreToolUse guard. But 26/120 agents non-invocable (no frontmatter), 2 hook scripts orphaned, and CLAUDE.md names a <span class="mono">root_write_guard.sh</span> that doesn't exist (logic is in <span class="mono">pre_tool_guard.py</span>).</td></tr>
+    <tr><td><b>Cadence</b></td><td><span class="pill RED">RED</span></td><td>Engine alive on the WRONG host: 72 phone crons vs the "never a phone cron host" law. deploy-to-Oracle silent 35 days, watchdog crashing on fd exhaustion, dead-mother tunnel firing every 2 min, Broker matching "never" run.</td></tr>
+  </table>
+
+  <h2>Built &amp; Actively Used : hard proof</h2>
+  <table>
+    <tr><th style="width:230px">Asset</th><th>Evidence</th></tr>
+    <tr><td>Supabase backend (main + alley-kingz)</td><td class="proof">Live MCP list_projects: jdqqmsmwmbsnlnstyavl + mfghdobptredxxhbjwyz, BOTH ACTIVE_HEALTHY (PG17).</td></tr>
+    <tr><td>Resend email + branded outreach</td><td class="proof">Live MCP: domain verified, sending enabled; 10 real sends 2026-06-22 (delivered + suppressed). Pipeline FIRES.</td></tr>
+    <tr><td>Public sites</td><td class="proof">curl: everlightventures.io 200, alleykingz.online 200, alley-kingz.pages.dev 200 (Cloudflare).</td></tr>
+    <tr><td>Local MCP backbone (5/7)</td><td class="proof">127.0.0.1:{3101,3102,3104,3105,3107} returns HTTP 406 (live) + ps confirms blinko/market/broker/supabase/resend procs.</td></tr>
+    <tr><td>Onyx / MGN POS</td><td class="proof">36 commits/30d, last 2026-06-26 "redeem rewards at checkout". Highest-volume venture.</td></tr>
+    <tr><td>Alley Kingz game ecosystem</td><td class="proof">29 commits/30d, last 2026-06-20; both hosts 200; Supabase AK project healthy.</td></tr>
+    <tr><td>Kalshi agent (dev cadence)</td><td class="proof">21 commits/30d, last 2026-06-29 (1 day ago). Repo hot; production order-placement not verifiable from phone.</td></tr>
+    <tr><td>Local OSINT + bridges</td><td class="proof">uvicorn osint_api :2301, esign :2302, blinko bridge :2701 alive (ps + curl).</td></tr>
+    <tr><td>CLAUDE.md + MEMORY corpus</td><td class="proof">CLAUDE.md 2026-06-09; MEMORY.md 142 lines; 324 memory files; 120 agent files.</td></tr>
+    <tr><td>PreToolUse guard hook</td><td class="proof">settings.json to pre_tool_guard.py; py_compile OK. Wired + compiles.</td></tr>
+    <tr><td>AK GitHub Action deploy</td><td class="proof">deploy-alley-kingz.yml ENABLED, commit 2026-06-20 "replaces flaky ssh". <b>Contradicts the "Action DISABLED" doctrine.</b></td></tr>
+    <tr><td>GitHub version control</td><td class="proof">183 commits/30d, latest 2026-06-29. SSH key github_deploy.</td></tr>
+  </table>
+
+  <h2>Built but Dark / Unverified</h2>
+  <table>
+    <tr><th style="width:230px">Asset</th><th>Why it's not "active"</th></tr>
+    <tr><td>Broker OS pipeline</td><td class="proof"><b>Confirmed dead</b>: live MCP "Django not running", matches "never" run, KPIs empty. A revenue lane producing nothing.</td></tr>
+    <tr><td>Stripe payments (live charge)</td><td class="proof">Edge functions + sk_live on disk, but NO live transaction / webhook event verified. Wired, not proven transacting.</td></tr>
+    <tr><td>Stripe MCP (3106)</td><td class="proof">HTTP 000, no process. Configured in .mcp.json but dead.</td></tr>
+    <tr><td>Kalshi live trading (runtime)</td><td class="proof">0 local procs; orders run only from e5 (CA IP), unreachable from proot. Money-live runtime UNVERIFIED.</td></tr>
+    <tr><td>XLM bot / :8502</td><td class="proof">127.0.0.1:8502 returns 000; PARKED 2026-05-28; runs on Oracle Micro.</td></tr>
+    <tr><td>Django ops dashboard :8504</td><td class="proof">000; DEFERRED to Phase 7. Source intact, not serving.</td></tr>
+    <tr><td>e5-mother + Oracle services</td><td class="proof">Tailscale absent in proot; Blinko :1111, agentmemory :3108, Open WebUI :8080, remote systemd all dark from here.</td></tr>
+    <tr><td>deploy_to_oracle.sh loop</td><td class="proof">Log frozen 2026-05-26 (35d), last entries "e5-mother unreachable". Auto-deploy guarantee currently unproven.</td></tr>
+    <tr><td>oracle watchdog</td><td class="proof">"OSError [Errno 24] Too many open files". Crashing on fd exhaustion.</td></tr>
+    <tr><td>26 non-invocable agents</td><td class="proof">No YAML frontmatter, cannot be spawned. On disk, not usable.</td></tr>
+    <tr><td>coverforge SaaS</td><td class="proof">28 commits all 2026-06-15 then cold; blocked on $0 Anthropic + missing FAL_KEY.</td></tr>
+    <tr><td>alley-kingz-maps.pages.dev</td><td class="proof">HTTP 404. Documented live maps host serves nothing.</td></tr>
+    <tr><td>Frozen ventures</td><td class="proof">Broker / AI_Consulting / Field_Ops / Literature / legacy onyx_pos all share one 2026-06-09 bulk-reorg commit. No real feature work in 3+ weeks.</td></tr>
+  </table>
+
+  <h2>RED Items : self-healing fix slate</h2>
+  <div class="card"><span class="red-q">1 &middot; Phone is the primary cron host (72 jobs) vs the "never a phone cron host" HARD LAW.</span><br><span class="fix">Fix: rule on one truth. Either update <span class="mono">feedback_oracle_only_crons</span> to reflect reality, OR migrate the 72 jobs to e5 systemd timers leaving only Termux:Boot bootstrap. Doctrine and a running PID can't both be true.</span></div>
+  <div class="card"><span class="red-q">2 &middot; deploy_to_oracle.sh silent 35 days ("e5-mother unreachable").</span><br><span class="fix">Fix: run it manually to see firing-but-no-op vs unscheduled. If e5 is unreachable from phone (tailscale absent), move the trigger to an e5-side pull cron and downgrade the "pushes immediately" claim.</span></div>
+  <div class="card"><span class="red-q">3 &middot; oracle watchdog crashing on fd exhaustion + stray copy in ps (PID 28397).</span><br><span class="fix">Fix: kill PID 28397, raise <span class="mono">ulimit -n</span>, close the dir-scan handles. This fd leak is the likely common cause of the whole ~2026-05-26 silent-cron cluster. Fix once, several loops recover.</span></div>
+  <div class="card"><span class="red-q">4 &middot; Dead-mother tunnel SSH-poking 129.159.38.250 every 2 min.</span><br><span class="fix">Fix: repoint the two crontab lines to e5-mother (163.192.60.35) or delete them. Pure wasted SSH noise.</span></div>
+  <div class="card"><span class="red-q">5 &middot; Broker OS revenue lane dead ("Django not running / matches never").</span><br><span class="fix">Fix: start the broker service + seed one <span class="mono">broker_run_matching</span>, OR mark Broker_OS PARKED in LIVING_PUNCHLIST so it stops counting toward $10k/mo as a ghost lane.</span></div>
+  <div class="card"><span class="red-q">6 &middot; 26/120 agents non-invocable (no frontmatter). Usable count is 94.</span><br><span class="fix">Fix: add minimal frontmatter to the 26 legacy persona files, or archive them to 08_BACKUPS. Then correct the "63 agents" prose to the real invocable count.</span></div>
+  <div class="card"><span class="red-q">7 &middot; alley-kingz-maps.pages.dev returns 404. Documented live host serves nothing.</span><br><span class="fix">Fix: confirm the real CF Pages project name and redeploy, or update <span class="mono">project_ak_maps_host</span> to the correct hostname.</span></div>
+  <div class="card"><span class="red-q">8 &middot; .mcp.json (entire Hive MCP wiring) git-untracked &amp; frozen 2026-04-23.</span><br><span class="fix">Fix: version-control it, but <b>scan for secrets first</b> (it may hold tokens, which is why it's untracked). Prune the dead stripe-3106 + parked n8n-3103 entries.</span></div>
+
+  <h2>The "$20/mo Modern Startup Stack" : our coverage map</h2>
+  <p class="sub">There's never been a cheaper time to build. Here's the canonical stack vs. what we actually run.</p>
+  <table>
+    <tr><th>Canonical tool</th><th>Our equivalent</th><th style="width:95px">Status</th><th style="width:90px">Cost</th><th>Note</th></tr>
+    <tr><td>GitHub : VCS</td><td>GitHub (SSH push)</td><td><span class="pill USING">USING</span></td><td>$0</td><td>183 commits/30d. 1:1 match.</td></tr>
+    <tr><td>Claude : coding</td><td>Claude Code (Opus 4.8) + Hive</td><td><span class="pill USING">USING</span></td><td>~$100-200/mo</td><td>Canonical underprices reality: Max tier + multi-AI stack.</td></tr>
+    <tr><td>Cloudflare : DNS</td><td>CF DNS + CF Pages</td><td><span class="pill USING">USING</span></td><td>$0</td><td>We use CF for DNS <i>and</i> deploy, absorbing the Vercel slot.</td></tr>
+    <tr><td>Vercel : deploy</td><td>Cloudflare Pages</td><td><span class="pill ALTERNATIVE">ALT</span></td><td>$0</td><td>Vercel not used; deploy slot filled by CF Pages.</td></tr>
+    <tr><td>Namecheap : domain</td><td>everlightventures.io (via CF)</td><td><span class="pill ALTERNATIVE">ALT</span></td><td>~$10/yr</td><td>Owned + live; registrar likely CF, not Namecheap.</td></tr>
+    <tr><td>Clerk : auth</td><td>Supabase Auth + OAuth + domain-lock</td><td><span class="pill ALTERNATIVE">ALT</span></td><td>$0</td><td>No Clerk; auth via Supabase + GLOB allowlists.</td></tr>
+    <tr><td>Supabase : backend/DB</td><td>Supabase x2 projects</td><td><span class="pill USING">USING</span></td><td>$0-25/mo</td><td><b>Hard-proven live</b>: both ACTIVE_HEALTHY. Strongest match.</td></tr>
+    <tr><td>Upstash : Redis</td><td>None (local JSON + Supabase)</td><td><span class="pill MISSING">MISSING</span></td><td>$0</td><td>No managed cache/queue/rate-limit. Gap at scale.</td></tr>
+    <tr><td>Pinecone : vector DB</td><td>Blinko RAG + agentmemory (self-host)</td><td><span class="pill ALTERNATIVE">ALT</span></td><td>$0</td><td>Free-FIRST self-host on e5; runtime unverified from phone.</td></tr>
+    <tr><td>Resend : email</td><td>Resend via branded_mailer</td><td><span class="pill USING">USING</span></td><td>$0</td><td><b>Hard-proven</b>: 10 real sends 2026-06-22.</td></tr>
+    <tr><td>Stripe : payments</td><td>Stripe (AK shop, Onyx, broker)</td><td><span class="pill USING">USING</span></td><td>2.9%+30c</td><td>Wired across surfaces; <i>no live charge verified yet</i>.</td></tr>
+    <tr><td>PostHog : analytics</td><td>None</td><td><span class="pill MISSING">MISSING</span></td><td>$0</td><td>No product analytics. Flying blind on user behavior.</td></tr>
+    <tr><td>Sentry : error tracking</td><td>None (ad-hoc logs)</td><td><span class="pill MISSING">MISSING</span></td><td>$0</td><td><b>Highest-value gap</b>: you learn of breakage from log-spelunking, not alerts.</td></tr>
+  </table>
+  <p class="sub"><b>Stack verdict:</b> 5 USING &middot; 4 ALTERNATIVE (covered by our own infra) &middot; 3 MISSING. The three free freebies we're leaving on the table (<b>Sentry, PostHog, Upstash</b>) are all $0. Sentry first.</p>
+
+  <h2>Top Recommendations</h2>
+  <ol class="recs">
+    <li>Resolve the <b>phone-cron HARD-LAW conflict</b> this week: rewrite the doctrine to match reality, or migrate to e5 systemd timers. A running PID 24553 and the law can't both be the truth.</li>
+    <li>Fix the <b>fd-exhaustion</b> root cause in the watchdog. Likely the single cause of the whole ~2026-05-26 silent-cron cluster; one fix revives deploy_oracle + cron_catchup too.</li>
+    <li>Rule on <b>Broker OS</b>: start the service + seed one matching run, or mark it PARKED. No ghost revenue lanes.</li>
+    <li><b>Version-control .mcp.json</b> (after a secret scan) and prune the dead stripe/n8n entries. The whole MCP backbone is unbacked-up.</li>
+    <li><b>Register or archive the 26 frontmatter-less agents</b> so the count is honest (94, not 63 or 120), then fix the headcount in CLAUDE.md + roster.</li>
+    <li><b>Reconcile the AK deploy doctrine.</b> The GitHub Action is the live path now; update the "Action DISABLED" memory or you'll fight your own kill-switch.</li>
+    <li><b>Add Sentry</b> (free) for error tracking. Highest-value missing piece. PostHog second for funnel visibility.</li>
+    <li><b>Refresh LIVING_PUNCHLIST.md</b> (32d stale) and fix the maps 404. Both point at stale reality.</li>
+  </ol>
+
+  <div class="foot">
+    <b>Method &amp; honesty caveats (red-team grade B).</b> This audit ran 8 parallel finders, then a red-team truth-gate, then a synthesizer that hardened the revenue lanes with live MCP pulls (Supabase project IDs, Resend sends are real, not inferred). What the red-team docked: finders sometimes stamped "active" on disk-presence + a recent commit (the BUILT does-not-equal ACTIVE failure mode), and three money-live lanes are still unverified from this phone: <b>Kalshi order placement, a live Stripe charge, and any paying SaaS customer</b>. Everything behind the e5/Oracle tailnet is dark from proot, not dead. It's labeled UNKNOWN, not claimed. Note: this report could not be logged to Blinko (e5-mother unreachable from phone, as the audit itself proves).<br><br>
+    <span class="tag">&#9733;</span> Generated by the Everlight Hive &middot; AIOS Four C's framework &middot; <span class="mono">06_DEVELOPMENT/everlight_os/audits/aios_2026-06-30.html</span>
+  </div>
+</div>
+</body>
+</html>

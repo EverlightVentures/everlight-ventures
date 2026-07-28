@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>LUCREX // Command Deck</title>
+  <link rel="stylesheet" href="vendor/xterm.css">
+  <link rel="stylesheet" href="deck.css">
+</head>
+<body>
+  <!-- atmosphere -->
+  <div id="aurora" aria-hidden="true"></div>
+  <div id="grain" aria-hidden="true"></div>
+  <div id="vignette" aria-hidden="true"></div>
+
+  <!-- brand / status bar -->
+  <header id="topbar">
+    <div class="brand">
+      <span class="crown">&#9819;</span>
+      <span class="wordmark">LUCREX</span>
+      <span class="subtitle">King of Divine Light</span>
+    </div>
+    <div class="sysline">
+      <span class="ok"><i class="pip"></i>ALL SYSTEMS OPERATIONAL</span>
+      <span class="mono" id="s-uptime">up --</span>
+      <span class="mono" id="s-load">load --</span>
+      <span class="stream" id="s-stream" hidden><i></i>STREAMING</span>
+      <span class="live"><i class="dot"></i>LIVE</span>
+    </div>
+  </header>
+
+  <div id="shell">
+    <!-- slim activity bar -->
+    <nav id="activity">
+      <button class="act active" title="Explorer">&#9636;</button>
+      <div class="act-spacer"></div>
+      <a class="act" href="http://127.0.0.1:2000/" target="_blank" rel="noopener" title="Hub">&#9633;</a>
+      <a class="act" href="http://127.0.0.1:2700/" target="_blank" rel="noopener" title="Memory">&#9741;</a>
+      <button class="act" id="act-refresh" title="Refresh">&#8635;</button>
+    </nav>
+
+    <!-- left: explorer (file tree + top commands) -->
+    <aside id="leftpanel">
+      <div class="p-head"><span>EXPLORER</span><span class="p-sub">AA_MY_DRIVE</span></div>
+      <div id="tree" class="tree"></div>
+      <div class="p-head sub"><span>TOP COMMANDS</span><span class="mono muted">tap to run</span></div>
+      <div id="top-cmds" class="rank"></div>
+    </aside>
+
+    <!-- center: the chat is the hero -->
+    <main id="chat">
+      <div id="etabs">
+        <div class="etab active"><i class="tab-dot"></i>CLAUDE<span class="etab-sub mono">the mind behind the money</span></div>
+        <div class="etoolbar" id="quickcmds"></div>
+        <span class="etab-status mono" id="term-status">connecting...</span>
+      </div>
+      <div id="terminal-wrap">
+        <div id="terminal-wall" aria-hidden="true"></div>
+        <div id="terminal"></div>
+      </div>
+    </main>
+
+    <!-- right rail: the Winner + live glow widgets -->
+    <aside id="rail">
+      <div class="widget mascot-widget">
+        <div class="mascot-stage">
+          <canvas id="mascot"></canvas>
+          <img id="mascot-fallback" src="assets/winner.jpg" alt="BCARDD, the Winner" aria-hidden="true">
+          <div class="mascot-frame" aria-hidden="true"></div>
+        </div>
+        <div id="mood" class="mood">Waking up.</div>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">CONTEXT <span id="ctx-pct" class="hot">--%</span></div>
+        <canvas id="ctx-gauge" width="240" height="132"></canvas>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">TOKEN BURN <span id="tok-total" class="hot">--</span></div>
+        <canvas id="burn-chart" width="260" height="72"></canvas>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">SYSTEM</div>
+        <div id="sys-rows"></div>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">SESSION</div>
+        <div id="session-rows" class="kv mono"></div>
+      </div>
+
+      <div class="widget">
+        <div class="w-title">LIVE ACTIVITY</div>
+        <div id="activity" class="activity mono"></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer id="footer" class="mono">
+    <span class="f-brand"><span class="crown">&#9819;</span> LUCREX Deck</span>
+    <span id="f-uptime">up --</span>
+    <span id="f-turns">-- turns</span>
+    <span id="f-quote" class="quote">The edge that never sleeps.</span>
+    <span id="f-model">--</span>
+  </footer>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/xterm.js"></script>
+  <script src="widgets.js"></script>
+  <script src="mascot.js"></script>
+  <script src="filemanager.js"></script>
+  <script src="deck.js"></script>
+</body>
+</html>

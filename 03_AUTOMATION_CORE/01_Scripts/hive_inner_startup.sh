@@ -188,6 +188,20 @@ if [ -f $ROOT/03_AUTOMATION_CORE/01_Scripts/ak_crown_daemon.sh ]; then
   log "  ak_crown (AK daily art -> pages.dev) spawned (pid=$!)"
 fi
 
+# ------------------------------------------------------------------------------
+# 12. Auto-open the Seedance copy-deck dashboard (operator request 2026-06-16).
+#     The :2410 server is brought up by dashboards_watchdog above; wait a few
+#     seconds for it to bind, then fire an ACTION_VIEW via termux-open-url.
+#     DISABLE: set EV_NO_AUTOOPEN=1 before boot, or delete this block.
+#     (LUCREX OS Plan B will regenerate this from registry.yaml.)
+# ------------------------------------------------------------------------------
+if [ -z "${EV_NO_AUTOOPEN:-}" ] && command -v termux-open-url >/dev/null 2>&1; then
+  ( sleep 12; termux-open-url http://127.0.0.1:2410/SEEDANCE_ART_PROMPTS.html ) >/dev/null 2>&1 &
+  log "  seedance copy-deck auto-open scheduled (:2410)"
+  ( sleep 16; termux-open-url http://127.0.0.1:2200/reports/kalshi_trader.html ) >/dev/null 2>&1 &
+  log "  kalshi trader auto-open scheduled (:2200)"
+fi
+
 log "=== hive_inner_startup complete ==="
 
 # Write heartbeat so the meta-watchdog (Phase 5) can detect "boot completed"

@@ -77,7 +77,7 @@ def render():
 
 # operator-only pages (NEVER public -- served on 127.0.0.1 only)
 OPS = "/mnt/sdcard/AA_MY_DRIVE/_state/bcardd_ops"
-LOCAL_PAGES = {"/share": OPS + "/share.html", "/kit": OPS + "/kit.html"}
+LOCAL_PAGES = {"/share": OPS + "/share.html", "/kit": OPS + "/kit.html", "/raid": OPS + "/raid_kit.html"}
 
 OPS_INDEX = """<!DOCTYPE html><html><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
@@ -90,6 +90,7 @@ small{display:block;font-weight:600;opacity:.7;font-size:11px;margin-top:3px}</s
 <h1>&#128054; BCARDD Ops</h1><p>Private. This runs only on your phone (127.0.0.1). Never public.</p>
 <a href="/share">&#10084;&#65039; Share Kit<small>heart ask + anonymous share messages</small></a>
 <a href="/kit">&#128203; Submission Kit<small>copy-paste fields for listing forms</small></a>
+<a href="/raid">&#128293; Raid Kit<small>where to drop the link + paste copy</small></a>
 <a href="/karma">&#129504; Karma Pack<small>today's reddit comment missions</small></a>
 </body></html>"""
 
