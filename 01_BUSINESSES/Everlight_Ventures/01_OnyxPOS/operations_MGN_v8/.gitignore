@@ -1,0 +1,14 @@
+
+# ---- MGN POS OPERATIONAL RECORDS (2026-07-28) ----
+# Customer emails, employee time-clock hours, transaction + sales logs.
+# Real operational PII/payroll, not source. Same reasoning as 05_PERSONAL.
+# The POS *code* stays tracked; the POS *data* does not.
+01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8/Customers/
+01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8/Time_Clock/
+01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8/Transaction_Logs/
+01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8/Sales_Logs/
+01_BUSINESSES/Everlight_Ventures/01_OnyxPOS/operations_MGN_v8/Money_OS/
+
+# ---- BACKUP / ROLLBACK FILE SUFFIXES ----
+*.bak
+*.bak-[0-9]*
