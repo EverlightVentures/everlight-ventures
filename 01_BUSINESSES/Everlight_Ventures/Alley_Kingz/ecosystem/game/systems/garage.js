@@ -297,11 +297,29 @@
   }
 
   // ---- parts ----
+  // AK-FIX-lane-H 2026-07-28: fitting a part burns a little Common scrap -- a cheap
+  // sink so a rig is EARNED, not free. Stock (tier 0) is free (it IS the default / a
+  // downgrade); the cost climbs with tier. Best-effort + fully guarded: no AK_ECON
+  // (headless / node) or an empty bag just charges what is there and still bolts the
+  // part on, so equip never blocks the build and never throws.
+  var PART_SCRAP_COST = [0, 2, 4, 7, 12];   // by tierIndex: Stock / Sport / Pro / Elite / Kingz Custom
+  function partScrapCost(pd) { var c = pd ? PART_SCRAP_COST[pd.tierIndex | 0] : 0; return (typeof c === 'number' && c > 0) ? c : 0; }
   function equip(rigId, slot, partId) {
     var pd = part(partId);
     if (!pd) return { ok: false, reason: 'no_part' };
     if (pd.slot !== slot) return { ok: false, reason: 'wrong_slot' };
-    return write(rigId, function (st) { st.parts[slot] = pd.id; return { ok: true, slot: slot, part: pd.id }; });
+    // charge only when the slot is actually CHANGING to this part (re-fitting the same part is free)
+    var cur = rigState(rigId), cost = (!cur || cur.parts[slot] !== pd.id) ? partScrapCost(pd) : 0;
+    return write(rigId, function (st, p) {
+      st.parts[slot] = pd.id;
+      var paid = 0;
+      if (cost > 0 && p) {                          // best-effort scrap sink (guarded, floors at 0)
+        if (!p.scrap || typeof p.scrap !== 'object') p.scrap = {};
+        paid = Math.min(cost, p.scrap.Common | 0);
+        p.scrap.Common = Math.max(0, (p.scrap.Common | 0) - paid);
+      }
+      return { ok: true, slot: slot, part: pd.id, cost: cost, paid: paid };
+    });
   }
   function unequip(rigId, slot) {
     if (!SLOT_DELTA[slot]) return { ok: false, reason: 'no_slot' };
@@ -674,6 +692,25 @@
     cs.cardNumber = String(m.card.cardNumber || '');
     cs.chassisSource = m.source;         // 'canon' | 'family_top'
     return cs;
+  }
+
+  // ---- rigLootMult: AK-FIX-lane-H 2026-07-28. THE GARAGE FINALLY PAYS OUT ----
+  // The rig stats were inert -- nothing outside the panel read them for balance. A built
+  // rig now HAULS MORE: the ADDED payload over the bare chassis (parts + a paired dog)
+  // lifts raid loot a little. Delta-based, so a stock rig is exactly 1x (no free baseline);
+  // clamped, so a maxed hauler is a bonus and never an exploit. Pure + guarded: pass a card
+  // to score that dog's rig, or nothing to use the active rig; any gap reads a flat 1x.
+  var RIG_LOOT_PER_PAYLOAD = 0.06;   // +6% raid loot per chassis-unit of ADDED payload
+  var RIG_LOOT_MULT_MAX = 1.5;       // a fully-kitted hauler tops out at +50%
+  function rigLootMult(card, p) {
+    try {
+      var cs = null;
+      if (card != null) cs = rigStats(card, p);
+      else { var id = activeRig(p); cs = id ? computeStats(id, { profile: p }) : null; }
+      if (!cs || !cs.stats || !cs.base) return 1;
+      var addPayload = Math.max(0, (+cs.stats.payload || 0) - (+cs.base.payload || 0));
+      return clampN(1 + RIG_LOOT_PER_PAYLOAD * addPayload, 1, RIG_LOOT_MULT_MAX);
+    } catch (_e) { return 1; }
   }
 
   // ---- rigVisual: everything a renderer needs, derived from the same state ----
@@ -1449,6 +1486,7 @@
     // stats
     dogStats: dogStats, findCard: findCard, pairingFor: pairingFor,
     computeStats: computeStats, contribLines: contribLines,
+    rigLootMult: rigLootMult,   // AK-FIX-lane-H 2026-07-28: equipped-rig raid-loot multiplier (raidscene.js reads this)
     // AK-GARAGE 2026-07-18 -- THE OUTWARD RESOLVERS. Everything outside the garage
     // that draws or fights a rig reads through exactly these two, so the district and
     // the raid cannot disagree with the garage: all three read one persisted state.

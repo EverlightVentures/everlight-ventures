@@ -38,8 +38,9 @@ window.AK_ARENA3D = (function (root) {
   var MODEL = 'assets/models/arena_interior.glb';
   var ID    = 'ak-arena3d';
 
-  var S = { on: false, booted: false, renderer: null, scene: null, camera: null,
-            stadium: null, mount: null, raf: 0, board: null, failed: false };
+  var S = { on: false, booted: false, booting: false, bootCbs: null, renderer: null,
+            scene: null, camera: null, stadium: null, mount: null, raf: 0, board: null,
+            failed: false };
 
   function boardEl() {
     if (S.board && S.board.isConnected) return S.board;
@@ -129,6 +130,19 @@ window.AK_ARENA3D = (function (root) {
       var hFov = 2 * Math.atan(Math.tan(vFov / 2) * (S.camera.aspect || 1));
       // distance that fits the sphere on the TIGHTER axis, then 1.12 margin so the rim is not clipped
       var dist = (R / Math.sin(Math.min(vFov, hFov) / 2)) * 1.12;
+
+      /* AK-ARENA3D-V4 2026-07-28: FOG MUST RIDE THE CAMERA, or it erases the whole stadium.
+       * boot() sets a fixed fog band of 900..3400. But the model is scaled to BOARD_DIAG*2.1 (~2205 px
+       * diagonal), so its bounding-sphere radius R is ~1100 and this fit distance lands the camera ~5-6k
+       * px from the bowl. At that range the ENTIRE stadium sits BEYOND fog-far 3400 and every surface
+       * blends 100% to the background tint -- the arena rendered as a flat 0x0d0f18 void (verified: the
+       * stadium-only screenshot, board lifted, was uniform background colour). So place the band ON the
+       * model: start just in front of the near rim, end past the far stands. Derived from dist/R, never
+       * authored, so it survives a model re-export at any scale. Kept just inside the 9000 far-plane. */
+      if (S.scene && S.scene.fog) {
+        S.scene.fog.near = Math.max(1, dist - R * 1.2);
+        S.scene.fog.far  = Math.min(8800, dist + R * 2.6);
+      }
       // 34deg above the pitch: high enough to read the whole bowl, low enough that the far stand
       // still rises behind the field instead of being looked down into.
       var el = 34 * Math.PI / 180;
@@ -173,67 +187,97 @@ window.AK_ARENA3D = (function (root) {
     S.raf = root.requestAnimationFrame(frame);
   }
 
+  /* AK-ARENA3D-V4 2026-07-28: BOOT OWNS THE THREE LOAD -- this is the deadlock fix.
+   * three_boot is LAZY by design. ok()/get() are PASSIVE reads (three_boot.js:187-188 -- ok() is just
+   * `return !!THREE`); ONLY ready()/loadGLB() fire the dynamic import() that actually loads three
+   * (three_boot.js:146 loadCore, :186 ready wraps it). The battler (game.html) calls ready() NOWHERE:
+   * it loads neither world3d.js nor hub3d.js, so nothing ever kicked the loader. V3's boot() then bailed
+   * on `!T.ok()` (this line) and loadGLB -- the one call that WOULD have kicked the load -- sat below the
+   * guard, unreachable. That is a hard deadlock: ok() needs a load, the load needs loadGLB, loadGLB needs
+   * boot() to pass the ok() gate. So ok() stayed false for the life of the page and the stadium never
+   * rendered (headless diag stuck at {on:false, booted:false, failed:true, hasStadium:false, mounted:false},
+   * the whole board area a flat black void). Even a direct AK_ARENA3D.setOn(true) bailed here.
+   *
+   * The fix mirrors the working HUB exactly: world3d.js awaits AK_THREE.ready() once and boots from the
+   * .then (world3d.js:56-57). So boot() now KICKS the load itself and continues from the resolved promise
+   * instead of reading a value nobody populated. ready() is idempotent -- every caller shares the one
+   * in-flight core promise (three_boot.js:147 `if (coreP) return coreP`) -- so a warm boot costs nothing,
+   * and per the three_boot contract it NEVER rejects (resolves THREE or null). A null resolve degrades to
+   * the untouched 2D board exactly as the old ok()-false path did. Side benefit: setOn(true) is now
+   * self-sufficient from ANY caller, not just the game.html poll (the diagnosis harness needed that). */
   function boot(cb) {
     if (S.booted) { cb && cb(true); return; }
     var T = root.AK_THREE;
-    if (!T || !T.ok || !T.ok()) { S.failed = true; cb && cb(false); return; }
-    var THREE = T.get(); if (!THREE) { S.failed = true; cb && cb(false); return; }
-    if (!mount()) { S.failed = true; cb && cb(false); return; }
+    if (!T || typeof T.ready !== 'function') { S.failed = true; cb && cb(false); return; }
+    // Coalesce re-entrant boots: a second setOn(true) while the load is in flight must NOT start a
+    // second WebGLRenderer (one-renderer law) -- it just rides the same in-flight boot.
+    if (S.booting) { S.bootCbs.push(cb || null); return; }
+    S.booting = true; S.bootCbs = [cb || null];
+    function finish(ok) {
+      S.booting = false;
+      var cbs = S.bootCbs || []; S.bootCbs = null;
+      for (var i = 0; i < cbs.length; i++) { try { if (cbs[i]) cbs[i](ok); } catch (_e) {} }
+    }
+    // ready() kicks loadCore() -> the dynamic import() -> ok() flips true on its own. Boot from the .then.
+    T.ready().then(function (THREE) {
+      if (!THREE || !THREE.WebGLRenderer) { S.failed = true; return finish(false); }  // vendor 404 -> 2D
+      if (!mount()) { S.failed = true; return finish(false); }
 
-    try {
-      S.renderer = new THREE.WebGLRenderer({ canvas: S.mount, antialias: false, alpha: true });
-    } catch (_e) { S.failed = true; cb && cb(false); return; }
-    S.scene = new THREE.Scene();
-
-    // Match the hub's night-alley atmosphere so the stadium does not read as a different game.
-    var tint = 0x0d0f18;
-    S.scene.background = new THREE.Color(tint);
-    S.scene.fog = new THREE.Fog(tint, 900, 3400);
-    S.scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x2a2418, 1.15));
-    var d = new THREE.DirectionalLight(0xffe9b8, 0.9); d.position.set(500, 1200, 700);
-    S.scene.add(d);
-
-    S.camera = new THREE.PerspectiveCamera(42, 1, 1, 9000);
-    S.booted = true;
-    syncSize();
-
-    T.loadGLB(MODEL, function (glb) {
-      var o = glb && (glb.scene || glb);
-      if (!o) { S.failed = true; cb && cb(false); return; }
       try {
-        // Scale from the model's OWN bbox against the board diagonal. Never an authored constant.
-        var bb = new THREE.Box3().setFromObject(o);
-        var sz = bb.getSize(new THREE.Vector3());
-        var BOARD_DIAG = Math.hypot(540, 900);              // the 2D board, in its own units
-        var modelDiag = Math.max(1e-6, Math.hypot(sz.x, sz.z));
-        // 2.1x so the bowl surrounds the playfield rather than sitting flush with its edges.
-        var k = (BOARD_DIAG * 2.1) / modelDiag;
-        o.scale.setScalar(k);
-        var bb2 = new THREE.Box3().setFromObject(o);
-        o.position.y = -bb2.min.y;                          // floor on y=0
-        var c2 = bb2.getCenter(new THREE.Vector3());
-        o.position.x = -c2.x; o.position.z = -c2.z;         // centre the bowl on the board
-        // Back faces on: Tripo exports vary, and a stadium seen from inside is ALL back faces --
-        // with culling on you would see straight through the far stand to the void.
-        o.traverse(function (m) {
-          if (!m.isMesh || !m.material) return;
-          var arr = Array.isArray(m.material) ? m.material : [m.material];
-          for (var i = 0; i < arr.length; i++) {
-            if (arr[i] && arr[i].side !== THREE.DoubleSide) {
-              var cl = arr[i].clone(); cl.side = THREE.DoubleSide; cl.needsUpdate = true;
-              if (Array.isArray(m.material)) m.material[i] = cl; else m.material = cl;
-            }
-          }
-        });
-      } catch (_e) {}
-      S.scene.add(o); S.stadium = o;
+        S.renderer = new THREE.WebGLRenderer({ canvas: S.mount, antialias: false, alpha: true });
+      } catch (_e) { S.failed = true; return finish(false); }
+      S.scene = new THREE.Scene();
 
-      // Camera: above and behind the board's near edge, looking down the long axis at the far end,
-      // so the player's own towers are nearest and the bowl rises past the far goal.
-      try { frameStadium(THREE); } catch (_e2) {}
-      S.needFrame = true;
-      cb && cb(true);
-    }, function () { S.failed = true; cb && cb(false); });
+      // Match the hub's night-alley atmosphere so the stadium does not read as a different game.
+      var tint = 0x0d0f18;
+      S.scene.background = new THREE.Color(tint);
+      S.scene.fog = new THREE.Fog(tint, 900, 3400);
+      S.scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x2a2418, 1.15));
+      var d = new THREE.DirectionalLight(0xffe9b8, 0.9); d.position.set(500, 1200, 700);
+      S.scene.add(d);
+
+      S.camera = new THREE.PerspectiveCamera(42, 1, 1, 9000);
+      S.booted = true;
+      syncSize();
+
+      T.loadGLB(MODEL, function (glb) {
+        var o = glb && (glb.scene || glb);
+        if (!o) { S.failed = true; return finish(false); }
+        try {
+          // Scale from the model's OWN bbox against the board diagonal. Never an authored constant.
+          var bb = new THREE.Box3().setFromObject(o);
+          var sz = bb.getSize(new THREE.Vector3());
+          var BOARD_DIAG = Math.hypot(540, 900);              // the 2D board, in its own units
+          var modelDiag = Math.max(1e-6, Math.hypot(sz.x, sz.z));
+          // 2.1x so the bowl surrounds the playfield rather than sitting flush with its edges.
+          var k = (BOARD_DIAG * 2.1) / modelDiag;
+          o.scale.setScalar(k);
+          var bb2 = new THREE.Box3().setFromObject(o);
+          o.position.y = -bb2.min.y;                          // floor on y=0
+          var c2 = bb2.getCenter(new THREE.Vector3());
+          o.position.x = -c2.x; o.position.z = -c2.z;         // centre the bowl on the board
+          // Back faces on: Tripo exports vary, and a stadium seen from inside is ALL back faces --
+          // with culling on you would see straight through the far stand to the void.
+          o.traverse(function (m) {
+            if (!m.isMesh || !m.material) return;
+            var arr = Array.isArray(m.material) ? m.material : [m.material];
+            for (var i = 0; i < arr.length; i++) {
+              if (arr[i] && arr[i].side !== THREE.DoubleSide) {
+                var cl = arr[i].clone(); cl.side = THREE.DoubleSide; cl.needsUpdate = true;
+                if (Array.isArray(m.material)) m.material[i] = cl; else m.material = cl;
+              }
+            }
+          });
+        } catch (_e) {}
+        S.scene.add(o); S.stadium = o;
+
+        // Camera: above and behind the board's near edge, looking down the long axis at the far end,
+        // so the player's own towers are nearest and the bowl rises past the far goal.
+        try { frameStadium(THREE); } catch (_e2) {}
+        S.needFrame = true;
+        finish(true);
+      }, function () { S.failed = true; finish(false); });
+    }, function () { S.failed = true; finish(false); });  // contract says ready() never rejects; belt-and-suspenders
   }
 
   function setOn(v) {

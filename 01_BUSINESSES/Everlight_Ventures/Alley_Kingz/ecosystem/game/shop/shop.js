@@ -1841,7 +1841,13 @@ function deckMutate(fn) {
   }
   function fenceDealPrice(card, slot) {
     var base = fenceBaseScrap(card), disc = FENCE_DISCOUNTS[slot] || 0.20;
-    return { base: base, price: Math.max(1, Math.round(base * (1 - disc))), disc: Math.round(disc * 100) };
+    /* AK-FIX-shop 2026-07-28: the DROP building (shop-discount) now bites -- its price
+       multiplier stacks on the fence window markdown so the building actually saves scrap.
+       Guarded per the shared econ contract: reads 1x if AK_ECON/shopPriceMult isn't wired,
+       and clamped to (0,1] so it can only ever discount, never inflate or zero a price. */
+    var e = econ(), m = (e && e.shopPriceMult) ? e.shopPriceMult() : 1;
+    if (!(m > 0) || m > 1) m = 1;
+    return { base: base, price: Math.max(1, Math.round(base * (1 - disc) * m)), disc: Math.round(disc * 100) };
   }
   function fenceBonusClaimedToday() {
     var p = localProfile() || {};

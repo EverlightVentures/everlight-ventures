@@ -50,7 +50,7 @@ window.AK_BLDMODELS = (function (root) {
   // modelled building the same size as its boxed neighbours instead of towering over them.
   function targetHeight(b) {
     var h = (b && b.h) || 96;
-    return Math.max(90, h * 1.65);
+    return Math.max(140, h * 2.35);   // AK-BIGGER 2026-07-28 (operator: "buildings are too small"). Was 90/1.65. Walkable GLBs are hero buildings -- they should tower.
   }
 
   function modelFor(id) { return (id && MODELS[id]) || null; }
@@ -139,6 +139,34 @@ window.AK_BLDMODELS = (function (root) {
     } catch (_e) { return false; }
   }
 
+  /* AK-VIBRANT 2026-07-28 (operator: "the glb buildings need to be more vibrant or highlighted...
+   * the buildings u walk into need to be superior. the other buildings can just be eye candy").
+   * These are the ENTERABLE hero buildings, and they were reading as flat and dark as the generated
+   * background boxes. A mild EMISSIVE lift makes them self-illuminate -- so even on the shadow side
+   * they glow warmly and stand out against worldgen's desaturated grey band, without a separate
+   * light. Keyed to each material's own map/colour so a red facade glows red, not white. Applied on
+   * the clone only. */
+  function vibrance(THREE, obj) {
+    try {
+      obj.traverse(function (o) {
+        if (!o.isMesh || !o.material) return;
+        var arr = Array.isArray(o.material) ? o.material : [o.material];
+        for (var i = 0; i < arr.length; i++) {
+          var m = arr[i]; if (!m) continue;
+          try {
+            if ('emissive' in m && m.emissive) {
+              // glow keyed to the material's own base colour (or a warm default if untinted)
+              if (m.color) m.emissive.copy(m.color); else m.emissive.setHex(0x8a6a34);
+              m.emissiveIntensity = 0.35;
+              if (m.map && 'emissiveMap' in m) m.emissiveMap = m.map;   // the texture itself glows
+            }
+            m.needsUpdate = true;
+          } catch (_e2) {}
+        }
+      });
+    } catch (_e) {}
+  }
+
   /* ---------------------------------------------------------------------
    * PUBLIC: attach(THREE, scene, b, onDone)
    * Loads this building's model, fits it, parents it to a world-positioned
@@ -166,6 +194,7 @@ window.AK_BLDMODELS = (function (root) {
       var inst;
       try { inst = src.clone(true); } catch (_e) { inst = src; }
       solidify(THREE, inst, b.id);
+      vibrance(THREE, inst);   // AK-VIBRANT: walkable buildings pop; generated ones stay dim eye-candy
       fit(THREE, inst, b, spec);
       try { g.add(inst); } catch (_e2) {}
       if (onDone) onDone(g);

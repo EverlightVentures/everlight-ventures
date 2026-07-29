@@ -68,6 +68,16 @@
                      "More watts here, faster everything else runs."] }
   };
 
+  // AK-FIX-lane-E 2026-07-28: producer -> embedded arcade cabinet map. ONLY the
+  // Gem Mine and Card Forge have a playable cabinet; their micro-games (gem_tap /
+  // forge_temper) are fully built in arcade.js but were never launched. The keeper
+  // renders this button guarded on window.AK_ARCADE so a page without arcade.js
+  // simply omits it (never crashes -- pure wiring, no new game code).
+  var CAB = {
+    GEM:  { game: 'gem_tap',      label: 'VEIN STRIKE' },
+    FORGE:{ game: 'forge_temper', label: 'TEMPER' }
+  };
+
   // ---- module-private caches (no profile state lives here) ------------------
   var _flavor = {};              // bid -> flavor string chosen on open (stable across re-renders)
   var _cache  = { prod:null, now:0 };  // throttled snapshot for the per-frame glow (no per-frame JSON.parse)
@@ -195,23 +205,39 @@
     var collectLabel = pend > 0 ? ('COLLECT ' + pend + ' ' + cfg.resLabel) : 'NOTHING READY YET';
     var upLabel = atMax ? ('MAX LEVEL (Lv ' + lvl + ')') : ('UPGRADE → Lv ' + (lvl + 1) + '  (' + cost + 'g)');
 
+    var buttons = [
+      { label: collectLabel, primary: true, disabled: pend <= 0, onClick: function (c) {
+          var r = doCollect(c, bid);
+          if (r && r.ok) c.showBanner(collectBanner(cfg, r.units, r.forged), 1.8);
+          renderKeeper(c, b);
+        } },
+      { label: upLabel, primary: false, disabled: atMax || gold < cost, onClick: function (c) {
+          var r = doUpgrade(c, bid);
+          if (r && r.ok) c.showBanner(cfg.keeper.split(' ')[0] + ' upgraded ' + b.label + ' to Lv ' + r.lvl + '!', 1.8);
+          else if (r && r.err === 'FUNDS') c.showBanner('Need ' + r.need + 'g (have ' + r.have + ')', 1.6);
+          renderKeeper(c, b);
+        } }
+    ];
+
+    // AK-FIX-lane-E 2026-07-28: launch this producer's embedded arcade cabinet
+    // (Gem Mine -> VEIN STRIKE, Card Forge -> TEMPER). Guarded on AK_ARCADE so a
+    // page without arcade.js just omits the button. onDone re-renders the keeper so
+    // the fresh haul/coins show after the run; we DON'T pass keeper:true (that would
+    // swap to the Arcade keeper -- we want to stay in this producer's interior).
+    var cab = CAB[bid];
+    if (cab && global.AK_ARCADE && global.AK_ARCADE.play) {
+      buttons.push({ label: cab.label, primary: false, onClick: function (c) {
+        var ok = false;
+        try { ok = global.AK_ARCADE.play(cab.game, c, { onDone: function () { renderKeeper(c, b); } }); } catch (_e) {}
+        if (!ok) c.showBanner('Cabinet\'s warming up -- try again', 1.4);
+      } });
+    }
+
     ctx.ui.keeperCard({
       place: b.label, art: cfg.art, glyph: cfg.glyph, name: cfg.keeper,
       line: flavor + '   ' + status,
       interiorArt: 'assets/interiors/' + cfg.it + '.png',
-      buttons: [
-        { label: collectLabel, primary: true, disabled: pend <= 0, onClick: function (c) {
-            var r = doCollect(c, bid);
-            if (r && r.ok) c.showBanner(collectBanner(cfg, r.units, r.forged), 1.8);
-            renderKeeper(c, b);
-          } },
-        { label: upLabel, primary: false, disabled: atMax || gold < cost, onClick: function (c) {
-            var r = doUpgrade(c, bid);
-            if (r && r.ok) c.showBanner(cfg.keeper.split(' ')[0] + ' upgraded ' + b.label + ' to Lv ' + r.lvl + '!', 1.8);
-            else if (r && r.err === 'FUNDS') c.showBanner('Need ' + r.need + 'g (have ' + r.have + ')', 1.6);
-            renderKeeper(c, b);
-          } }
-      ]
+      buttons: buttons
     });
   }
 

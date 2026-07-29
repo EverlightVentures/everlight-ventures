@@ -17,6 +17,20 @@
   #fight{position:fixed;right:12px;bottom:14px;padding:12px 18px;border-radius:14px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#1a1206;font-weight:800;font-size:13px;border:none;box-shadow:0 4px 14px rgba(201,168,76,.4);letter-spacing:.05em;z-index:5;}
   #stick{position:fixed;left:16px;bottom:16px;width:116px;height:116px;border-radius:50%;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);touch-action:none;z-index:5;pointer-events:none;transition:opacity .15s;}
   #nub{position:absolute;left:33px;top:33px;width:50px;height:50px;border-radius:50%;background:rgba(201,168,76,.55);}
+  #runbtn{position:fixed;right:14px;bottom:150px;width:60px;height:60px;border-radius:50%;z-index:6;
+    background:radial-gradient(circle at 40% 30%,rgba(255,255,255,.28),#2a2313 55%,#17110a 130%);
+    border:2.5px solid rgba(232,197,90,.6);color:#e8c55a;font:800 13px Inter,sans-serif;letter-spacing:.04em;
+    box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}
+  #runbtn.on{background:radial-gradient(circle at 40% 30%,#ffe6a0,#e8c55a 55%,#c9a84c 130%);color:#15110a;border-color:#fff;box-shadow:0 0 16px rgba(232,197,90,.8);}
+  #punchbtn{position:fixed;right:82px;bottom:150px;width:66px;height:66px;border-radius:50%;z-index:6;
+    background:radial-gradient(circle at 40% 30%,rgba(255,120,90,.35),#3a1a12 55%,#1a0d0a 130%);
+    border:2.5px solid rgba(255,120,90,.7);font-size:26px;box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}
+  #punchbtn:active{transform:scale(.9);}
+  #jumpbtn{position:fixed;right:20px;bottom:220px;width:56px;height:56px;border-radius:50%;z-index:6;
+    background:radial-gradient(circle at 40% 30%,rgba(120,200,255,.32),#122636 55%,#0a141c 130%);
+    border:2.5px solid rgba(127,200,255,.7);color:#9fd8ff;font:800 12px Inter,sans-serif;letter-spacing:.04em;
+    box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}   /* AK-P2Z: JUMP (hold to glide) */
+  #jumpbtn:active{transform:scale(.9);}
   #radar{position:fixed;right:10px;top:46px;width:100px;height:128px;border-radius:8px;background:rgba(8,8,14,.78);border:1px solid rgba(201,168,76,.5);z-index:5;}
   #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .45s;z-index:20;}
   .tag{position:fixed;bottom:5px;left:0;right:0;text-align:center;font-size:9px;color:#555;}
@@ -347,7 +361,7 @@
 <canvas id="c"></canvas>
 <div id="loadscreen"><video id="ls-vid" autoplay loop muted playsinline preload="auto"><source src="assets/ui/menu_bg.mp4" type="video/mp4"></video><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
-<div id="phud"><span class="chip ak25-glow" id="ph-name"><img src="assets/icons/chip_player.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9670;'))"> STRAY</span><span class="chip ak25-glow" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;"><img src="assets/icons/icon_arena.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9670;'))"> TH -</span><span class="chip ak25-glow" id="ph-story" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="Your story -- chapter, next move, and re-watch the tutorial" onclick="try{akOpenStory();}catch(_e){}"><img src="assets/icons/chip_story.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10070;'))"> STORY</span><span class="chip ak25-glow" id="ph-rank" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="The Block ladder -- rank + Block Rep + the season exclusive" onclick="try{window.akOpenLadder&&akOpenLadder();}catch(_e){}"><img src="assets/icons/chip_trophy.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9733;'))"> --</span><span class="chip ak25-glow" id="ph-mk" style="cursor:pointer;pointer-events:auto;border-color:#7CFFb0;color:#7CFFb0;"><img src="assets/icons/chip_jobs.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9636;'))"> JOBS</span><span class="chip ak25-glow" id="ph-bld" style="cursor:pointer;pointer-events:auto;border-color:#7fc8ff;color:#7fc8ff;--ak-glow:#7fc8ff;"><img src="assets/icons/chip_builder.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9650;'))"> -/-</span><span class="chip ak25-glow" id="ph-tools" style="cursor:pointer;pointer-events:auto;border-color:#ff9d5c;color:#ff9d5c;--ak-glow:#ff9d5c;"><img src="assets/icons/chip_tools.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10022;'))"> TOOLS</span><span class="chip ak25-glow" id="ph-crew" style="cursor:pointer;pointer-events:auto;border-color:#9d8bff;color:#9d8bff;--ak-glow:#9d8bff;" onclick="try{window.AKSocial&&AKSocial.open();}catch(_e){}"><img src="assets/icons/chip_crew.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9679;'))"> CREW</span><span class="chip ak25-glow" id="ph-watch" style="cursor:pointer;pointer-events:auto;border-color:#ff6b6b;color:#ff6b6b;--ak-glow:#ff6b6b;" title="THE WATCH -- defend your district" onclick="try{window.akOpenGuard&&window.akOpenGuard();}catch(_e){}"><img src="assets/icons/def_street.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9632;'))"> WATCH</span><span class="chip ak25-glow" id="ph-raid" style="cursor:pointer;pointer-events:auto;border-color:#ff7a3c;color:#ff7a3c;--ak-glow:#ff7a3c;" title="RAID -- see other blocks &amp; hit em for their stash" onclick="try{window.akOpenRaidMap&&window.akOpenRaidMap();}catch(_e){}"><img src="assets/icons/chip_raid.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10005;'))"> RAID</span><span class="chip ak25-glow" id="ph-infirm" style="cursor:pointer;pointer-events:auto;border-color:#7CFFb0;color:#7CFFb0;--ak-glow:#7CFFb0;" title="THE INFIRMARY -- step inside, patch up your downed dogs" onclick="try{(window.akEnterInfirmaryBuilding||window.akOpenInfirmary)();}catch(_e){}"><img src="assets/icons/chip_infirmary.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10010;'))"> INFIRMARY</span><span class="chip ak25-glow" id="ph-fence" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="THE FENCE -- trade &amp; launder goods" onclick="try{window.akOpenMarket&&window.akOpenMarket();}catch(_e){}"><img src="assets/icons/chip_fence.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9672;'))"> FENCE</span><span class="chip ak25-glow" id="ph-transit" style="cursor:pointer;pointer-events:auto;border-color:#7fc8ff;color:#7fc8ff;--ak-glow:#7fc8ff;" title="Open the World Map" onclick="try{ if(window.AKWorldMap&&AKWorldMap.open){AKWorldMap.open();} else {akOpenTransit();} }catch(_e){}"><img src="assets/icons/chip_transit.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#187;'))"> TRANSIT</span><span id="ak-auth" style="display:inline-flex;align-items:center;pointer-events:auto;touch-action:auto;"></span><span class="cur ak25-glow" id="ph-gold" style="cursor:pointer;pointer-events:auto;" title="Tap for the Shop" onclick="try{doEnter('shop/shop.html#gems','the SHOP');}catch(_e){}"><img src="assets/icons/chip_gold.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129689;'}))"><b>-</b></span><span class="cur ak25-glow" id="ph-gem" style="cursor:pointer;pointer-events:auto;" title="Tap for gems" onclick="try{doEnter('shop/shop.html#gems','the SHOP');}catch(_e){}"><img src="assets/icons/chip_gem.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128142;'}))"><b>-</b></span><span class="cur ak25-glow" id="ph-scrap" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_scrap.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#9881;&#65039;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-keys" style="cursor:pointer;pointer-events:auto;" title="Tap for chests" onclick="try{doEnter('shop/shop.html#chests','the SHOP');}catch(_e){}"><img src="assets/icons/chip_keys.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128273;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-bones" style="cursor:pointer;pointer-events:auto;" title="Tap for chests" onclick="try{doEnter('shop/shop.html#chests','the SHOP');}catch(_e){}"><img src="assets/icons/chip_bones.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129460;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-wood" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_wood.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129717;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-stone" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_stone.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129704;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-metal" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_metal.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128297;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-produce" style="cursor:pointer;pointer-events:auto;--ak-glow:#7CFFb0;border-color:#7CFFb0;" title="Tap to trade"><img src="assets/icons/chip_produce.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#127807;'}))"><b>0</b></span></div>
+<div id="phud"><span class="chip ak25-glow" id="ph-name"><img src="assets/icons/chip_player.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9670;'))"> STRAY</span><span class="chip ak25-glow" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;"><img src="assets/icons/icon_arena.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9670;'))"> TH -</span><span class="chip ak25-glow" id="ph-story" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="Your story -- chapter, next move, and re-watch the tutorial" onclick="try{akOpenStory();}catch(_e){}"><img src="assets/icons/chip_story.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10070;'))"> STORY</span><span class="chip ak25-glow" id="ph-rank" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="The Block ladder -- rank + Block Rep + the season exclusive" onclick="try{window.akOpenLadder&&akOpenLadder();}catch(_e){}"><img src="assets/icons/chip_trophy.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9733;'))"> --</span><span class="chip ak25-glow" id="ph-mk" style="cursor:pointer;pointer-events:auto;border-color:#7CFFb0;color:#7CFFb0;"><img src="assets/icons/chip_jobs.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9636;'))"> JOBS</span><span class="chip ak25-glow" id="ph-bld" style="cursor:pointer;pointer-events:auto;border-color:#7fc8ff;color:#7fc8ff;--ak-glow:#7fc8ff;"><img src="assets/icons/chip_builder.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9650;'))"> -/-</span><span class="chip ak25-glow" id="ph-tools" style="cursor:pointer;pointer-events:auto;border-color:#ff9d5c;color:#ff9d5c;--ak-glow:#ff9d5c;"><img src="assets/icons/chip_tools.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10022;'))"> TOOLS</span><span class="chip ak25-glow" id="ph-crew" style="cursor:pointer;pointer-events:auto;border-color:#9d8bff;color:#9d8bff;--ak-glow:#9d8bff;" onclick="try{window.AKSocial&&AKSocial.open();}catch(_e){}"><img src="assets/icons/chip_crew.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9679;'))"> CREW</span><span class="chip ak25-glow" id="ph-watch" style="cursor:pointer;pointer-events:auto;border-color:#ff6b6b;color:#ff6b6b;--ak-glow:#ff6b6b;" title="THE WATCH -- defend your district" onclick="try{window.akOpenGuard&&window.akOpenGuard();}catch(_e){}"><img src="assets/icons/def_street.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9632;'))"> WATCH</span><span class="chip ak25-glow" id="ph-raid" style="cursor:pointer;pointer-events:auto;border-color:#ff7a3c;color:#ff7a3c;--ak-glow:#ff7a3c;" title="RAID -- see other blocks &amp; hit em for their stash" onclick="try{window.akOpenRaidMap&&window.akOpenRaidMap();}catch(_e){}"><img src="assets/icons/chip_raid.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10005;'))"> RAID</span><span class="chip ak25-glow" id="ph-infirm" style="cursor:pointer;pointer-events:auto;border-color:#7CFFb0;color:#7CFFb0;--ak-glow:#7CFFb0;" title="THE INFIRMARY -- step inside, patch up your downed dogs" onclick="try{(window.akEnterInfirmaryBuilding||window.akOpenInfirmary)();}catch(_e){}"><img src="assets/icons/chip_infirmary.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#10010;'))"> INFIRMARY</span><span class="chip ak25-glow" id="ph-fence" style="cursor:pointer;pointer-events:auto;border-color:#ffd76b;color:#ffd76b;--ak-glow:#ffd76b;" title="THE BAZAAR -- trade materials &amp; goods" onclick="try{window.akOpenMarket&&window.akOpenMarket();}catch(_e){}"><img src="assets/icons/chip_fence.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#9672;'))"> BAZAAR</span><!-- AK-FIX-lane-A 2026-07-28: relabel FENCE->BAZAAR so the chip name matches what akOpenMarket actually opens (the Bazaar materials board, not a laundering fence) --><span class="chip ak25-glow" id="ph-transit" style="cursor:pointer;pointer-events:auto;border-color:#7fc8ff;color:#7fc8ff;--ak-glow:#7fc8ff;" title="Open the World Map" onclick="try{ if(window.AKWorldMap&&AKWorldMap.open){AKWorldMap.open();} else {akOpenTransit();} }catch(_e){}"><img src="assets/icons/chip_transit.png" alt="" style="width:14px;height:14px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('&#187;'))"> TRANSIT</span><span id="ak-auth" style="display:inline-flex;align-items:center;pointer-events:auto;touch-action:auto;"></span><span class="cur ak25-glow" id="ph-gold" style="cursor:pointer;pointer-events:auto;" title="Tap for the Shop" onclick="try{doEnter('shop/shop.html#gems','the SHOP');}catch(_e){}"><img src="assets/icons/chip_gold.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129689;'}))"><b>-</b></span><span class="cur ak25-glow" id="ph-gem" style="cursor:pointer;pointer-events:auto;" title="Tap for gems" onclick="try{doEnter('shop/shop.html#gems','the SHOP');}catch(_e){}"><img src="assets/icons/chip_gem.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128142;'}))"><b>-</b></span><span class="cur ak25-glow" id="ph-scrap" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_scrap.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#9881;&#65039;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-keys" style="cursor:pointer;pointer-events:auto;" title="Tap for chests" onclick="try{doEnter('shop/shop.html#chests','the SHOP');}catch(_e){}"><img src="assets/icons/chip_keys.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128273;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-bones" style="cursor:pointer;pointer-events:auto;" title="Tap for chests" onclick="try{doEnter('shop/shop.html#chests','the SHOP');}catch(_e){}"><img src="assets/icons/chip_bones.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129460;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-wood" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_wood.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129717;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-stone" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_stone.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#129704;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-metal" style="cursor:pointer;pointer-events:auto;" title="Tap to trade" onclick="try{akOpenTrade();}catch(_e){}"><img src="assets/icons/chip_metal.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#128297;'}))"><b>0</b></span><span class="cur ak25-glow" id="ph-produce" style="cursor:pointer;pointer-events:auto;--ak-glow:#7CFFb0;border-color:#7CFFb0;" title="Tap to trade"><img src="assets/icons/chip_produce.png" alt="" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith(Object.assign(document.createElement('i'),{innerHTML:'&#127807;'}))"><b>0</b></span></div>
 <div id="encind"><span class="dir"></span><span class="txt"></span></div>
 <!-- AK-GOALBEACON 2026-06-27 (P3): always-on next-rung tracker + Old Pack stake + world-signal + the ONE Block Tribute front door. Wired by the controller below. -->
 <div id="ak-beacon" aria-live="polite">
@@ -394,6 +408,12 @@
 <canvas id="radar" width="100" height="128"></canvas>
 <div id="banner"></div>
 <div id="stick"><div id="nub"></div></div>
+<!-- AK-BOXBTN 2026-07-28 (operator: built the character to box; wants walk default + RUN + PUNCH in
+     districts AND raids). Walk is the stick default; RUN toggles sprint; PUNCH throws a jab. -->
+<button id="runbtn" type="button">RUN</button>
+<button id="punchbtn" type="button">&#128074;</button>
+<button id="jumpbtn" type="button">JUMP</button>
+
 <div id="fade"></div>
 <div class="tag">walkable world proto &bull; 3 districts &bull; not the final build</div>
 <!-- AK-RESPONSIVE + AK-PRELOAD 2026-07-11: load FIRST. responsive.js (window.AK_RESPONSIVE) = the viewport/tier + crisp-canvas shell; preloader.js (window.AK_PRELOAD) = the branded loading gate + image warm-cache. Both are headless-safe with zero load-time side effects beyond defining their globals; every consumer below is typeof-guarded, so a missing file = today's exact behavior. -->
@@ -449,6 +469,8 @@
 <script src="systems/encounters.js?v=1782969843"></script>
 <script src="systems/keyboard.js?v=1782969843"></script>
 <script src="systems/juice.js?v=1782969843"></script>
+<!-- AK-FIX-lane-A 2026-07-28: wire the procedural SFX engine into the 3D world + raid (was loaded nowhere, so the walkable world was silent). window.AK_SFX.play(cue) -- every call site guards on window.AK_SFX. -->
+<script src="systems/sfx.js?v=1782969843"></script>
 <script type="module" src="assets/vendor/model-viewer.min.js?v=350"></script>
 <!-- AK-THREE 2026-07-18: the 3D unlock. Vendored Three.js r160 (core + OrbitControls + GLTFLoader) is
      on disk at assets/vendor/; this bootstrapper gates access behind AK_THREE.ok()/get() so every 3D
@@ -642,6 +664,11 @@
      idle flip and back). MUST load AFTER hub3d.js. Readout: AK_HEROANIM.diag().
      Proof: node systems/akheroanim.test.js (60 checks) -->
 <script src="systems/akheroanim.js?v=1782969843"></script>
+<!-- AK-HEROACTIONS 2026-07-28: one action button per non-locomotion clip the SELECTED hero GLB ships
+     (bcardd 8, balboa 5, jagged 2). Self-registers with AK_SYSTEMS + self-ticks for raids. After hub3d. -->
+<script src="systems/akheroactions.js?v=1782969843"></script>
+<!-- AK-HEROHUD 2026-07-28: HUD chip showing current hero + tap-to-switch; live-swaps the hero everywhere. -->
+<script src="systems/akherohud.js?v=1782969843"></script>
 <script src="systems/raid.js?v=1782969843"></script>
 <script src="systems/raidscene.js?v=1782969843"></script>
 <script src="systems/seasons.js?v=1782969843"></script>
@@ -916,7 +943,7 @@ const ZONES={
     edges:{E:{to:'DOWNTOWN',spawn:{x:150,y:650}},S:{to:'THE_YARDS',spawn:{x:850,y:150}}}},
   DOWNTOWN:{id:'DOWNTOWN',name:'DOWNTOWN',gx:1,gy:0,tint:[14,12,18],ground:'midtown',
     buildings:[B('DROP','THE DROP','#ff8fae',560,560,170,104,'shop/shop.html#gems','the SHOP'),
-               B('GARAGE','THE GARAGE','#7fc8ff',1140,560,170,104,'shop/shop.html#deck','deck builder')],
+               B('GARAGE','THE GARAGE','#7fc8ff',1140,560,170,104,'','rig garage')],
     edges:{S:{to:'HOME_TURF',spawn:{x:850,y:150}},W:{to:'THE_OVERLOOK',spawn:{x:1550,y:650}},E:{to:'NEON_HEIGHTS',spawn:{x:150,y:650}}}},
   NEON_HEIGHTS:{id:'NEON_HEIGHTS',name:'NEON HEIGHTS',gx:2,gy:0,tint:[16,10,20],ground:'midtown',
     buildings:[B('WARD','THE WARDROBE','#ff79c6',560,560,160,96,'shop/shop.html#drip2','Drip cosmetics'),
@@ -970,7 +997,7 @@ let activeZone=getZone(localStorage.getItem('ak_hub_zone')||'HOME_TURF');
 function curBuildings(){return activeZone.buildings;}
 function curGround(){var d=districtBg[activeZone.id]; if(d&&d.complete&&d.naturalWidth>0)return d; return groundImg[activeZone.ground];}
 function curTint(){var c=activeZone.tint;return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
-const me={x:850,y:650,tx:null,ty:null,r:23,spd:300}; // AK-SPAWN: centre of the active zone (empty tile)
+const me={x:850,y:650,tx:null,ty:null,r:23,spd:300,z:0,vz:0}; // AK-SPAWN: centre of the active zone (empty tile). AK-P2Z: z=jump height, vz=vertical velocity (Prototype-2 verticality via world3d.project height arg)
 let spawnGrace=0.8;
 let cam={x:0,y:0};
 // AK-CAMCENTRE 2026-07-19 (operator bug 1): "my player needs to move across the map while walking in
@@ -1048,8 +1075,9 @@ addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(['arrowu
   // RAID bag (carried vs secured), in the district you get the full stash with the 3D preview.
   if(k==='b'&&window.AK_BACKPACK){ try{ AK_BACKPACK.open({mode: (window.RAID&&!RAID.over)?'raid':'district'}); }catch(_eB){} }
   if(k==='escape'&&window.AK_BACKPACK){ try{ AK_BACKPACK.close(); }catch(_eB2){} }
+  if(k===' '||k==='spacebar'){ e.preventDefault(); akJump(); window.__akGlideHeld=true; }   // AK-P2Z: Space = jump; hold for glide
 });
-addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0;});
+addEventListener('keyup',e=>{const _k=e.key.toLowerCase();keys[_k]=0; if(_k===' '||_k==='spacebar')window.__akGlideHeld=false;});   // AK-P2Z: release glide
 // AK-KEYBOARD 2026-07-14 (operator: full keyboard + hotkeys, hybrid touch/remote):
 // systems/keyboard.js owns key listening + the Quick-Travel palette + a HELP card;
 // the HUB hands it a single dispatch(action) seam. Movement (WASD/arrows, above)
@@ -1119,6 +1147,73 @@ function cvStickUp(e){ if(stickOn && e.pointerId===stickId){ stickEnd(e); stick.
 cv.addEventListener('pointerup',cvStickUp); cv.addEventListener('pointercancel',cvStickUp);
 // AK-MOVE 2026-06-19 (Build 2): radial deadzone (kills drift) + analog magnitude (trot/sprint) + seed-on-touch + multi-touch guard
 let stickV={x:0,y:0},stickOn=false,stickId=null,runArmed=false,lastStickUp=0,running=false;const stick=document.getElementById('stick'),nub=document.getElementById('nub');
+// AK-BOXBTN 2026-07-28: RUN toggle + PUNCH. Available in district and raid.
+window.__akRunToggle=false; window.__akPunchT=0; window.__akHitstop=0;   // AK-FIX-lane-A 2026-07-28: __akHitstop = seconds of combat freeze remaining (consumed in loop())
+(function(){ var rb=document.getElementById('runbtn'), pb=document.getElementById('punchbtn'), jb=document.getElementById('jumpbtn');
+  if(rb) rb.addEventListener('click',function(){ window.__akRunToggle=!window.__akRunToggle; rb.classList.toggle('on',window.__akRunToggle); try{if(navigator.vibrate)navigator.vibrate(12);}catch(_e){} try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('tap'); }catch(_e){} });   // AK-FIX-lane-A 2026-07-28: UI tap cue on the RUN toggle
+  if(pb) pb.addEventListener('click',function(ev){ ev.preventDefault(); akPunch(); }, {passive:false});
+  if(jb){ var _jd=function(ev){ ev.preventDefault(); akJump(); window.__akGlideHeld=true; }, _ju=function(){ window.__akGlideHeld=false; };   // AK-P2Z: tap = jump, HOLD = glide
+    jb.addEventListener('pointerdown',_jd,{passive:false}); jb.addEventListener('pointerup',_ju); jb.addEventListener('pointerleave',_ju); jb.addEventListener('pointercancel',_ju); }
+})();
+/* AK-FIX-lane-A 2026-07-28: shared combat/reward juice helpers -- SFX + hitstop + camera-kick + reward burst.
+   All guarded so a missing AK_SFX / AK_JUICE / RAID never throws in the game loop. */
+function akCombatFeedback(hit,big,dmg){
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play(hit?(big?'crit':'hit'):'whoosh'); }catch(_e){}   // hit/miss SFX split
+  if(!hit)return;
+  try{ window.__akHitstop=Math.max(window.__akHitstop||0, big?0.09:0.05); }catch(_e){}            // brief hitstop, consumed in loop()
+  var mg=big?9:5;
+  try{ if(window.AK_JUICE&&AK_JUICE.impact){ var row=AK_JUICE.impact(dmg||(big?120:40)); if(row&&row.shake)mg=Math.max(mg,row.shake+3); } }catch(_e){}   // size the kick off the juice tier
+  try{ if(window.RAID){ var a=(typeof faceAngle==='number')?faceAngle:0; RAID._kx=Math.cos(a)*mg; RAID._ky=Math.sin(a)*mg; } }catch(_e){}   // camera-kick offset, decayed+applied in akRaidStep
+}
+function akFlashChip(id){ try{ var el=document.getElementById(id); if(!el)return; el.style.transition='none'; el.style.boxShadow='0 0 16px 4px rgba(232,197,55,.9)'; el.style.filter='brightness(1.6)';
+  setTimeout(function(){ try{ el.style.transition='box-shadow .5s ease, filter .5s ease'; el.style.boxShadow=''; el.style.filter=''; }catch(_e){} },40); }catch(_e){} }   // AK-FIX-lane-A: brief stat-changed flash
+function akRewardFly(n){ try{ var dst=document.getElementById('ph-gold'); if(!dst||typeof document==='undefined')return; var dr=dst.getBoundingClientRect(); var cx=innerWidth/2, cy=innerHeight*0.5; n=Math.max(1,Math.min(8,n|0));
+  for(var i=0;i<n;i++){ (function(i){ var d=document.createElement('div'); d.textContent='🪙'; d.style.cssText='position:fixed;left:'+(cx+(Math.random()*60-30))+'px;top:'+(cy+(Math.random()*40-20))+'px;font-size:20px;z-index:9999;pointer-events:none;transition:transform .55s cubic-bezier(.4,0,.2,1),opacity .55s;will-change:transform,opacity;';
+    document.body.appendChild(d); requestAnimationFrame(function(){ var tx=(dr.left+dr.width/2)-cx, ty=(dr.top+dr.height/2)-cy; d.style.transform='translate('+tx+'px,'+ty+'px) scale(.5)'; d.style.opacity='0'; });
+    setTimeout(function(){ try{ d.remove(); }catch(_e){} }, 620); })(i); } }catch(_e){} }   // AK-FIX-lane-A: coin-fly-to-HUD reward burst
+/* AK-FIX-lane-A 2026-07-28: HUD MUTE chip -- flips localStorage 'ak_muted' (districtmusic.js watches it) and syncs the new AK_SFX engine. Self-contained; appended to #phud. */
+(function(){ try{
+  function akIsMuted(){ try{ return localStorage.getItem('ak_muted')==='1'; }catch(_e){ return false; } }
+  function akSyncMute(m){ try{ if(window.AK_SFX&&AK_SFX.setMuted)AK_SFX.setMuted(!!m); }catch(_e){} }
+  var host=document.getElementById('phud'); if(!host)return;
+  var chip=document.createElement('span'); chip.className='chip ak25-glow'; chip.id='ph-mute';
+  chip.style.cssText='cursor:pointer;pointer-events:auto;border-color:#9aa8b5;color:#cdd6df;--ak-glow:#9aa8b5;';
+  chip.title='Mute / unmute all game sound';
+  function paint(){ var m=akIsMuted(); chip.innerHTML=(m?'&#128263; MUTED':'&#128266; SOUND'); }
+  chip.addEventListener('click',function(){ var m=!akIsMuted(); try{ localStorage.setItem('ak_muted', m?'1':'0'); }catch(_e){} akSyncMute(m); paint(); });
+  host.appendChild(chip); paint(); akSyncMute(akIsMuted());
+}catch(_e){} })();
+/* AK-P2Z 2026-07-28: jump/glide launch. Grounded (with a small coyote window) -> upward impulse; horizontal
+ * momentum is preserved by the integrator, so a running jump bounds across gaps and off rooftops. Holding the
+ * jump control on the way down engages glide (weak gravity). Works in the hub and in raids. */
+function akJump(){
+  if(typeof me==='undefined')return;
+  if((me.z||0)<=1.2 && (me.vz||0)<=0.1){ me.vz=640; window.__akWasAir=true;
+    try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('charge'); if(navigator.vibrate)navigator.vibrate([8,10]); }catch(_e){}
+  }
+}
+function akPunch(){
+  if(typeof me==='undefined')return;
+  var now=performance.now(); if(now-window.__akPunchT<280)return; window.__akPunchT=now;   // cooldown
+  // lunge the hero a touch in the facing direction so it reads as a jab
+  var ang=(typeof faceAngle==='number')?faceAngle:(faceDir>=0?0:Math.PI);
+  try{ me.x+=Math.cos(ang)*10; me.y+=Math.sin(ang)*6; }catch(_e){}
+  var hx=me.x+Math.cos(ang)*38, hy=me.y+Math.sin(ang)*38, hit=false;
+  // RAID: damage the nearest defender in range
+  try{ if(state==='RAID'&&window.RAID&&RAID.defenders){ var best=null,bd=1e9;
+    for(var i=0;i<RAID.defenders.length;i++){ var d=RAID.defenders[i]; if(d.dead)continue;
+      var dd=Math.hypot(d.x-hx,d.y-hy); if(dd<bd){bd=dd;best=d;} }
+    if(best&&bd<64){ best.hp=(best.hp||best.maxHp||30)-Math.max(14,(me.atk||18)); hit=true;
+      // AK-PUNCHFIX 2026-07-28: (1) spawnHit takes (list,x,y,color,n) -- the old 2-arg call threw (swallowed) so a punch made NO sparks;
+      // (2) a punch-kill must feed the killstreak/energy economy like FIRE/melee do, or boxing is second-class to walking into enemies.
+      if(best.hp<=0){ best.dead=true; if(window.RAID){ RAID.kills=(RAID.kills|0)+1; RAID.energy=Math.min(RAID.eMax||100,(RAID.energy||0)+4); } }
+      try{ if(window.AK_FX&&AK_FX.spawnHit)AK_FX.spawnHit(RAID.parts,best.x,best.y,'#ff5b5b',5); }catch(_e){} } }
+  }catch(_e){}
+  // punch shockwave FX at the fist
+  try{ if(window.akMangaImpact) akMangaImpact(wx(hx,hy),wy(hy,hx), hit?'#ff5b5b':'#e8c55a'); }catch(_e){}
+  try{ if(navigator.vibrate)navigator.vibrate(hit?[10,30,10]:14); }catch(_e){}
+  try{ akCombatFeedback(hit,false); }catch(_e){}   // AK-FIX-lane-A 2026-07-28: hit/miss SFX split + hitstop + camera-kick on the jab
+}
 const STICK_DZ=0.14; // resting deadzone: below this = no movement (no jitter)
 function setStick(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+58),dy=e.clientY-(r.top+58);
   const m=Math.hypot(dx,dy)||1; const cl=Math.min(m,44); nub.style.left=(33+dx/m*cl)+'px'; nub.style.top=(33+dy/m*cl)+'px';
@@ -1233,7 +1328,7 @@ function showBanner(t,hold){banner.textContent=t;banner.style.opacity='1';banner
   function refreshProdCache(){ try{ var p=prof(), m={}; if(p.prod){ for(var k in p.prod){ if(p.prod[k])m[k]=p.prod[k].lvl|0; } } window.__akProd=m; }catch(_e){} }
   function completeFinished(){ var p=prof(), now=Date.now(), changed=false;
     if(p.prod){ for(var k in p.prod){ var e=p.prod[k]; if(e&&e.upUntil&&now>=e.upUntil){ changed=true; } } }
-    if(changed && E()){ E().mutateProfile(function(pp){ var nn=Date.now(); for(var k in pp.prod){ var e=pp.prod[k]; if(e&&e.upUntil&&nn>=e.upUntil){ e.lvl=(e.lvl|0)+1; e.upUntil=0; } } }); refreshProdCache(); try{ if(window.akPlayCinematic)akPlayCinematic('upgrade_done'); }catch(_e){} try{ akMangaImpact(innerWidth/2,innerHeight*0.42,'#7fc8ff'); }catch(_e2){} try{ if(window.AK_WORLDVERBS&&AK_WORLDVERBS.refresh)AK_WORLDVERBS.refresh(); }catch(_e){} } }   // AK-MANGA (W4): ordinary building done = the LIGHT beat -- one builder-blue impact frame riding the upgrade_done stinger (Town Hall gets the full page)   // AK-BUILDERCAP: freed slot -> refresh the SEND DOG button
+    if(changed && E()){ E().mutateProfile(function(pp){ var nn=Date.now(); for(var k in pp.prod){ var e=pp.prod[k]; if(e&&e.upUntil&&nn>=e.upUntil){ e.lvl=(e.lvl|0)+1; e.upUntil=0; } } }); refreshProdCache(); try{ if(window.akPlayCinematic)akPlayCinematic('upgrade_done'); }catch(_e){} try{ akMangaImpact(innerWidth/2,innerHeight*0.42,'#7fc8ff'); }catch(_e2){} try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('reward'); }catch(_eS){} try{ if(typeof akFlashChip==='function')akFlashChip('ph-bld'); }catch(_eF){} try{ if(window.AK_WORLDVERBS&&AK_WORLDVERBS.refresh)AK_WORLDVERBS.refresh(); }catch(_e){} } }   // AK-MANGA (W4): ordinary building done = the LIGHT beat -- one builder-blue impact frame riding the upgrade_done stinger (Town Hall gets the full page)   // AK-FIX-lane-A 2026-07-28: upgrade-done reward cue + flash the builder chip (the stat that changed)   // AK-BUILDERCAP: freed slot -> refresh the SEND DOG button
   function close(){ var m=document.getElementById('upgpanel'); if(m)m.style.display='none'; }
   function fmtT(ms){ var s=Math.max(0,Math.round(ms/1000)); if(s<60)return s+'s'; var mm=Math.floor(s/60); return mm+':'+(s%60<10?'0':'')+(s%60); }
   window.akOpenUpgrade=function(b){
@@ -1837,6 +1932,11 @@ function akRaidBankBag(bag){ try{ var E=window.AK_ECON; if(!E||!bag)return; var 
     if(bag.stone && E.bankMaterial){ E.bankMaterial('stone', bag.stone|0); any=true; }
     if(bag.metal && E.bankMaterial){ E.bankMaterial('metal', bag.metal|0); any=true; }
     if(any && window.akHud && akHud.tick) akHud.tick();
+    if(any){   // AK-FIX-lane-A 2026-07-28: banking the raid haul = a reward beat -- coin-fly to the gold chip + gold impact frame + payoff cue
+      try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('reward'); }catch(_e){}
+      try{ if(typeof akRewardFly==='function')akRewardFly(6); }catch(_e){}
+      try{ if(window.akMangaImpact)akMangaImpact(innerWidth/2,innerHeight*0.5,'#e8c55a'); }catch(_e){}
+    }
   }catch(_e){} }
 function akRaidBar(g,x,y,w,frac,col){ frac=Math.max(0,Math.min(1,frac)); g.save();
   g.fillStyle='rgba(0,0,0,.6)'; g.fillRect(x-1,y-1,w+2,6); g.fillStyle=col; g.fillRect(x,y,w*frac,4);
@@ -1858,7 +1958,8 @@ function akRaidSwapDistrict(nzi){ if(!RAID||nzi<0||!RAID.zones||nzi>=RAID.zones.
   for(var rt=0;rt<RAID.defenders.length;rt++){ var _rd=RAID.defenders[rt]; if(!_rd.dead && _rd.zi<nzi){ _rd.zi=nzi; _rd.hx=140+Math.random()*(RAID_W-280); _rd.hy=180+Math.random()*(RAID_H-360); _rd.x=_rd.hx; _rd.y=_rd.hy; } }   // survivors FALL BACK deeper -- the whole 11-deck stands between you and the Hall
   genProps(); akRaidArmProps(); spawnGrace=0.6; try{ fade.style.opacity='1'; setTimeout(function(){ fade.style.opacity='0'; },260); }catch(_e){}   // AK-LOOTALL: this district's props go minable too
   try{ showBanner(RAID.zone.name+'  ·  district '+(nzi+1)+'/'+RAID.zones.length+(nzi===RAID.coreZi?'  ·  THE HALL IS HERE':''),2.2); }catch(_e){}
-  try{ if(navigator.vibrate)navigator.vibrate(20); }catch(_e){} }
+  try{ if(navigator.vibrate)navigator.vibrate(20); }catch(_e){}
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('whoosh'); }catch(_e){} }   // AK-FIX-lane-A 2026-07-28: district-swap swoosh
 function akRaidBtn(id,label){ var b=document.getElementById(id); if(!b){ b=document.createElement('button'); b.id=id; document.body.appendChild(b); } b.textContent=label; b.style.display='block'; return b; }
 // AK-ARSENAL 2026-06-30 (W5): the raid hero's full weapon+spell kit (Mobile Legends / Inotia feel)
 // built from AK_FX.ARSENAL -- bolt (basic FIRE), beam, nova, chain, dot, and the Crown Nuke ult.
@@ -1966,6 +2067,7 @@ function akDeployCard(nm){ try{
   if(window.AK_FX&&AK_FX.spawnHit)AK_FX.spawnHit(RAID.parts,me.x,me.y-30,'#e8c55a',6);
   try{ showBanner(nm+' hits the block',1.1); }catch(_e4){}
   try{ if(navigator.vibrate)navigator.vibrate(12); }catch(_e5){}
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('tap'); }catch(_e6){}   // AK-FIX-lane-A 2026-07-28: deploy-a-dog cue
   akDeployUpdateBar();
 }catch(_e){} }
 // cardfx walk/engage clip for a deployed dog (pooled <video>; guarded fallback = the static circle draw)
@@ -2027,7 +2129,8 @@ function akRaidCast(ab){ if(!RAID||RAID.over||!ab)return; RAID.cd=RAID.cd||{}; R
   else if(ab.kind==='chain'){ akRaidChainHit((ab.dmg||120)*_nd,col); }
   else if(ab.kind==='dot'){ if(tgt){ tgt._dot={dps:(ab.dmg||24)*_nd,t:3,col:col}; } RAID.casts.push({kind:'dot',x1:me.x,y1:me.y,x2:tx,y2:ty,col:col,life:0.3,max:0.3}); }
   if(window.AK_FX&&AK_FX.spawnSpellParticles)AK_FX.spawnSpellParticles(RAID.parts,ab.kind,tx,ty,col,0);
-  try{ if(navigator.vibrate)navigator.vibrate(ab.kind==='nuke'?[15,30,15]:12); }catch(_e){} }
+  try{ if(navigator.vibrate)navigator.vibrate(ab.kind==='nuke'?[15,30,15]:12); }catch(_e){}
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play(ab.kind==='nuke'?'crit':(ab.kind==='beam'||ab.kind==='nova'?'heavy':'charge')); }catch(_e){} }   // AK-FIX-lane-A 2026-07-28: spell-cast cue, nuke ult = crit-weight
 // AK-MULTIDISTRICT 2026-07-01: the opponent's base is 2-3 walkable DISTRICTS like yours -- their buildings split
 // across them, defenders posted per district, the TOWN HALL deep in the LAST one. Walk the E/W edges to move
 // between their districts (same edge-walk as your own map). Win = crack the Hall or level every district.
@@ -2197,6 +2300,7 @@ window.akEnterRaid=function(target){
   // AK-NEEDS (bible 10.1): entering a raid STARVING = the one-time 'RUNNING ON EMPTY' tell (after the BREACH banner clears)
   try{ if(RAID.ndm<1) setTimeout(function(){ try{ if(RAID&&!RAID.over)showBanner('RUNNING ON EMPTY -- your runner is starving. Bites land soft. Feed him after this.',2.6); }catch(_e2){} },2400); }catch(_eN2){}
   try{ if(navigator.vibrate)navigator.vibrate(40); }catch(_e){}
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('boss_enter'); }catch(_e){}   // AK-FIX-lane-A 2026-07-28: the BREACH lands as an adrenaline boss-enter cue
   }
   if(_mgCall){ akRaidCallPend=true; _mgP.then(_mgGo,_mgGo); } else _mgGo();
 };
@@ -2213,6 +2317,9 @@ function akRaidStep(dt){ if(!RAID||RAID.over)return; var blds=RAID.zone.building
     } else RAID._exT=0;
   }
   if(RAID.fireCd>0)RAID.fireCd-=dt; if(RAID.ultCd>0)RAID.ultCd-=dt; if(RAID.hurt>0)RAID.hurt-=dt; if(RAID.flash>0)RAID.flash-=dt;
+  /* AK-FIX-lane-A 2026-07-28: apply + decay the combat camera-kick. akCamFollow() ran earlier this frame (loop),
+     akRaidDraw runs after, and wx/wy read cam -- so nudging cam here shows in the draw and self-recentres next frame. */
+  try{ if(RAID._kx||RAID._ky){ cam.x+=RAID._kx||0; cam.y+=RAID._ky||0; RAID._kx=(RAID._kx||0)*0.6; RAID._ky=(RAID._ky||0)*0.6; if(Math.abs(RAID._kx)<0.5)RAID._kx=0; if(Math.abs(RAID._ky)<0.5)RAID._ky=0; } }catch(_ek){}
   if(RAID.energy<RAID.eMax)RAID.energy=Math.min(RAID.eMax,RAID.energy+7*dt);   // GOAL 9: trimmed +11->+7/s so ults aren't spammable (retune here)
   for(var ck in RAID.cd){ if(RAID.cd[ck]>0)RAID.cd[ck]-=dt; }                    // ability cooldowns tick down
   RAID._btnT=(RAID._btnT||0)+dt; if(RAID._btnT>=0.08){ RAID._btnT=0; akRaidUpdateButtons(); }   // radial cooldown rings + seconds
@@ -2230,7 +2337,9 @@ function akRaidStep(dt){ if(!RAID||RAID.over)return; var blds=RAID.zone.building
   for(var mi=0;mi<blds.length;mi++){ var mb=blds[mi]; if(mb.hp<=0)continue; var md=Math.hypot(mb.x-me.x,mb.y-me.y)-Math.max(mb.w,mb.h)*0.5; if(md<14&&md<mbd){mbd=md;mtgt=mb;} }
   for(var mj=0;mj<RAID.defenders.length;mj++){ var mdf=RAID.defenders[mj]; if(mdf.dead||((mdf.zi|0)!==(RAID.zi|0)))continue; var md2=Math.hypot(mdf.x-me.x,mdf.y-me.y)-mdf.r; if(md2<14&&md2<mbd){mbd=md2;mtgt=mdf;} }
   for(var mk=0;RAID.nodes&&mk<RAID.nodes.length;mk++){ var mnd=RAID.nodes[mk]; if(mnd.dead||((mnd.zi|0)!==(RAID.zi|0)))continue; var md3=Math.hypot(mnd.x-me.x,mnd.y-me.y)-mnd.r; if(md3<14&&md3<mbd){mbd=md3;mtgt=mnd;} }   // GOAL 10: walk into a node to MINE it (same melee reach as a wall)
-  if(mtgt){ if(mtgt.isNode){ akRaidDepleteNode(mtgt,26*dt*(RAID.ndm||1)); } else { mtgt.hp-=26*dt*(RAID.ndm||1); if(mtgt.r&&mtgt.hp<=0&&!mtgt.dead){mtgt.dead=true;RAID.kills++;} } }   // AK-NEEDS: hunger dmg mult on the hero's bite (default 1)
+  RAID._biteT=(RAID._biteT||0)-dt;   // AK-FIX-lane-A 2026-07-28: bite-feedback throttle so a continuous chomp fires SFX/hitstop on a ~0.2s cadence, not every frame
+  if(mtgt){ var _wasDead=mtgt.dead; if(mtgt.isNode){ akRaidDepleteNode(mtgt,26*dt*(RAID.ndm||1)); } else { mtgt.hp-=26*dt*(RAID.ndm||1); if(mtgt.r&&mtgt.hp<=0&&!mtgt.dead){mtgt.dead=true;RAID.kills++;} }
+    if(RAID._biteT<=0){ RAID._biteT=0.2; try{ akCombatFeedback(true,(mtgt.dead&&!_wasDead)); }catch(_e){} } }   // AK-FIX-lane-A: bite lands with hit/crit SFX + hitstop + camera-kick (crit when this chomp KO'd)   // AK-NEEDS: hunger dmg mult on the hero's bite (default 1)
   // ALLY crew (offense): advance on the nearest structure/defender and wail on it
   for(var ai=0;ai<RAID.allies.length;ai++){ var al=RAID.allies[ai]; if(al.dead)continue; al.atkT-=dt; var at=null,ad=1e9;
     for(var bi=0;bi<blds.length;bi++){ var bb=blds[bi]; if(bb.hp<=0)continue; var bd2=Math.hypot(bb.x-al.x,bb.y-al.y)-Math.max(bb.w,bb.h)*0.4; if(bd2<ad){ad=bd2;at=bb;} }
@@ -2238,7 +2347,7 @@ function akRaidStep(dt){ if(!RAID||RAID.over)return; var blds=RAID.zone.building
     if(at){ if(ad>30){ al._mv=1; var adx=at.x-al.x,ady=at.y-al.y,adm=Math.hypot(adx,ady)||1; al.x+=adx/adm*al.spd*dt; al.y+=ady/adm*al.spd*dt; } else { al._mv=0; if(al.atkT<=0){ al.atkT=0.7; at.hp-=(al.dmg||18); if(at.r&&at.hp<=0&&!at.dead){at.dead=true;RAID.kills++;} if(window.AK_FX)AK_FX.spawnHit(RAID.parts,at.x,at.y,al.deploy?'#e8c55a':'#7CFFb0',3); } } } else al._mv=0; }   // AK-DEPLOYBAR: deployed dogs bite with their card dmg (14-22); _mv drives the walk/engage clip
   // ---- KILLSTREAK tier-up (the tower-lane DOG GOD beat, now in the raid) ----
   var ti=window.AK_FX?AK_FX.tier(RAID.kills):0;
-  if(ti>RAID.lastTier){ RAID.lastTier=ti; RAID.flash=0.25; if(window.AK_FX&&AK_FX.spawnTierUp)AK_FX.spawnTierUp(RAID.parts,me.x,me.y,RAID.kills); akMangaImpact(wx(me.x,me.y),wy(me.y,me.x),'#e8c55a'); try{ showBanner((window.AK_FX?AK_FX.tierName(RAID.kills):'STREAK')+' -- killstreak up',1.3); }catch(_e){} try{ if(navigator.vibrate)navigator.vibrate(ti>=4?[20,40,20]:18); }catch(_e){} }   // AK-MANGA (W3): killstreak tier-up fires the gold impact frame on the hero (>=1.2s throttle lives in akMangaImpact)
+  if(ti>RAID.lastTier){ RAID.lastTier=ti; RAID.flash=0.25; if(window.AK_FX&&AK_FX.spawnTierUp)AK_FX.spawnTierUp(RAID.parts,me.x,me.y,RAID.kills); akMangaImpact(wx(me.x,me.y),wy(me.y,me.x),'#e8c55a'); try{ showBanner((window.AK_FX?AK_FX.tierName(RAID.kills):'STREAK')+' -- killstreak up',1.3); }catch(_e){} try{ if(navigator.vibrate)navigator.vibrate(ti>=4?[20,40,20]:18); }catch(_e){} try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play(ti>=4?'crown':'reward'); }catch(_e){} }   // AK-MANGA (W3): killstreak tier-up fires the gold impact frame on the hero (>=1.2s throttle lives in akMangaImpact)   // AK-FIX-lane-A 2026-07-28: tier-up hype cue (crown at high tiers)
   // ---- DEFENDERS (GOAL 9): wide AGGRO (380), they PRESS -- melee dogs chase + bite (14 dmg), ranged dogs kite +
   //      fire telegraphed tracers (12 dmg). Out of range they HOLD ground (no stroll-back-to-post) so the pressure
   //      stays on you. Retune AGGRO / dmg / gap here. ----
@@ -2282,7 +2391,7 @@ function akRaidStep(dt){ if(!RAID||RAID.over)return; var blds=RAID.zone.building
   for(var dl=0;dl<RAID.defenders.length;dl++){ var de=RAID.defenders[dl]; if(((de.zi|0)!==(RAID.zi|0)))continue; if(de.dead && !de._looted){ de._looted=true; akRaidDrop(de.x,de.y,'scrap',3); } }
   // PICK UP loot you walk over -> banked into RAID.bag (a retreat at any point keeps what you grabbed)
   for(var dpi=RAID.drops.length-1;dpi>=0;dpi--){ var D=RAID.drops[dpi]; D.t+=dt; if(((D.zi|0)!==(RAID.zi|0)))continue;
-    if(Math.hypot(D.x-me.x,D.y-me.y) < me.r+16){ RAID.bag[D.kind]=(RAID.bag[D.kind]|0)+(D.amount|0); if(window.AK_FX)AK_FX.spawnHit(RAID.parts,D.x,D.y,LOOT_COL[D.kind]||'#ffd76b',4); RAID.drops.splice(dpi,1); try{ if(navigator.vibrate)navigator.vibrate(8); }catch(_e){} continue; }
+    if(Math.hypot(D.x-me.x,D.y-me.y) < me.r+16){ RAID.bag[D.kind]=(RAID.bag[D.kind]|0)+(D.amount|0); if(window.AK_FX)AK_FX.spawnHit(RAID.parts,D.x,D.y,LOOT_COL[D.kind]||'#ffd76b',4); RAID.drops.splice(dpi,1); try{ if(navigator.vibrate)navigator.vibrate(8); }catch(_e){} try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('coin'); }catch(_e){} continue; }   /* AK-FIX-lane-A 2026-07-28: loot-grab coin cue */
     if(D.t>45)RAID.drops.splice(dpi,1); }
   var coreAlive=RAID.core&&RAID.core.hp>0, liveStruct=0;
   for(var zq=0;zq<RAID.zones.length;zq++){ var zbs=RAID.zones[zq].buildings; for(var q=0;q<zbs.length;q++) if(!zbs[q].core&&zbs[q].hp>0)liveStruct++; }
@@ -2300,6 +2409,7 @@ function akRaidStep(dt){ if(!RAID||RAID.over)return; var blds=RAID.zone.building
       try{ showBanner((((RAID.target&&RAID.target.name)||'THE RIVAL')+': '+_rbl),3.4); }catch(_eMB){}
       try{ akMangaImpact(wx(me.x,me.y),wy(me.y,me.x),'#ff5b5b'); }catch(_eMB2){}
       try{ if(navigator.vibrate)navigator.vibrate([14,60,14]); }catch(_eMB3){}
+      try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('boss_roar'); }catch(_eMB4){}   // AK-FIX-lane-A 2026-07-28: the rival's mid-raid bark roars
     } }
   if(RAID.hp<=0){ akRaidEnd(false); return; }
   if(!coreAlive||liveStruct===0){ akRaidEnd(true); return; }
@@ -2334,6 +2444,7 @@ function akRaidEnd(win,byTimer){ if(!RAID||RAID.over)return; RAID.over=true; RAI
     AK_MANGA.impactFrame({full:true,color:(_mfw?_mfw.accent:'#e8c55a')});
   } }catch(_eFK){}
   try{ if(navigator.vibrate)navigator.vibrate(win?[20,40,20]:[80,40,80]); }catch(_e){}
+  try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play(win?'victory':'defeat'); }catch(_e){}   // AK-FIX-lane-A 2026-07-28: raid-end fanfare / defeat sting
   try{ if(win&&window.AK_NEEDS&&AK_NEEDS.boostMorale)AK_NEEDS.boostMorale('crew-win'); }catch(_e){}   // AK-NEEDS (bible 10.1): a crew win feeds MORALE (+15, the biggest boost on the table)
   // AK-RAID-INFIRMARY 2026-06-30: a LOSS downs your runner -> the infirmary (auto-wake + heal cost, wired when AK_INFIRMARY exposes it)
   if(!win){ try{ var _hc=heroCard(); if(_hc && window.AK_INFIRMARY && AK_INFIRMARY.downCard) AK_INFIRMARY.downCard(_hc.name||_hc.id); }catch(_e){} }
@@ -2615,8 +2726,13 @@ function akStoryFocus(){ try{
 }catch(_e){} return false; }
 window.akStoryFocus=akStoryFocus;
 let last=performance.now();
-function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+function loop(now){let dt=Math.min(.05,(now-last)/1000);last=now;
+  if(window.__akHitstop>0){ window.__akHitstop-=dt; dt*=0.12; }   // AK-FIX-lane-A 2026-07-28: combat hitstop -- nearly freeze the frame for a few ms so a landed hit reads with weight
   var _sf=akStoryFocus();   // AK-STORYFOCUS: computed once per frame, gates every world interrupt below
+  // AK-BOXBTN: show RUN/PUNCH only while actually walking a district or in a raid
+  try{ var _bx=(state==='IN_ZONE'||state==='RAID')&&!interiorOpen&&!entering;
+    var _rb=document.getElementById('runbtn'), _pb=document.getElementById('punchbtn'), _jb=document.getElementById('jumpbtn');
+    if(_rb)_rb.style.display=_bx?'block':'none'; if(_pb)_pb.style.display=_bx?'block':'none'; if(_jb)_jb.style.display=_bx?'block':'none'; }catch(_e){}   // AK-P2Z: JUMP shows with RUN/PUNCH in zones + raids
   // AK-BM-DPAD 2026-07-09: cheap per-frame poll -- hide the touch stick while BUILD MODE is on
   // (restore on exit + kill any live drag so the dpad never fights placement). WASD untouched.
   try{ var _bmOn=!!(window.AK_BUILDMODE&&((AK_BUILDMODE.isOn&&AK_BUILDMODE.isOn())||(AK_BUILDMODE.isActive&&AK_BUILDMODE.isActive())));
@@ -2645,7 +2761,9 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
         vx=_ovx*_cs+_ovy*_sn; vy=-_ovx*_sn+_ovy*_cs; } } }
   var tvx=0,tvy=0; running=false; // AK-MOVE2: compute target velocity, then SMOOTH toward it (accel/decel) for a non-jerky feel
   if(!entering && !interiorOpen && (state==='IN_ZONE'||state==='RAID')){
-    if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} running=((runArmed&&stickOn)||!!keys['shift']); var _rs=running?1.75:1; tvx=vx*me.spd*_rs; tvy=vy*me.spd*_rs; me.tx=me.ty=null;}   // AK-RUN: double-held stick (or Shift) = 1.75x sprint
+    if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} running=((runArmed&&stickOn)||!!keys['shift']||!!window.__akRunToggle);
+      /* AK-P2RUN 2026-07-28: sprint no longer SNAPS to 1.75x -- it RAMPS up over ~0.5s so speed reads as building power (Prototype-2 surge), and a slightly higher 1.9x top. Ramp up slow, drop fast. */
+      var _rtgt=running?1.9:1; var _rk=1-Math.exp(-(running?4.5:9)*dt); window.__runRamp=(window.__runRamp||1)+(_rtgt-(window.__runRamp||1))*_rk; var _rs=window.__runRamp;   /* AK-BOXBTN: explicit RUN button */ tvx=vx*me.spd*_rs; tvy=vy*me.spd*_rs; me.tx=me.ty=null;}   // AK-RUN: double-held stick (or Shift) = ramped sprint
     else if(me.tx!=null){var dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy); if(d>6){tvx=dx/d*me.spd; tvy=dy/d*me.spd;} else me.tx=me.ty=null;}
   }
   // AK-MOVE3 2026-06-20: smoothing branched by input. JOYSTICK = DIRECT -- the analog magnitude IS the ramp; lerping it again added ~190ms lag (the floaty/drifty feel). Keyboard/tap get a quick ramp so digital input isn't jarring; fast decel so you stop crisply.
@@ -2653,6 +2771,16 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   else { var _lam=(Math.hypot(tvx,tvy)>=Math.hypot(me.vx||0,me.vy||0))?22:35; var _sk=1-Math.exp(-_lam*dt); me.vx=(me.vx||0)+(tvx-(me.vx||0))*_sk; me.vy=(me.vy||0)+(tvy-(me.vy||0))*_sk; if(Math.hypot(me.vx,me.vy)<3){me.vx=tvx;me.vy=tvy;} }
   var _px=me.x,_py=me.y;
   me.x+=me.vx*dt; me.y+=me.vy*dt;
+  /* AK-P2Z 2026-07-28: vertical integration for jump + glide. Horizontal velocity above is untouched,
+   * so you KEEP your speed in the air like Prototype 2. Gravity is weak while gliding (jump held on the
+   * way down) so a running jump carries you across gaps and off rooftops. Purely visual (height feeds
+   * world3d.project); it never blocks x/y movement or collision. */
+  if((me.z||0)>0 || (me.vz||0)!==0){
+    var _G=(window.__akGlideHeld && me.vz<0)? 260 : 1500;   // glide = ~1/6 gravity on descent while the jump control is held
+    me.vz=(me.vz||0)-_G*dt; me.z=(me.z||0)+me.vz*dt;
+    if(me.z<=0){ me.z=0; me.vz=0; if(window.__akWasAir){ window.__akWasAir=false; try{ if(window.AK_SFX&&AK_SFX.play)AK_SFX.play('tap'); if(navigator.vibrate)navigator.vibrate(10); }catch(_e){} } }   // land cue
+    else { window.__akWasAir=true; }
+  }
   if(window.AK_COLLISION) window.AK_COLLISION.resolve(me,_px,_py, window.AK_COLLISION.obstaclesFor(activeZone)); // AK-MOVE3: block out of obstacles + slide along edges (fences/cars/trains)
   // AK-ZONES edge transition: walk into a mapped edge -> new district (locked target -> barrier)
   // AK-TUNNEL 2026-07-20: the edge is no longer a tripwire along the whole wall -- it is a GATEWAY you
@@ -2745,6 +2873,13 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
 // Sites migrate mechanically (wx(e.x,e.y) -> wx(e.x,e.y)) and un-migrated sites keep working, so this
 // lands incrementally instead of as one big-bang diff.
 function akProj3D(){ var P=window.AK_WORLD3D;
+  // AK-RAIDFLAT 2026-07-28: the 3D projector is the HUB DISTRICT camera. Raids are a separate,
+  // flat, 2D-designed mode (RAID_W/RAID_H, own defenders, own layout). world3d.isOn() stays true
+  // globally after boot, so without this gate raid movement got camera-relative D-pad rotation
+  // (AK-CAMREL) and perspective projection (wx/wy) it was never built for -- which is why raids
+  // "felt off". Returning null during RAID makes wx/wy fall back to the flat x-cam.x seam and input
+  // stay in world axes, i.e. the raid's original correct behaviour. Hub (IN_ZONE) is unchanged.
+  if(typeof state!=='undefined' && state==='RAID') return null;
   return (P&&P.isOn&&P.isOn()&&typeof P.project==='function')?P:null; }
 function wx(x,y){ var P=akProj3D();
   if(P&&typeof y==='number'){ var r=P.project(x,y,0); if(r&&isFinite(r.sx))return r.sx; }
@@ -2793,11 +2928,15 @@ function akTagDraw(g,X,Y,txt,col,alpha){ if(!txt)return; g.save();
   g.globalAlpha=alpha*0.62; g.fillStyle='#06060a'; g.fillRect(X-w/2,Y-9,w,11);
   g.globalAlpha=alpha*0.34; g.strokeStyle=col; g.lineWidth=1; g.strokeRect(X-w/2,Y-9,w,11);
   g.globalAlpha=alpha; g.fillStyle=col; g.fillText(txt,X,Y-1); g.restore(); }
-function akDrawMatProp(g,X,Y,p){ var s=9*(p.h||1); g.save(); g.globalAlpha=.55;
-  if(p.t==='tree'){ g.fillStyle='#4a3418'; g.fillRect(X-1.5,Y,3,s*0.9); g.fillStyle='#25452a'; g.beginPath(); g.arc(X,Y-s*0.2,s*0.9,0,7); g.fill(); }
-  else if(p.t==='rock'){ g.fillStyle='#565d68'; g.beginPath(); g.moveTo(X-s*0.8,Y+s*0.5); g.lineTo(X-s*0.4,Y-s*0.5); g.lineTo(X+s*0.4,Y-s*0.6); g.lineTo(X+s*0.85,Y+s*0.5); g.closePath(); g.fill(); }
-  else if(p.t==='metal'){ g.fillStyle='#3f4854'; g.fillRect(X-s*0.8,Y-s*0.1,s*1.6,s*0.45); g.fillRect(X-s*0.2,Y-s*0.7,s*0.4,s*1.2); }
-  else { g.fillStyle='#4a4453'; g.fillRect(X-s*0.7,Y-s*0.2,s*1.4,s*0.7); g.fillStyle='#5a5266'; g.fillRect(X-s*0.3,Y-s*0.65,s*0.9,s*0.5); }
+function akDrawMatProp(g,X,Y,p){ var s=9*(p.h||1); g.save(); g.globalAlpha=.62;
+  // AK-GROUNDPROP 2026-07-28 (operator: "scrap/resources flooding through mid-air"): the sprite BASE
+  // sits at the projected ground point (X,Y) and the shape rises UPWARD from it, so nothing floats.
+  // A soft contact shadow at the base sells the ground plant.
+  g.save(); g.globalAlpha=.28; g.fillStyle='#000'; g.beginPath(); g.ellipse(X,Y,s*0.85,s*0.30,0,0,7); g.fill(); g.restore();
+  if(p.t==='tree'){ g.fillStyle='#4a3418'; g.fillRect(X-1.5,Y-s*1.1,3,s*1.1); g.fillStyle='#25452a'; g.beginPath(); g.arc(X,Y-s*1.25,s*0.9,0,7); g.fill(); }
+  else if(p.t==='rock'){ g.fillStyle='#565d68'; g.beginPath(); g.moveTo(X-s*0.8,Y); g.lineTo(X-s*0.4,Y-s*1.0); g.lineTo(X+s*0.4,Y-s*1.1); g.lineTo(X+s*0.85,Y+s*0.5); g.closePath(); g.fill(); }
+  else if(p.t==='metal'){ g.fillStyle='#3f4854'; g.fillRect(X-s*0.8,Y-s*0.55,s*1.6,s*0.55); g.fillRect(X-s*0.2,Y-s*1.25,s*0.4,s*1.2); }
+  else { g.fillStyle='#4a4453'; g.fillRect(X-s*0.7,Y-s*0.7,s*1.4,s*0.7); g.fillStyle='#5a5266'; g.fillRect(X-s*0.3,Y-s*1.05,s*0.9,s*0.5); }
   g.restore(); }
 // node TYPE -> what the street calls it / what it pays. Falls back to the node's own mat.
 var WV_TAG={ BRUSHWOOD:'TREE / WOOD', HARDWOOD:'HARDWOOD / WOOD', RUBBLE:'RUBBLE / STONE', BOULDER:'BOULDER / STONE',
@@ -2823,13 +2962,16 @@ function akLootTags(){ try{
 // the WebGL layer below shows through and the Canvas2D layer keeps drawing props, HUD and every
 // plugin system OVER it. Same composite hub3d.js already proves on this device, just at scene scale.
 function draw(){ var _w3=window.AK_WORLD3D;
-  if(_w3&&_w3.isOn&&_w3.isOn()){ ctx.clearRect(0,0,W,H); }
+  // AK-RAIDFLAT 2026-07-28: only CLEAR to show the 3D layer in the HUB. In a RAID the hub's 3D
+  // district is still rendering underneath (world3d.isOn stays true globally), so clearing here let
+  // it bleed through behind the raid. Raids fill opaque -- their own flat 2D world, no hub showing.
+  if(_w3&&_w3.isOn&&_w3.isOn() && (typeof state==='undefined'||state!=='RAID')){ ctx.clearRect(0,0,W,H); }
   else { ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H); }
   // AK-GROUND2 2026-06-20: ONE themed image stretched to cover the whole district (NO tiling/repeat -- the operator disliked the tiled look). Scrolls 1:1 with the camera.
   // AK-WORLD3D 2026-07-19: the ground PLATE and the grid are the other two full-screen occluders.
   // In 3D the ground is a real textured plane in the scene, so painting the 2D plate over it would
   // hide everything below. Skip both while 3D owns the ground; the 2D path is untouched otherwise.
-  var _w3g=(window.AK_WORLD3D&&AK_WORLD3D.isOn&&AK_WORLD3D.isOn());
+  var _w3g=(window.AK_WORLD3D&&AK_WORLD3D.isOn&&AK_WORLD3D.isOn() && (typeof state==='undefined'||state!=='RAID'));  // AK-RAIDFLAT: raid keeps its own 2D ground
   var gd=_w3g?null:curGround();
   if(gd&&gd.complete&&gd.naturalWidth>0){
     ctx.save();ctx.globalAlpha=0.80;ctx.imageSmoothingQuality='high';
@@ -2920,7 +3062,12 @@ function draw(){ var _w3=window.AK_WORLD3D;
   akDrawSystems();
   if(state!=='RAID')akLootTags();   // AK-LOOTTAG 2026-07-18: name the harvest nodes worldverbs just painted (raid nodes get tagged in akRaidDraw instead)
   akDrawMissionTrail();   // AK-WAYFIND (JOB 3): gold paw-print breadcrumbs from the hero toward the active mission's target (or its exit edge)
-  const X=wx(me.x,me.y),Y=wy(me.y,me.x); var ds=akDepthScale(me.x,me.y,Y);   // AK-PROJPAIR: true near/far scale
+  var Xg=wx(me.x,me.y),Yg=wy(me.y,me.x); var ds=akDepthScale(me.x,me.y,Yg);   // AK-PROJPAIR: true near/far scale. Xg/Yg = GROUND screen pos (shadow + heading arrow live here)
+  /* AK-P2Z 2026-07-28: lift the hero (3D model + 2D body + card FX) by me.z, projected through the
+   * height arg world3d.project already supports so it reads in real perspective. The contact shadow and
+   * the ground heading-arrow stay at Xg/Yg so the shadow reads as "on the ground below him" while he rises. */
+  var X=Xg,Y=Yg;
+  if((me.z||0)>0.5){ var _pz=akProj3D(); if(_pz){ var _rz=_pz.project(me.x,me.y,me.z); if(_rz&&isFinite(_rz.sy)){ X=_rz.sx; Y=_rz.sy; } } else { Y=Yg-(me.z||0); } }
   if(window.AK_FX&&AK_FX.drawCardFx&&state!=='RAID'&&!(window.__hero3d&&window.__hero3d.active))AK_FX.drawCardFx(ctx,X,Y,me.r*ds,heroCard(),last/1000);   // AK-HEROFX: card identity FX (faction aura + rarity ring). AK-HUB3D 2026-07-17: NO ring/aura under the live 3D hero (operator: "remove the rings around the hero") -- the 2D fallback keeps its glow.
   // AK-AVATAR2 2026-06-30: an ARTICULATED walking dog -- the card art is the body, with 4 paws doing a real TROT
   // (diagonal pairs lift + plant), body gait dipping on each foot-plant, so it reads as a CHARACTER walking, not a floating photo.
@@ -2935,7 +3082,8 @@ function draw(){ var _w3=window.AK_WORLD3D;
   if(moving && av_dust.length<30 && (Math.floor(last/55)%2===0)) av_dust.push({x:me.x-faceDir*11,y:me.y+me.r*0.65,r:3+Math.random()*3,life:1});
   for(var _d2=av_dust.length-1;_d2>=0;_d2--){ var _du=av_dust[_d2]; _du.life-=0.05; _du.r+=0.5; if(_du.life<=0){av_dust.splice(_d2,1);continue;}
     ctx.save();ctx.globalAlpha=_du.life*0.38;ctx.fillStyle='#6b5e48';ctx.beginPath();ctx.arc(wx(_du.x,_du.y),wy(_du.y,_du.x),_du.r,0,7);ctx.fill();ctx.restore(); }
-  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+R+2,R*0.82*sq,5/sq,0,0,7);ctx.fill();   // contact shadow (squashes with the bounce)
+  var _zsh=(me.z||0)>0.5?Math.max(0.4,1-(me.z||0)/300):1;   // AK-P2Z: shadow shrinks + fades as he rises off the ground
+  ctx.fillStyle='rgba(0,0,0,'+(0.35*_zsh).toFixed(3)+')';ctx.beginPath();ctx.ellipse(Xg,Yg+R+2,R*0.82*sq*_zsh,5/sq*_zsh,0,0,7);ctx.fill();   // contact shadow at GROUND (Xg,Yg) -- stays under him while he jumps
   // AK-FACEIND 2026-07-18 (operator bug 2): "the arrow under his feet points the wrong way, doesn't point
   // the direction he's walking". There was no facing arrow at all -- what sat by his feet was the ARENA
   // BEARING pointer (moved to the screen edge below), so of course it disagreed with his walk. This is the
@@ -2950,7 +3098,7 @@ function draw(){ var _w3=window.AK_WORLD3D;
     // analog stick. Pre-compensate: rotate by phi = atan2(sin(theta)/k, cos(theta)) so that AFTER
     // the squash the apparent heading is exactly faceAngle. Verified across all 8 compass points.
     var _sq=0.42, _phi=Math.atan2(Math.sin(faceAngle)/_sq, Math.cos(faceAngle));
-    ctx.save(); ctx.translate(X,Y+R+2); ctx.scale(1,_sq); ctx.rotate(_phi);   // flattened onto the ground plane, matching the contact-shadow ellipse
+    ctx.save(); ctx.translate(Xg,Yg+R+2); ctx.scale(1,_sq); ctx.rotate(_phi);   // AK-P2Z: heading arrow stays on the GROUND (Xg,Yg), matching the contact-shadow ellipse, while the hero may be airborne
     ctx.globalAlpha=_aim?0.9:(moving?0.55:0.3); ctx.fillStyle=_aim?'#ff7a4d':'#e8c55a';
     ctx.beginPath(); ctx.moveTo(_fr+9,0); ctx.lineTo(_fr-6,-7); ctx.lineTo(_fr-6,7); ctx.closePath(); ctx.fill(); ctx.restore(); }
   // ---- WHEEL-SPIN blur arcs at the base (imply the buggy's wheels turning while you drive) ----

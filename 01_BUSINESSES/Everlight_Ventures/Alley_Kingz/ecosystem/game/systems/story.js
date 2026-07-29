@@ -660,6 +660,47 @@
   }
 
   /* ======================================================================== *
+   * THE CROWNED PAYOFF -- the surfaced crowning beat (AK-FIX-lane-G 2026-07-28).
+   * Reaching CROWNED (Gen I idx 6, via the throne force-crown OR the rank ladder)
+   * authored a "you did it" vision (GEN_I[6].vision) but never surfaced a moment.
+   * crownReveal() hands the host the full-screen crowning card (title + the Old
+   * Pack's first bow + the reused throne backdrop); crownedPayoffSeen() /
+   * markCrownedSeen() gate it to fire ONCE. Pure data + one mutateProfile on the
+   * mark -- writes nothing on its own, byte-identical until the crown is taken.
+   * ======================================================================== */
+  function isCrowned(p) {
+    if (!p) return false;
+    if (flagsOf(p).crowned) return true;                     // force-crown / ladder crown flag
+    return (p.storyGen | 0) === 0 && (p.storyStage | 0) >= (GEN_I.length - 1);
+  }
+  // the full-screen crowning card | null until the crown is actually taken.
+  function crownReveal() {
+    var ctx = ctxOf(), p = profile(ctx);
+    if (!isCrowned(p)) return null;
+    var st = GEN_I[GEN_I.length - 1];                        // CROWNED -- the reign chapter
+    var meta = CARD_META[st.id] || {};
+    return { id: st.id, num: roman(GEN_I.length - 1), title: st.title,
+             objective: st.objective, vision: st.vision,
+             epigraph: meta.epigraph || st.objective,
+             backdrop: meta.backdrop || 'assets/hub/trophy.png',
+             narrator: STORY_ART.narrator };
+  }
+  // has the crowning beat already played? (falsy-default, zero-state safe)
+  function crownedPayoffSeen() {
+    var ctx = ctxOf(), p = profile(ctx);
+    return !!(p && flagsOf(p).crownedSeen);
+  }
+  // persist that the crowning beat has played (one mutateProfile, lazy storyFlags).
+  function markCrownedSeen() {
+    var ctx = ctxOf(); if (!ctx || !ctx.econ) return false;
+    ctx.econ.mutateProfile(function (p) {
+      if (!p.storyFlags || typeof p.storyFlags !== 'object') p.storyFlags = {};
+      p.storyFlags.crownedSeen = true;
+    });
+    return true;
+  }
+
+  /* ======================================================================== *
    * SCAR / MEMORY LEDGER -- how you won. logDeed(text) is the hook raid.js +
    * encounters.js call on a WIN; ledger()/recentDeeds()/scars() read it back; the
    * dream-visions recite the freshest scars (stage().scars). Append-only + capped.
@@ -748,6 +789,10 @@
     // --- THE COLLAR IS THE MONSTER (apex antagonist = the human system) ---
     collarReveal: collarReveal,    // Old Pack reveal near the rank ceiling | null
     markCollarSeen: markCollarSeen, // persist that the collar reveal has played
+    // --- THE CROWNED PAYOFF (the surfaced crowning beat, fires ONCE) ---
+    crownReveal: crownReveal,      // full-screen crowning card | null until crowned
+    crownedPayoffSeen: crownedPayoffSeen, // has the crowning beat already played?
+    markCrownedSeen: markCrownedSeen, // persist that the crowning beat has played
     // --- SCAR / MEMORY LEDGER (how you won) ---
     logDeed: logDeed,              // raid.js/encounters.js call this on a WIN
     ledger: ledger,                // full ledger copy (newest last)

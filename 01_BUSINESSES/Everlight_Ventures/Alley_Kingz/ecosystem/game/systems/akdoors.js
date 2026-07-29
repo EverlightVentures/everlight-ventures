@@ -936,7 +936,7 @@
       var ALL = [HOME, ROW,
         { id: 'DOWNTOWN', buildings: [
           { id: 'DROP', label: 'THE DROP', col: '#ff8fae', x: 560, y: 560, w: 170, h: 104, url: 'shop/shop.html#gems', act: 'the SHOP' },
-          { id: 'GARAGE', label: 'THE GARAGE', col: '#7fc8ff', x: 1140, y: 560, w: 170, h: 104, url: 'shop/shop.html#deck', act: 'deck builder' }] },
+          { id: 'GARAGE', label: 'THE GARAGE', col: '#7fc8ff', x: 1140, y: 560, w: 170, h: 104, url: '', act: 'rig garage' }] },   /* AK-FIX-lane-H 2026-07-28: GARAGE opens AK_GARAGE (claimed by id in garage.js), not the deck builder; url '' stays enterable (!== 'soon') so the DOWNTOWN door count is unchanged */
         { id: 'THE_STRIP', buildings: [
           { id: 'STREET', label: 'THE STREET', col: '#7CFFb0', x: 560, y: 560, w: 160, h: 96, url: 'shop/shop.html#street', act: 'street mode' },
           { id: 'ARCADE', label: 'THE ARCADE', col: '#7CFFE0', x: 1140, y: 560, w: 160, h: 96, url: 'soon', act: 'mini-games' }] },

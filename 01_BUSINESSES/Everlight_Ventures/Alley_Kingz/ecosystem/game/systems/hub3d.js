@@ -47,22 +47,26 @@
   // Translation range is the discriminator: a stationary idle against a walk/run pair reads as
   // roughly 0 : 1 : 2. WHEN A NEW HERO GLB LANDS, RE-MEASURE IT AND ADD A ROW HERE. Falling back
   // to the 4-clip default on an unknown 14-clip model would silently play the wrong animations. */
+  /* AK-3DALL 2026-07-28: ALL SIX heroes re-exported as the *_3d_all GLBs (operator downloaded a new
+   * batch with MORE animations). Every index below was RE-MEASURED from the new file's animation
+   * accessors via scratchpad/glb_measure.py (per-bone leg/arm rotation energy + root translation
+   * range -- the same motion-analysis method as before, since NlaTrack.00N names still carry zero
+   * info and a fresh export REORDERS every clip). Proof it must be re-measured: old bcardd.glb was
+   * {2,10,7}; the new Bacardi_3d_all export measures {5,1,8}. The three new breed heroes map to their
+   * bible cards (cards_catalog.js): bulldog=Grit Bulldog 0006, rottweiler=Iron Rottweiler 0004,
+   * malamute=Blackout Malamute 0127. */
+  /* AK-CLIPFIX 2026-07-28 (operator: "my hero uses his front kick as a walk"). RE-MEASURED every GLB's
+   * animation accessors: a quadruped WALK is LEG-driven with QUIET arms (leg/arm energy ratio ~2-2.7),
+   * whereas the old table pointed `walk` at arm-active COMBAT clips -- so the hub played a punch/kick as
+   * the walk. New indices = highest leg-dominance for walk, fastest high-energy leg cycle for run, lowest
+   * energy for idle. Corroborated: the akheroactions header independently measured bcardd walk=10 too. */
   var CLIP_BY_MODEL = {
-    'bcardd.glb': { idle: 2, walk: 10, run: 7 },   // legendary skin, 14 clips, measured 2026-07-20
-    'jagged.glb': { idle: 3, walk: 1,  run: 0 },   // 4-clip rig, the original verified set
-    /* AK-BALBOA 2026-07-20. 8 clips, same 41-bone rig. Indices are MEASURED and then
-     * CROSS-REFERENCED against the legendary bcardd, because ranking clips by translation alone
-     * gets Balboa BACKWARDS. These rigs share animations, so an identical (rotation, translation)
-     * signature identifies the same clip in both files:
-     *     balboa[0] 4.2/0.005  == bcardd[2]  4.3/0.005   -> IDLE
-     *     balboa[4] 52.1/1.188 == bcardd[10] 52.1/1.226  -> WALK
-     *     balboa[5] 68.3/0.347 == bcardd[4]  68.3/0.358  -> NOT locomotion (naive ranking picks
-     *                                                       this as "walk" purely because it is
-     *                                                       the second most mobile clip)
-     * bcardd[7] (207.3/2.502) is RUN and has NO counterpart -- Balboa has no run cycle at all, so
-     * run REUSES walk. Reusing walk keeps him running-as-walking; picking an unmatched index would
-     * fire a random emote mid-sprint. */
-    'balboa.glb': { idle: 0, walk: 4,  run: 4 }    // no run clip in this export
+    'bcardd.glb':     { idle: 5,  walk: 10, run: 2 },   // Bacardi_3d_all 14 clips  (was walk:1 = a leg-lunge combat clip)
+    'balboa.glb':     { idle: 15, walk: 4,  run: 5 },   // Balboa_3d_all 16 clips
+    'jagged.glb':     { idle: 9,  walk: 1,  run: 12 },  // Jagged_3d_all 15 clips
+    'bulldog.glb':    { idle: 1,  walk: 3,  run: 7 },   // Grit Bulldog 0006, 10 clips
+    'rottweiler.glb': { idle: 4,  walk: 9,  run: 5 },   // Iron Rottweiler 0004, 12 clips
+    'malamute.glb':   { idle: 11, walk: 7,  run: 0 }    // Blackout Malamute 0127, 12 clips
   };
   var CLIP_DEFAULT = { idle: 3, walk: 1, run: 0 }; // safe on any 4-clip Tripo export
   function clipsForModel(url) {
@@ -78,7 +82,13 @@
   var HERO_MODELS = {
     bcardd: 'assets/models/bcardd.glb',
     jagged: 'assets/models/jagged.glb',
-    balboa: 'assets/models/balboa.glb'
+    balboa: 'assets/models/balboa.glb',
+    // AK-3DALL 2026-07-28: three new breed heroes. Keys are the BREED slug on purpose -- the resolver
+    // below matches by substring (indexOf), so 'rottweiler' matches the card "Iron Rottweiler",
+    // 'bulldog' matches "Grit Bulldog", 'malamute' matches "Blackout Malamute".
+    rottweiler: 'assets/models/rottweiler.glb',   // Iron Rottweiler (0004)
+    bulldog:    'assets/models/bulldog.glb',       // Grit Bulldog (0006)
+    malamute:   'assets/models/malamute.glb'       // Blackout Malamute (0127)
   };
   var DEFAULT_MODEL = 'assets/models/bcardd.glb';   // $BCARDD fallback (4 anims, 43-bone rig)
   // Resolve the selected hero's model. A future hero-selector sets window.AK_HERO
@@ -133,7 +143,12 @@
   // is unreachable: that is exactly why Jagged (card 0013, full GLB live) never appeared in the picker.
   // Rather than hand-granting one dog, every hero in HERO_MODELS is ensured owned. New hero + GLB =
   // automatically switchable, no follow-up wiring. Idempotent, guarded, runs once per load.
-  var HERO_CARD_NAME = { bcardd: '$BCARDD', jagged: 'Jagged' };
+  // AK-3DALL 2026-07-28: hero slug -> bible card NAME (cards_catalog.js), so every hero with a GLB is
+  // auto-granted + switchable. balboa was missing before; the three breed heroes are new.
+  var HERO_CARD_NAME = {
+    bcardd: '$BCARDD', jagged: 'Jagged', balboa: 'Balboa',
+    rottweiler: 'Iron Rottweiler', bulldog: 'Grit Bulldog', malamute: 'Blackout Malamute'
+  };
   function unlockHeroes() {
     try {
       var econ = window.AK_ECON;

@@ -246,7 +246,16 @@
         var wm = s.winMarks || {}; var got = (wm.day === today) ? (wm.n | 0) : 0;
         if (got >= WIN_MARKS_CAP) return;
         var add = Math.min(WIN_MARKS, WIN_MARKS_CAP - got);
-        s.marks = Math.max(0, (s.marks | 0) + add);
+        /* AK-FIX-lane-C 2026-07-28: TROPHY building payoff. The Trophy Hall upgrade
+           (AK_ECON.trophyRepMult, +5%/lvl) already boosts core Rep inside addRep(),
+           but season Marks are granted directly here and were bypassing it -- so the
+           upgrade did nothing for the season faucet. Guarded (global idiom, matches
+           this file's AK_ECON refs) so an unwired multiplier just reads 1x and never
+           crashes. The anti-farm WIN_MARKS_CAP stays tracked in BASE units below
+           (winMarks.n = got + add), so the trophy boost pays more Marks without
+           inflating the daily grant cap. */
+        var tm = (global.AK_ECON && global.AK_ECON.trophyRepMult) ? global.AK_ECON.trophyRepMult(p) : 1;
+        s.marks = Math.max(0, (s.marks | 0) + Math.round(add * tm));
         s.winMarks = { day: today, n: got + add };
       });
     } catch (_e) {}

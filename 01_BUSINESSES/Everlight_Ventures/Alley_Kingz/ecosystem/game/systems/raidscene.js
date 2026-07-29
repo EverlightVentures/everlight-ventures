@@ -318,6 +318,12 @@
       var r = target && target.reward; if (!r) return;
       var mult = starMult(stars);
       var gm = (E.garageLootMult) ? E.garageLootMult() : 1; mult = mult * gm;
+      // AK-FIX-lane-H 2026-07-28: the EQUIPPED RIG hauls the loot too. The active rig's
+      // added payload (parts + a paired dog, over the bare chassis) lifts the haul -- so
+      // building a rig in THE GARAGE finally pays out in a raid. Guarded: no garage loaded
+      // (headless / node) reads as 1x and never touches the grant.
+      var rm = 1; try { if (global.AK_GARAGE && global.AK_GARAGE.rigLootMult) rm = global.AK_GARAGE.rigLootMult() || 1; } catch (_rm) {}
+      mult = mult * rm;
       if (r.scrap && E.addScrap) E.addScrap(r.scrapR || 'Rare', Math.round((r.scrap | 0) * mult));
       if (r.wood  && E.bankMaterial) E.bankMaterial('wood',  Math.round((r.wood  | 0) * mult));
       if (r.stone && E.bankMaterial) E.bankMaterial('stone', Math.round((r.stone | 0) * mult));
@@ -326,6 +332,35 @@
         if (r.gold)    p.coins   = (p.coins   | 0) + Math.round((r.gold    | 0) * mult);
         if (r.produce) p.produce = (p.produce | 0) + Math.round((r.produce | 0) * mult);
       });
+      // AK-FIX-lane-H 2026-07-28: THE FENCE LOOP, made real. A raid also nets HOT goods --
+      // a stolen stash that cannot spend until laundered at the docks (the Fence takes a cut
+      // + a wash delay = the sink). This is a BONUS on top of the clean cut above, so the
+      // WASH tab is finally fed by real raids instead of sitting forever empty. And the block
+      // you just gutted screams for the fortify mats it lost (postRaidDemand) -- that spikes
+      // those Fence prices AND posts buy-orders you can sell your haul into. Both fully guarded
+      // + fired once per target: no marketplace (headless / node) is a silent no-op, never a
+      // throw inside the raid result funnel.
+      if (target && !target._fenceFed && global.AKFence) {
+        target._fenceFed = true;
+        try {
+          if (typeof global.AKFence.deposit === 'function') {
+            var HOT = 0.4, hot = [];
+            var _hot = function (kind, amt, rarity) {
+              var n = Math.floor((amt | 0) * mult * HOT);
+              if (n > 0) hot.push(rarity ? { kind: kind, rarity: rarity, amount: n } : { kind: kind, amount: n });
+            };
+            _hot('wood', r.wood); _hot('stone', r.stone); _hot('metal', r.metal); _hot('produce', r.produce);
+            if (r.scrap) _hot('scrap', r.scrap, r.scrapR || 'Rare');
+            if (hot.length) global.AKFence.deposit(hot, 'raid');
+          }
+        } catch (_fd) {}
+        try {
+          if (typeof global.AKFence.postRaidDemand === 'function') {
+            var sev = clamp(0.4 + 0.18 * (stars | 0), 0.4, 1);
+            global.AKFence.postRaidDemand({ id: target.id || target.faction || target.name, name: target.name || 'a gutted block' }, sev);
+          }
+        } catch (_pd) {}
+      }
     } catch (_e) {}
   }
   // AK-DUTYWIRE 2026-07-18: the CLAN DUTY credit for a raid. missions.js exposes

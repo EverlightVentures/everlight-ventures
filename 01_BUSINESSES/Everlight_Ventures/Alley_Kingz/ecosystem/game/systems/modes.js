@@ -188,13 +188,18 @@
    */
   function grantReward(ctx, win, kind) {
     if (!ctx || !ctx.currency) return;
+    /* AK-FIX-lane-D:modes.js 2026-07-28: STREET PAY MULTIPLIER -- level-scaled soft
+     * payout applied to gold + scrap only (bones/rank untouched). Guarded so a
+     * not-yet-wired economy.js reads as 1x; zero-state payout is byte-identical. */
+    var pay = (global.AK_ECON && AK_ECON.streetPayMult) ? AK_ECON.streetPayMult() : 1;
+    function sp(n) { return Math.max(1, Math.round(n * pay)); }
     try {
       if (kind === 'moba') {
-        if (win) { ctx.currency.grant('gold', Math.round(rand(140, 220))); ctx.currency.grant('scrap', 2, 'Rare'); ctx.currency.grant('bones', 5); }
-        else     { ctx.currency.grant('gold', 30); ctx.currency.grant('bones', 1); }
+        if (win) { ctx.currency.grant('gold', sp(rand(140, 220))); ctx.currency.grant('scrap', sp(2), 'Rare'); ctx.currency.grant('bones', 5); }
+        else     { ctx.currency.grant('gold', sp(30)); ctx.currency.grant('bones', 1); }
       } else { // gulag
-        if (win) { ctx.currency.grant('gold', Math.round(rand(90, 150))); ctx.currency.grant('scrap', 5, 'Common'); ctx.currency.grant('bones', 3); }
-        else     { ctx.currency.grant('gold', 20); }
+        if (win) { ctx.currency.grant('gold', sp(rand(90, 150))); ctx.currency.grant('scrap', sp(5), 'Common'); ctx.currency.grant('bones', 3); }
+        else     { ctx.currency.grant('gold', sp(20)); }
       }
     } catch (_e) {}
     // AK-RANK 2026-06-22: every battle moves the ONE shared rank (the same ladder the tower climbs). Win = +, loss = small -.
@@ -209,6 +214,27 @@
         if (win) m.wins = (m.wins | 0) + 1; else m.losses = (m.losses | 0) + 1;
         if (typeof score === 'number' && score > (m.best | 0)) m.best = score | 0;
       });
+    } catch (_e) {}
+  }
+
+  /* AK-FIX-lane-D:modes.js 2026-07-28 -- HEROES BOX IN COMBAT.
+   * The gulag/MOBA overlays already track the player's hits; wire each landed
+   * PLAYER hit to the selected hero's REAL GLB combat clip (JAB/HOOK/STRIKE) via
+   * the SAME driver the hub emote rail uses (AK_HEROACTIONS.play(label)). Rotates
+   * labels for variety and is throttled so rapid fire fires a punch, not a strobe.
+   * Fully guarded: no 3D layer / headless load -> silent no-op (reads like today).
+   * We do NOT touch akheroactions.js / hub3d.js -- only consume their public play(). */
+  var _boxActT = 0, _boxRot = 0;
+  var BOX_LABELS = ['JAB', 'HOOK', 'STRIKE'];
+  function boxNowMs() { try { return (global.performance && global.performance.now) ? global.performance.now() : Date.now(); } catch (_e) { return Date.now(); } }
+  function boxHeroHit(label) {
+    try {
+      var t = boxNowMs();
+      if (t - _boxActT < 360) return;                    // ~2.7 strikes/sec cap
+      var HA = global.AK_HEROACTIONS, H3 = global.__hero3d;
+      var lab = label || BOX_LABELS[(_boxRot++) % BOX_LABELS.length];
+      if (HA && typeof HA.play === 'function') { _boxActT = t; HA.play(lab); return; }
+      if (H3 && typeof H3.play === 'function') { _boxActT = t; H3.play(lab); return; }   // future direct-handle path -- guarded
     } catch (_e) {}
   }
 
@@ -604,7 +630,7 @@
         var sh = shots[i]; sh.x += sh.vx * dt; sh.y += sh.vy * dt; sh.life -= dt;
         var hit = null;
         for (var j = 0; j < ents.length; j++) { var o = ents[j]; if (o.dead || o.team === sh.team) continue; if (hyp(o.x - sh.x, o.y - sh.y) <= sh.r + o.r) { hit = o; break; } }
-        if (hit) { applyHit(sh.team === 0 ? hero : foe, hit, sh.dmg); if (!REDUCED) pushFx({ ring: true, x: sh.x, y: sh.y, life: 0.18, col: sh.col, rmax: 28 }); shots.splice(i, 1); continue; }
+        if (hit) { applyHit(sh.team === 0 ? hero : foe, hit, sh.dmg); if (sh.team === 0) boxHeroHit(); /* AK-FIX-lane-D:modes.js 2026-07-28: box the hero on a landed laser hit */ if (!REDUCED) pushFx({ ring: true, x: sh.x, y: sh.y, life: 0.18, col: sh.col, rmax: 28 }); shots.splice(i, 1); continue; }
         if (sh.life <= 0 || sh.x < -40 || sh.x > AW + 40 || sh.y < -40 || sh.y > AH + 40) shots.splice(i, 1);
       }
     }
@@ -702,7 +728,7 @@
           if (mvm > 0.01) { hero.x += (inp.mvx / mvm) * hero.spd * dt * Math.min(1, mvm); hero.y += (inp.mvy / mvm) * hero.spd * dt * Math.min(1, mvm); }
           hero.x = clamp(hero.x, 30, AW - 30); hero.y = clamp(hero.y, 30, AH - 30);
           var ht = nearestEnemy(hero, hero.rngPx + 6);     // auto-attack in range
-          if (ht && hero.atkT <= 0) { doAttack(hero, ht); hero.atkT = hero.atkInt; }
+          if (ht && hero.atkT <= 0) { doAttack(hero, ht); hero.atkT = hero.atkInt; boxHeroHit(); }   /* AK-FIX-lane-D:modes.js 2026-07-28: box the hero on a landed melee hit */
           continue;
         }
         if (e === foe) { aiHero(e, dt); continue; }
@@ -1052,7 +1078,7 @@
     var T = threeLib();
     if (!T) return null;
 
-    var cv, ren, scene, cam, rvGrp, gun, flash, flashLight, rvFlash, allyWas = null;
+    var cv, ren, scene, cam, rvGrp, gun, flash, flashLight, rvFlash, rvMixer = null, allyWas = null;   // AK-GULAGWALK: rvMixer drives the opponent's walk clip
     var junk = [], pool = [], dead = false;
     var yaw = 0, pitch = 0, recoil = 0, flashT = 0, rvFlashT = 0, shake = 0, mark = 0;
     var stick = { x: 0, y: 0 }, lx = 0, ly = 0, lastW = 0, lastH = 0;
@@ -1087,6 +1113,51 @@
       var ce = new T.Mesh(geo('PlaneGeometry', AW, AH), mat('MeshLambertMaterial', { color: 0x08070a, emissive: 0x050408 }));
       ce.rotation.x = PI / 2; ce.position.y = WALL_H; scene.add(ce);
 
+      /* AK-GULAGMAP 2026-07-28 (operator: "i added gulag_3d.glb which should be the map for the
+       * gulag battle"). Load the real gulag environment GLB and drop it INSIDE the procedural
+       * bunker. Same discipline as AK-GULAGHERO / AK-BLDMODELS: async load, bbox-normalise to the
+       * arena footprint, seat feet on the floor, force DoubleSide so interior walls render from
+       * inside (the townhall see-through lesson), and force an emissive floor so a dark export is
+       * never pitch-black. The procedural floor + walls stay as an INSTANT-ON fallback and a
+       * collision-truth stand-in -- gulag collision reads the 2D `cover` array + arena bounds, never
+       * this mesh, so the map is purely visual and cannot wall the player in. Lifted ~1u off y=0 so
+       * the map's own floor never z-fights the procedural plane it sits on. */
+      try {
+        if (T && typeof (global.AK_THREE && global.AK_THREE.loadGLB) === 'function') {
+          global.AK_THREE.loadGLB('assets/models/gulag_3d.glb', function (glb) {
+            try {
+              var mo = glb && (glb.scene || glb); if (!mo || !scene) return;
+              var mbb = new T.Box3().setFromObject(mo), msz = mbb.getSize(new T.Vector3());
+              // fit the map's horizontal footprint to the arena's larger dimension so the walls
+              // land roughly where the extruded perimeter boxes are.
+              var span = Math.max(msz.x || 1, msz.z || 1, 1e-6);
+              var ms = (Math.max(AW, AH) * 1.02) / span; mo.scale.setScalar(ms);
+              var mbb2 = new T.Box3().setFromObject(mo);
+              mo.position.set(0, -mbb2.min.y + 1, 0);   // centred, feet on floor, +1u to kill z-fight
+              mo.traverse(function (o) {
+                if (!o.isMesh || !o.material) return;
+                var arr = Array.isArray(o.material) ? o.material : [o.material];
+                for (var mi = 0; mi < arr.length; mi++) {
+                  var m = arr[mi]; if (!m) continue;
+                  try {
+                    if ('side' in m) m.side = T.DoubleSide;                 // see interior walls from inside
+                    if ('emissive' in m && m.emissive && m.map && 'emissiveMap' in m) {
+                      m.emissive.setHex(0x555555); m.emissiveMap = m.map;    // never pitch-black
+                      if ('emissiveIntensity' in m) m.emissiveIntensity = 0.28;
+                    }
+                    m.needsUpdate = true;
+                  } catch (_em) {}
+                }
+              });
+              scene.add(mo);
+              // map landed: recede the procedural floor/ceiling so the real environment reads,
+              // but keep them (a GLB with an open top still needs the dark ceiling behind fog).
+              try { if (fl.material) fl.material.emissive && fl.material.emissive.setHex(0x000000); } catch (_ef) {}
+            } catch (_emap) {}
+          }, function () {});
+        }
+      } catch (_egm) {}
+
       // COVER: read straight off the existing `cover` array, built once (it is static)
       for (var i = 0; i < cover.length; i++) {
         var c = cover[i];
@@ -1107,6 +1178,54 @@
       scene.add(rvGrp);
       rvFlash = new T.Mesh(geo('PlaneGeometry', 16, 16), mat('MeshBasicMaterial', { color: 0xffcf7a, transparent: true, opacity: 0 }));
       rvFlash.position.set(0, 22, -10); rvGrp.add(rvFlash);
+
+      /* AK-GULAGHERO 2026-07-28 (operator: "i need to see my hero and the opponents hero... see
+       * bacardi or balboa or whoever"). The rival was a generic red box. Load the OPPONENT's HERO
+       * GLB and stand it where the box was, so the enemy is a real dog-gang hero. The box body +
+       * head stay as an instant-on fallback and are hidden the moment the GLB lands (GLBs load
+       * async; a box-shaped enemy for 300ms beats an invisible one). bbox-normalised to ~30 units
+       * (matches the box: body 24 tall + head at 29) and seated on the floor, exactly like the hub
+       * hero. The opponent's hero is chosen deterministically DIFFERENT from the player's so a 1v1
+       * never mirrors the same dog. */
+      try {
+        var _roster = ['bcardd', 'balboa', 'jagged', 'rottweiler', 'bulldog', 'malamute'];  // AK-3DALL: full 6-hero pool
+        var _mine = (global.AK_HERO || 'bcardd').toString().toLowerCase();
+        var _opps = _roster.filter(function (h) { return _mine.indexOf(h) === -1; });
+        var _oppSlug = _opps[Math.floor(Math.random() * _opps.length)] || 'jagged';   // random rival from the 5 others
+        var _oppUrl = 'assets/models/' + _oppSlug + '.glb';
+        if (T && typeof (global.AK_THREE && global.AK_THREE.loadGLB) === 'function') {
+          global.AK_THREE.loadGLB(_oppUrl, function (glb) {
+            try {
+              var o = glb && (glb.scene || glb); if (!o || !rvGrp) return;
+              var bb = new T.Box3().setFromObject(o), sz = bb.getSize(new T.Vector3());
+              var s2 = 30 / Math.max(sz.y || 1, 1e-6); o.scale.setScalar(s2);
+              o.userData._base = s2;   // base scale for the hit-pulse to multiply
+              var bb2 = new T.Box3().setFromObject(o); o.position.y = -bb2.min.y;   // feet on floor
+              // face the same way the group faces (group already rotates to face the player)
+              rvGrp.add(o); rvGrp.userData.hero = o;
+              /* AK-GULAGFACE 2026-07-28 (operator: "his back is towards me"). Tripo GLBs face +Z; the
+               * group aims its -Z front (where the placeholder box head sat) at the player, so the raw
+               * mesh showed its back. Flip the mesh 180 so its front matches the group -> he FACES you. */
+              o.rotation.y = PI;
+              /* AK-GULAGWALK 2026-07-28 (operator: "stonejaw isn't using his walking animation"). The
+               * opponent was a FROZEN static mesh (no mixer anywhere). Drive his real WALK clip -- same
+               * measured leg-dominant index the hub uses, so he strides instead of standing. */
+              try {
+                var _anims = glb && glb.animations;
+                if (_anims && _anims.length && T.AnimationMixer) {
+                  var _WALK = { bcardd: 10, balboa: 4, jagged: 1, rottweiler: 9, bulldog: 3, malamute: 7 };
+                  var _wi = _WALK[_oppSlug]; if (typeof _wi !== 'number' || _wi >= _anims.length) _wi = 0;
+                  rvMixer = new T.AnimationMixer(o);
+                  rvMixer.clipAction(_anims[_wi]).play();
+                }
+              } catch (_ewm) {}
+              // hide the placeholder box body + head now that the real hero is in
+              if (rvGrp.children[0]) rvGrp.children[0].visible = false;
+              if (rvGrp.children[1]) rvGrp.children[1].visible = false;
+            } catch (_eh) {}
+          }, function () {});
+        }
+      } catch (_eo) {}
 
       // WEAPON in VIEW SPACE: parented to the camera so it never needs a per-frame transform
       gun = new T.Group();
@@ -1139,6 +1258,7 @@
     /* LOOK + STICK. Runs BEFORE step() and writes only the fields the 2D path
      * already wrote, so step() cannot tell which renderer is driving it.       */
     A.preStep = function (dt, you, inp) {
+      if (rvMixer) { try { rvMixer.update(dt); } catch (_emu) {} }   // AK-GULAGWALK: advance the opponent's walk animation every frame
       recoil = Math.max(0, recoil - dt * 7.5);
       flashT = Math.max(0, flashT - dt); rvFlashT = Math.max(0, rvFlashT - dt);
       shake = Math.max(0, shake - dt * 26); mark = Math.max(0, mark - dt);
@@ -1203,7 +1323,9 @@
           rvGrp.position.set(WX(rv.x), 0, WZ(rv.y));
           rvGrp.rotation.y = Math.atan2(WX(you.x) - WX(rv.x), WZ(you.y) - WZ(rv.y)) + PI;   // face the player
           rvFlash.material.opacity = rvFlashT > 0 ? 0.9 : 0;
-          rvGrp.children[0].scale.setScalar(rv.hitFx > 0 ? 1.12 : 1);
+          var _rvh = rvGrp.userData && rvGrp.userData.hero;
+          if (_rvh) _rvh.scale.setScalar((_rvh.userData._base || 1) * (rv.hitFx > 0 ? 1.12 : 1));
+          else rvGrp.children[0].scale.setScalar(rv.hitFx > 0 ? 1.12 : 1);
         }
 
         // ---- BULLETS: render the array the logic already stepped ----
@@ -1239,8 +1361,9 @@
       try { for (var i = 0; i < junk.length; i++) if (junk[i] && junk[i].dispose) junk[i].dispose(); } catch (_e6) {}
       try { if (scene && scene.clear) scene.clear(); } catch (_e7) {}
       if (allyWas !== null) allyPool(allyWas);              // hand the hub its model-viewer pool back
-      junk = []; pool = []; scene = null;
+      junk = []; pool = []; scene = null; rvMixer = null;   // AK-GULAGWALK: drop the opponent mixer
     };
+    A.setHands = function (h) { try { if (gun) gun.visible = !h; } catch (_e) {} };   // AK-GULAGFIST: hide the first-person gun in HANDS mode
     return A;
   }
 
@@ -1262,7 +1385,7 @@
       { x: AW / 2 - 130, y: AH / 2 + 86,  w: 70, h: 26 },
       { x: AW / 2 + 60,  y: AH / 2 + 86,  w: 70, h: 26 }
     ];
-    var fighters = {}, bullets = [], S = { t: 0, over: false, win: false };
+    var fighters = {}, bullets = [], S = { t: 0, over: false, win: false, hands: false, meleeT: 0, hudBtns: [] };   // AK-GULAGFIST: hands=melee mode, gun=shooter
     var inp = { mvId: null, mox: 0, moy: 0, mvx: 0, mvy: 0, aimId: null, ax: 0, ay: 0, firing: false };
     var vp = null, api = null;
     var TF = { sc: 1, ox: 0, oy: 0 };        // arena<->screen transform (set in draw)
@@ -1302,6 +1425,25 @@
       var dx = tx - f.x, dy = ty - f.y, m = hyp(dx, dy) || 1;
       bullets.push({ x: f.x + dx / m * (f.r + 4), y: f.y + dy / m * (f.r + 4), vx: dx / m * f.bSpd, vy: dy / m * f.bSpd, dmg: f.dmg, team: f.team, life: 1.6 });
     }
+    /* AK-GULAGFIST 2026-07-28 (operator: "the fight buttons need to be available during gulag... swap
+     * between guns or hands"). HANDS mode: a fight button throws a real melee that lands only IN REACH,
+     * with a small close-the-gap step (a dash ONLY on a melee, not on movement). Heavier hits reach
+     * further + hurt more but recover slower. Damage feeds the same win check as the gun. */
+    function melee(kind) {
+      var you = fighters.you, rv = fighters.rv;
+      if (!you || !rv || you.dead || rv.dead || S.over || S.meleeT > 0) return;
+      S.meleeT = kind === 'kick' ? 0.5 : (kind === 'hook' ? 0.42 : 0.3);
+      var dx = rv.x - you.x, dy = rv.y - you.y, d = hyp(dx, dy) || 1;
+      var reach = kind === 'kick' ? 100 : (kind === 'hook' ? 82 : 68);
+      var step2 = Math.min(Math.max(0, d - you.r - rv.r - 6), kind === 'kick' ? 30 : 20);   // dash INTO range, melee only
+      if (step2 > 0) { var nx = you.x + dx / d * step2, ny = you.y + dy / d * step2; if (!blocked(nx, you.y)) you.x = nx; if (!blocked(you.x, ny)) you.y = ny; }
+      if (hyp(rv.x - you.x, rv.y - you.y) < reach) {
+        rv.hp -= (kind === 'kick' ? 46 : (kind === 'hook' ? 34 : 22)); rv.hitFx = 0.18;
+        try { if (typeof boxHeroHit === 'function') boxHeroHit(); } catch (_e) {}
+        try { if (global.AK_SFX && AK_SFX.play) AK_SFX.play(kind === 'kick' ? 'crit' : 'hit'); } catch (_e2) {}
+        if (rv.hp <= 0 && !S.over) { rv.dead = true; S.over = true; S.win = true; finish(); }
+      }
+    }
     function moveF(f, vx, vy, dt) {
       var nx = clamp(f.x + vx * f.spd * dt, 20, AW - 20), ny = clamp(f.y + vy * f.spd * dt, 20, AH - 20);
       if (!blocked(nx, f.y)) f.x = nx;
@@ -1327,10 +1469,11 @@
 
     function step(dt) {
       S.t += dt;
+      if (S.meleeT > 0) S.meleeT -= dt;                    // AK-GULAGFIST: melee recovery
       var you = fighters.you, rv = fighters.rv;
       you.fireT -= dt; if (you.hitFx > 0) you.hitFx -= dt; if (rv.hitFx > 0) rv.hitFx -= dt;
       moveF(you, inp.mvx, inp.mvy, dt);
-      if (inp.firing && !you.dead) {                       // aim in ARENA coords (inp.ax/ay), light snap to rival
+      if (inp.firing && !you.dead && !S.hands) {           // AK-GULAGFIST: no shooting in HANDS mode. aim in ARENA coords (inp.ax/ay), light snap to rival
         var tx = inp.ax, ty = inp.ay;
         if (hyp(rv.x - tx, rv.y - ty) < 90) { tx = rv.x; ty = rv.y; }
         fire(you, tx, ty);
@@ -1342,6 +1485,7 @@
         var tgt = b.team === 0 ? rv : you;
         if (!tgt.dead && hyp(b.x - tgt.x, b.y - tgt.y) < tgt.r) {
           tgt.hp -= b.dmg; tgt.hitFx = 0.12; bullets.splice(i, 1);
+          if (b.team === 0) boxHeroHit();                 /* AK-FIX-lane-D:modes.js 2026-07-28: box the hero on a landed player hit */
           if (tgt.hp <= 0 && !S.over) { tgt.dead = true; S.over = true; S.win = (tgt === rv); finish(); }
         }
       }
@@ -1381,21 +1525,73 @@
     function drawHUD(g) {
       g.save(); g.fillStyle = 'rgba(6,6,12,.82)'; g.fillRect(0, 0, vp.w, 36);
       g.fillStyle = '#ff8a6b'; g.font = '900 13px Inter,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText('THE GULAG · 1v1 · win your way back', vp.w / 2, 18); g.restore();
+      g.fillText('THE GULAG · 1v1 · win your way back', vp.w / 2, 18);
+      // AK-GULAGHERO 2026-07-28: name the hero the player is fighting AS, so they SEE who they are
+      // even in first person. Roster label from the same AK_HERO the model system reads.
+      try {
+        // AK-GULAGLABEL6 2026-07-28: resolve all SIX playable heroes; the old 3-way check mislabelled
+        // rottweiler/bulldog/malamute as $BCARDD once the AK-3DALL roster shipped.
+        var _hs = String(global.AK_HERO || 'bcardd').toLowerCase();
+        var _hl = _hs.indexOf('balboa') >= 0 ? 'BALBOA'
+                : _hs.indexOf('jagged') >= 0 ? 'JAGGED'
+                : _hs.indexOf('rott') >= 0 ? 'IRON ROTT'
+                : _hs.indexOf('bulldog') >= 0 ? 'GRIT BULL'
+                : _hs.indexOf('malamute') >= 0 ? 'BLACKOUT'
+                : '$BCARDD';
+        g.font = '800 10px Inter, system-ui'; g.fillStyle = '#e8c55a'; g.textAlign = 'left';
+        g.fillText('YOU: ' + _hl, 12, 34);
+      } catch (_eh) {}
+      g.restore();
       var you = fighters.you, rv = fighters.rv;
       bar(g, 14, vp.h - 26, 150, 12, you.hp / you.maxHp, '#6be08a');
       g.fillStyle = '#cfe'; g.font = '700 10px Inter,sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(you.name, 14, vp.h - 38);
       bar(g, vp.w - 164, 44, 150, 10, rv.hp / rv.maxHp, '#ff6b6b');
       g.fillStyle = '#f9b'; g.textAlign = 'right'; g.fillText(rv.name, vp.w - 14, 56);
-      g.save(); g.globalAlpha = .5; g.strokeStyle = '#e8c55a'; g.lineWidth = 1.5; g.beginPath(); g.arc(vp.w - 60, vp.h - 70, 40, 0, 2 * PI); g.stroke();
-      g.fillStyle = '#e8c55a'; g.font = '700 10px Inter,sans-serif'; g.textAlign = 'center'; g.fillText('AIM+FIRE', vp.w - 60, vp.h - 70); g.restore();
+      if (!S.hands) {   // AIM+FIRE prompt belongs to GUN mode only
+        g.save(); g.globalAlpha = .5; g.strokeStyle = '#e8c55a'; g.lineWidth = 1.5; g.beginPath(); g.arc(vp.w - 60, vp.h - 70, 40, 0, 2 * PI); g.stroke();
+        g.fillStyle = '#e8c55a'; g.font = '700 10px Inter,sans-serif'; g.textAlign = 'center'; g.fillText('AIM+FIRE', vp.w - 60, vp.h - 70); g.restore();
+      }
+      /* AK-GULAGFIST 2026-07-28: the GUN/HANDS swap + the fight buttons. Rects are stashed on S.hudBtns
+       * so pointer() can claim the tap before the look-drag. Fight buttons only render in HANDS mode. */
+      S.hudBtns = [];
+      var tw = 86, th = 28, bx = vp.w - tw - 12, by = 64;
+      g.save();
+      g.fillStyle = S.hands ? 'rgba(255,120,90,.92)' : 'rgba(127,233,255,.88)';
+      g.strokeStyle = '#e8c55a'; g.lineWidth = 1.5; g.fillRect(bx, by, tw, th); g.strokeRect(bx, by, tw, th);
+      g.fillStyle = '#0a0a0c'; g.font = '900 12px Inter,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(S.hands ? 'HANDS' : 'GUN', bx + tw / 2, by + th / 2);
+      g.restore();
+      S.hudBtns.push({ id: 'swap', x: bx, y: by, w: tw, h: th });
+      if (S.hands && !S.over) {
+        var _fb = [{ id: 'jab', lab: 'JAB' }, { id: 'hook', lab: 'HOOK' }, { id: 'kick', lab: 'KICK' }];
+        for (var _fi = 0; _fi < _fb.length; _fi++) {
+          var cx = vp.w - 58, cy = vp.h - 160 - _fi * 66, rr = 27, rdy = S.meleeT <= 0;
+          g.save(); g.globalAlpha = rdy ? 1 : 0.4;
+          g.fillStyle = 'rgba(20,16,12,.9)'; g.strokeStyle = '#ff8a6b'; g.lineWidth = 2;
+          g.beginPath(); g.arc(cx, cy, rr, 0, 2 * PI); g.fill(); g.stroke();
+          g.fillStyle = '#ffd76b'; g.font = '900 11px Inter,sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(_fb[_fi].lab, cx, cy); g.restore();
+          S.hudBtns.push({ id: _fb[_fi].id, x: cx - rr, y: cy - rr, w: rr * 2, h: rr * 2 });
+        }
+        g.save(); g.fillStyle = '#ff8a6b'; g.font = '700 10px Inter,sans-serif'; g.textAlign = 'right'; g.fillText('CLOSE IN + STRIKE', vp.w - 14, vp.h - 66); g.restore();
+      }
+      try { if (FPS && FPS.setHands) FPS.setHands(S.hands); } catch (_esh) {}   // keep the 3D gun hidden/shown with the mode
       if (S.over) centerBanner(g, vp, S.win ? "YOU'RE BACK IN -- GULAG WON" : 'DROPPED IN THE GULAG', S.win ? '#6be08a' : '#ff6b6b');
     }
 
     function pointer(evt) {
       if (!vp) return;                                     // ignore taps before the first frame lays out vp/transform
-      if (FPS && FPS.active()) { FPS.pointer(evt, inp, vp); return; }   // AK-GULAGFPS 2026-07-18: look-drag instead of absolute aim
       var x = evt.clientX, y = evt.clientY, t = evt.type;
+      if (t === 'pointerdown') {                            // AK-GULAGFIST: the GUN/HANDS swap + fight buttons win the tap before look-drag / move
+        for (var _hb = 0; _hb < (S.hudBtns || []).length; _hb++) { var b0 = S.hudBtns[_hb];
+          if (x >= b0.x && x <= b0.x + b0.w && y >= b0.y && y <= b0.y + b0.h) {
+            if (b0.id === 'swap') { S.hands = !S.hands; try { if (FPS && FPS.setHands) FPS.setHands(S.hands); } catch (_e) {} try { if (global.AK_SFX && AK_SFX.play) AK_SFX.play('tap'); } catch (_e2) {} }
+            else { melee(b0.id); }
+            return;
+          }
+        }
+      }
+      if (FPS && FPS.active()) { FPS.pointer(evt, inp, vp); return; }   // AK-GULAGFPS 2026-07-18: look-drag instead of absolute aim
       if (t === 'pointerdown') {
         if (x < vp.w * 0.5) { inp.mvId = evt.pointerId; inp.mox = x; inp.moy = y; inp.mvx = 0; inp.mvy = 0; }
         else { inp.aimId = evt.pointerId; var a = aimToArena(x, y); inp.ax = a.x; inp.ay = a.y; inp.firing = true; }
@@ -1932,7 +2128,8 @@
       var fallen = Object.keys(S.fallenSet);
       if (win) {
         // PROTECT THE PLAYER: no Town Hall hit, no benched dogs. Small hold reward.
-        try { if (ctx && ctx.currency) { ctx.currency.grant('gold', Math.round(rand(60, 110))); ctx.currency.grant('bones', 2); } } catch (_e) {}
+        /* AK-FIX-lane-D:modes.js 2026-07-28: STREET PAY MULTIPLIER on the defense hold gold (guarded, 1x if unwired). */
+        try { if (ctx && ctx.currency) { var _dpay = (global.AK_ECON && AK_ECON.streetPayMult) ? AK_ECON.streetPayMult() : 1; ctx.currency.grant('gold', Math.max(1, Math.round(rand(60, 110) * _dpay))); ctx.currency.grant('bones', 2); } } catch (_e) {}
         try { recordResult(ctx, 'world-defense', true, S.kills * 10 + 100); } catch (_e2) {}
         try { if (ctx && ctx.econ && ctx.econ.addTrophies) ctx.econ.addTrophies(6); } catch (_e3) {}
         S.result = { result: 'win', win: true, blocked: false, fallen: [], zone: zone, fortify: fortLvl, kills: S.kills };

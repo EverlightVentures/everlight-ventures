@@ -5966,8 +5966,16 @@
                 _vAccent=null;
                 _vCont=function(){
                   resultScreen.classList.remove('hidden');
-                  // tease THE COLLAR -- the apex above the crown; do not field it yet
-                  try{ fxBanner('THE COLLAR -- ABOVE THE CROWN','THE POUND STILL WATCHES','You took the crown off the dog that ate names. The floodlights over the pound never blinked. The last collar is the whole city\'s.'); }catch(_ec){}
+                  // AK-FIX-lane-G 2026-07-28: FIRE THE ENDING. The throne win IS the
+                  // crowning -- surface it (the Old Pack's first bow, AKStory CROWNED
+                  // vision), then the del Toro COLLAR reveal (the pound was the real
+                  // monster; markCollarSeen stamps it). Both play ONCE over the result
+                  // screen, fully guarded; no AKStory = today's silent path (result only).
+                  var _fresh=false;
+                  try{ _fresh=!(window.AKStory && typeof window.AKStory.crownedPayoffSeen==='function' && window.AKStory.crownedPayoffSeen()); }catch(_ef){ _fresh=false; }
+                  if(_fresh){
+                    try{ akFireCrownedBeat(function(){ try{ akFireCollarReveal(function(){}); }catch(_ec2){} }); }catch(_ec){}
+                  }
                 };
               } else {
                 var _abw=akActBoss(g.worldCity|0);
@@ -7611,6 +7619,92 @@
       };
       setTimeout(fire, el.classList.contains('hidden') ? 900 : 5400);
     }catch(_e){}
+  }
+  /* AK-FIX-lane-G 2026-07-28: full-screen STORY CUTSCENE renderer -- the surfaced
+     home for the game's two biggest missing beats (the CROWNED payoff + THE COLLAR
+     reveal). Dim reused-hub-art backdrop + the Old Pack narrator portrait, a big
+     Cinzel title, the authored vision text, tap-anywhere / CONTINUE to advance.
+     Built text-only (textContent, no innerHTML). Fully guarded: no document (node
+     harness) = onDone() fires immediately so the result flow never stalls. */
+  function akStoryCutscene(opts, onDone){
+    var done=false, ov=null;
+    function fin(){ if(done) return; done=true;
+      try{ if(ov && ov.parentNode) ov.parentNode.removeChild(ov); }catch(_e){}
+      try{ if(typeof onDone==='function') onDone(); }catch(_e2){} }
+    try{
+      if(typeof document==='undefined'){ fin(); return false; }
+      opts=opts||{};
+      var accent=opts.accent||'#e8c55a';
+      ov=document.createElement('div'); ov.id='ak-story-cutscene';
+      ov.style.cssText='position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;'
+        +'justify-content:center;padding:24px;box-sizing:border-box;overflow:auto;font-family:Inter,system-ui,sans-serif;'
+        +'background:radial-gradient(circle at 50% 32%,rgba(20,16,9,.94),rgba(3,3,6,.985));animation:akScreenIn .35s ease;cursor:pointer;';
+      if(opts.backdrop){ var bg=document.createElement('img'); bg.src=String(opts.backdrop); bg.alt='';
+        bg.onerror=function(){ this.style.display='none'; };
+        bg.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16;filter:grayscale(.4) contrast(1.05);pointer-events:none;'; ov.appendChild(bg); }
+      var col=document.createElement('div'); col.style.cssText='position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;max-width:560px;';
+      if(opts.narrator){ var np=document.createElement('img'); np.src=String(opts.narrator); np.alt='';
+        np.onerror=function(){ this.style.display='none'; };
+        np.style.cssText='width:104px;height:104px;object-fit:contain;border-radius:14px;margin-bottom:10px;filter:drop-shadow(0 8px 22px rgba(0,0,0,.85));'; col.appendChild(np); }
+      if(opts.tag){ var tg=document.createElement('div'); tg.textContent=String(opts.tag);
+        tg.style.cssText='font:800 11px Inter;letter-spacing:.24em;color:'+accent+';margin-bottom:6px;text-align:center;'; col.appendChild(tg); }
+      if(opts.title){ var tt=document.createElement('div'); tt.textContent=String(opts.title);
+        tt.style.cssText='font:900 30px Cinzel,serif;color:#fff;text-align:center;line-height:1.03;margin-bottom:12px;text-shadow:0 3px 16px rgba(0,0,0,.7);'; col.appendChild(tt); }
+      if(opts.body){ var bd=document.createElement('div'); bd.textContent=String(opts.body);
+        bd.style.cssText='max-width:540px;text-align:center;color:#e9ddc0;font:italic 500 15px/1.65 "Playfair Display",Georgia,serif;margin:0 0 20px;'; col.appendChild(bd); }
+      var cont=document.createElement('button'); cont.type='button'; cont.textContent=String(opts.cta||'CONTINUE');
+      cont.style.cssText='background:linear-gradient(180deg,rgba(232,197,90,.16),rgba(12,12,18,.9));border:1.5px solid '+accent+';border-radius:24px;padding:11px 30px;cursor:pointer;color:#fff;font:800 13px Inter;letter-spacing:.14em;';
+      cont.addEventListener('click', function(e){ try{ e.stopPropagation(); }catch(_e){} fin(); });
+      col.appendChild(cont);
+      var hint=document.createElement('div'); hint.textContent='tap anywhere to continue';
+      hint.style.cssText='margin-top:12px;font:500 10px Inter;letter-spacing:.12em;color:#7b7f86;'; col.appendChild(hint);
+      ov.appendChild(col);
+      ov.addEventListener('pointerdown', fin);
+      document.body.appendChild(ov);
+      try{ if(window.AK_SFX){ if(AK_SFX.init) AK_SFX.init(); AK_SFX.play(opts.sfx||'charge'); } }catch(_e){}
+      return true;
+    }catch(_e){ fin(); return false; }
+  }
+  /* AK-FIX-lane-G 2026-07-28: fire the CROWNED payoff -- the surfaced crowning beat.
+     Reads AKStory.crownReveal() (the authored Old Pack "you did it" vision + reused
+     throne backdrop) and plays it ONCE (AKStory.markCrownedSeen()). Guarded: no
+     AKStory / already-seen / not-yet-crowned = onDone() straight through. */
+  function akFireCrownedBeat(onDone){
+    try{
+      var S=window.AKStory;
+      if(!S || typeof S.crownReveal!=='function'){ if(typeof onDone==='function') onDone(); return false; }
+      if(typeof S.crownedPayoffSeen==='function' && S.crownedPayoffSeen()){ if(typeof onDone==='function') onDone(); return false; }
+      var cr=null; try{ cr=S.crownReveal(); }catch(_e){ cr=null; }
+      if(!cr){ if(typeof onDone==='function') onDone(); return false; }
+      try{ if(typeof S.markCrownedSeen==='function') S.markCrownedSeen(); }catch(_e){}
+      return akStoryCutscene({
+        tag:'THE OLD PACK BOWS -- FOR THE FIRST TIME',
+        title:String(cr.title||'CROWNED -- KING OF THE BLOCK'),
+        body:String(cr.vision||''),
+        backdrop:String(cr.backdrop||'assets/hub/trophy.png'),
+        narrator:cr.narrator, accent:'#e8c55a', cta:'WEAR THE CROWN', sfx:'victory'
+      }, onDone);
+    }catch(_e){ if(typeof onDone==='function') onDone(); return false; }
+  }
+  /* AK-FIX-lane-G 2026-07-28: fire THE COLLAR reveal -- the del Toro apex twist (the
+     pound / the human system was always the real monster, the crown was the bait).
+     Reads AKStory.collarReveal() (the Old Pack's last lesson) and plays it ONCE
+     (AKStory.markCollarSeen()). Guarded: no AKStory / no reveal = onDone() through. */
+  function akFireCollarReveal(onDone){
+    try{
+      var S=window.AKStory;
+      if(!S || typeof S.collarReveal!=='function'){ if(typeof onDone==='function') onDone(); return false; }
+      var cr=null; try{ cr=S.collarReveal(); }catch(_e){ cr=null; }
+      if(!cr){ if(typeof onDone==='function') onDone(); return false; }
+      try{ if(typeof S.markCollarSeen==='function') S.markCollarSeen(); }catch(_e){}
+      return akStoryCutscene({
+        tag:'THE COLLAR -- ABOVE THE CROWN',
+        title:String(cr.title||'THE COLLAR'),
+        body:String(cr.vision||''),
+        backdrop:'assets/hub/town_hall.png',
+        narrator:cr.narrator, accent:'#c0402f', cta:'SEE THE REAL TEETH', sfx:'boss_roar'
+      }, onDone);
+    }catch(_e){ if(typeof onDone==='function') onDone(); return false; }
   }
   function showChoiceFxBanner(){
     if(_akFx==='rage'){
@@ -10891,11 +10985,20 @@
     var r=b.getBoundingClientRect(); return r.width>40 && r.height>40;
   }
   var lastOn=false;
+  var _threeKicked=false;
   function tick(){
     try{
       if(!window.AK_ARENA3D) return;
       var live=boardLive();
       if(live && !lastOn){
+        // AK-ARENA-KICK 2026-07-28: THE STADIUM DEADLOCK FIX. three_boot is LAZY -- its dynamic
+        // import() only fires via ready()/addon()/loadGLB(); ok()/get() are passive reads that never
+        // trigger a load. But this poll only turned the stadium on AFTER ok() was already true, and
+        // NOTHING in the battler ever kicked the load -- so ok() stayed false forever and the stadium
+        // never rendered (that is why "the tower battler isn't in the arena"). Kick the load once when
+        // the board goes live; loadCore resolves in <1s, ok() flips true, and the next tick boots the
+        // stadium on its own.
+        if(!_threeKicked && window.AK_THREE && window.AK_THREE.ready){ _threeKicked=true; try{ window.AK_THREE.ready(); }catch(_ek){} }
         if(window.AK_THREE && window.AK_THREE.ok && window.AK_THREE.ok()){ window.AK_ARENA3D.setOn(true); lastOn=true; }
       } else if(!live && lastOn){
         window.AK_ARENA3D.setOn(false); lastOn=false;

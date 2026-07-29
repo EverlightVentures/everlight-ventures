@@ -258,6 +258,12 @@
   function grantReward(ctx, def, res) {
     res = res || {};
     var id = def.id, rawGold = res.gold | 0, rawBones = res.bones | 0, score = res.score | 0;
+    /* AK-FIX-lane-E 2026-07-28: scale the currency haul by the ARCADE building reward
+     * multiplier (+5%/lvl). Guarded per SHARED CONTRACT -> reads 1x if the economy
+     * lever isn't wired yet, so lane ordering can never crash and a level-0 arcade
+     * pays exactly as before. The daily caps below still bound the boosted haul. */
+    var arcMult = (global.AK_ECON && global.AK_ECON.arcadeRewardMult) ? (global.AK_ECON.arcadeRewardMult() || 1) : 1;
+    if (arcMult !== 1) { rawGold = Math.max(0, Math.round(rawGold * arcMult)); rawBones = Math.max(0, Math.round(rawBones * arcMult)); }
     var e = econ(ctx);
     var out = { gold: 0, bones: 0, score: score, best: 0, capped: false, gameId: id,
                 sp: 0, produce: 0, scrap: 0, trophies: 0, note: '' };

@@ -202,7 +202,7 @@
       // this now honours a real numeric 0 for anyone who genuinely wants the old flat hub.
       phi:     (typeof o.phi === 'number' ? o.phi : DEFAULT_PHI),   // polar from straight-up; 0 = flat hub
       zoom:    o.zoom || 1,
-      dist:    o.dist || 620,
+      dist:    o.dist || 300,   // AK-CAMSCALE 2026-07-28: was 620 (hero rendered a tiny speck). Close 3rd-person default so a NEW player (no saved cam, loadCam early-returns) also gets presence.
       fov:     o.fov || 55
     };
 
@@ -687,6 +687,10 @@
     try { r = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' }); }
     catch (_e) { return null; }                 // context refused (budget blown): stay 2D
     r.setPixelRatio(Math.min(2, root.devicePixelRatio || 1));   // DPR 3 phones thermal-throttle
+    // AK-TONEMAP 2026-07-28: NoToneMapping (the default) clips shadows to pure black, which is most
+    // of why the night hub looked like a void. ACES filmic + exposure 1.25 lifts the shadow floor
+    // and adds filmic contrast so the scene reads as lit rather than dark. Verified via render.
+    try { r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.5; } catch (_tm) {}   // AK-LIGHTUP2 2026-07-28: 1.25->1.5. Exposure is the ONLY brightness lever for the UNLIT MeshBasic ground plate; a render-verified playtest showed the lot still murky. Bumped with the light floor below.
     r.setSize(root.innerWidth || 900, root.innerHeight || 600, false);
     var el = r.domElement;
     el.id = 'ak-world3d';
@@ -711,7 +715,7 @@
   // AK-APRON 2026-07-19: the district plate's base colour, shared with the apron skirt so the two
   // meet at the world rim in the SAME colour and the join cannot be seen. One constant, two call
   // sites (buildGround's plate + buildApron's skirt) -- they must never drift apart.
-  var GROUND_COLOR = 0x101018;
+  var GROUND_COLOR = 0x23262f;   // AK-LIGHTUP: was 0x101018 (near-black); lighter wet-asphalt
 
   /* AK-APRON 2026-07-19 -- THE "I AM IN THE SKY" FIX.
    *
@@ -861,7 +865,7 @@
     W3.bldIds = {};   // rebuilt from scratch: a district swap must never leave the old ids answering hasBox
     for (var i = 0; i < list.length; i++) {
       var b = list[i];
-      var h = Math.max(90, (b.h || 96) * 1.65);
+      var h = Math.max(140, (b.h || 96) * 2.35);   // AK-BIGGER 2026-07-28: was 90/1.65
       var geo = new THREE.BoxGeometry(b.w || 160, h, (b.h || 96) * 0.72);
       var col = 0x2a2a34;
       try { col = parseInt(String(b.col || '#2a2a34').slice(1), 16); } catch (_e) {}
@@ -1401,10 +1405,24 @@
   }
 
   function buildLights(THREE) {
-    W3.scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x2a2418, 1.05));
-    var d = new THREE.DirectionalLight(0xffe9b8, 0.85);
+    // AK-LIGHTUP 2026-07-28: the hub read as near-black -- 74 buildings were barely visible
+    // silhouettes (verified by render). Colours here are all dark (ground 0x22242c, buildings
+    // ~0x2a2a34), so moderate light left it in the murk. Brighter sky + key + a low ambient fill
+    // so the shadow side of a building is still readable. Kept warm/cool split so it stays a MOODY
+    // night alley, not flat daylight -- verified against the live render, not guessed.
+    W3.scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x302418, 2.2));   // AK-LIGHTUP2: 1.75->2.2 (lit buildings still read dark in the render-verified lot)
+    W3.scene.add(new THREE.AmbientLight(0x404a5c, 0.85));   // AK-LIGHTUP2: 0.55->0.85 fill -- the biggest lever on "murky" shadow floor
+    var d = new THREE.DirectionalLight(0xffe9b8, 1.7);       // AK-LIGHTUP2: 1.55->1.7 key, the "streetlamp sun"
     d.position.set(600, 900, 400);
-    W3.scene.add(d);
+    W3.scene.add(d); W3.keyLight = d;
+    // AK-DAYNIGHT-3D 2026-07-28: a visible sun/moon disc so the sky has a light SOURCE, and it moves
+    // with the phase. daynight.js already computes the phase deterministically; we just render it.
+    var sun = new THREE.Mesh(new THREE.SphereGeometry(70, 16, 12),
+                             new THREE.MeshBasicMaterial({ color: 0xffe9b8, fog: false }));
+    sun.position.set(600, 900, 400); W3.scene.add(sun); W3.sun = sun;
+    var d2 = new THREE.DirectionalLight(0x8fb4ff, 0.5);      // cool rim from the opposite side
+    d2.position.set(-500, 400, -300);
+    W3.scene.add(d2);
   }
 
   // AK-SKYFOG 2026-07-19: measured, 26% of the frame at default pitch and 38% at a low angle was
@@ -1434,7 +1452,7 @@
       W3.scene.background = new THREE.Color(tint);
       // near/far chosen off the camera dolly range (260-1150) so the far edge of a 1700x1300 plate
       // is well inside the fade instead of ending abruptly.
-      W3.scene.fog = new THREE.Fog(tint, 420, 1750);
+      W3.scene.fog = new THREE.Fog(tint, 700, 2600);   // AK-LIGHTUP: was 420/1750, buildings faded to black too soon
       W3.skyTint = tint;
     } catch (_e) {}
   }
@@ -1625,7 +1643,26 @@
     }
     var me = (ctx && ctx.me) || root.me || { x: 850, y: 650 };
     W3.proj.setViewport(root.innerWidth || W3.proj.state.W, root.innerHeight || W3.proj.state.H);
-    W3.proj.follow(me.x, me.y);
+    /* AK-P2CAM 2026-07-28 (Prototype-2 momentum camera): instead of hard-pinning the hero dead-centre,
+     * ease the projector centre toward a point AHEAD of him in the travel direction -- more lead the
+     * faster he moves, so a sprint reads as surging forward and the hero sits back on screen. follow()
+     * stays a pure hard-set primitive (parity self-test + raid centring); the lead + smoothing lives
+     * here at the one live call site. 2D sprites and the 3D ground both project through the SAME S.cam,
+     * so leading it moves the whole scene coherently -- they cannot detach. */
+    (function () {
+      var vx = me.vx || 0, vy = me.vy || 0, sp = Math.hypot(vx, vy);
+      var tx = me.x, ty = me.y;
+      if (sp > 10) {
+        var maxsp = (me.spd || 300) * 1.9;                  // approx sprint top speed
+        var lead = 42 + 62 * Math.min(1, sp / maxsp);        // ~42px lead at a walk, up to ~104px at full sprint
+        tx += (vx / sp) * lead; ty += (vy / sp) * lead;
+      }
+      if (W3._camLX == null) { W3._camLX = tx; W3._camLY = ty; }  // first frame: snap, no lurch
+      var _s = Math.max(0.001, Math.min(0.1, dt || 0.016));
+      var k = 1 - Math.pow(0.5, _s * 9);                     // frame-rate-independent trailing ease
+      W3._camLX += (tx - W3._camLX) * k; W3._camLY += (ty - W3._camLY) * k;
+      W3.proj.follow(W3._camLX, W3._camLY);
+    })();
     // AK-CAMWALK 2026-07-20: ease the camera behind the hero and settle the horizon. Uses the same
     // headingFrom() the hero mesh is rotated by, so the rig and the dog can never disagree about
     // which way "forward" is -- a mismatch there is what makes a third-person camera feel drunk.
@@ -1643,13 +1680,34 @@
     var _mv = Math.hypot(me.vx || 0, me.vy || 0) > 6;
     try { W3.proj.autoCentre(-headingFrom(ctx, me) - Math.PI / 2, dt, _mv); } catch (_eAC) {}
     if (W3.hero) {
-      W3.hero.position.set(me.x, 0, me.y);
+      W3.hero.position.set(me.x, (me.z || 0), me.y);   // AK-P2Z 2026-07-28: lift the 3D hero mesh by jump height (me.z), ground stays at 0
       // AK-WORLD3D-FIX 2026-07-18: window.faceAngle does not exist (index.html:731
       // is a top-level `let`, which never lands on the global object -- see the
       // makeHeading header). Prefer any REAL published heading, otherwise derive it
       // from motion the same way the hub does at index.html:2387.
       W3.hero.rotation.y = -headingFrom(ctx, me) + Math.PI / 2;
     }
+    // AK-DAYNIGHT-3D: drive the 3D key light + sun/moon from the deterministic phase. Throttled to
+    // ~1s -- the phase changes over minutes, so per-frame is waste. Night = cooler + dimmer, day =
+    // warm + bright. Bounded so it never goes darker than the readable floor set by AK-LIGHTUP.
+    try {
+      var _now = (root.performance && root.performance.now) ? root.performance.now() : 0;
+      if (W3.keyLight && (!W3._dnAt || _now - W3._dnAt > 1000)) {
+        W3._dnAt = _now;
+        var DN = root.AK_DAYNIGHT, cur = (DN && DN.current) ? DN.current() : null;
+        var ph = cur && cur.phase || 'day';
+        // intensity + colour + sun height per phase
+        // AK-LIGHTUP2 2026-07-28: raised the whole key-light floor so no phase reads murky. Night was
+        // 0.85 (too dark on the render-verified lot); now 1.3. day 1.75->2.0, dawn/dusk lifted to match.
+        var P = ({ dawn:  { i: 1.65, c: 0xffd9b0, y: 500, mc: 0xffe9b8 },
+                   day:   { i: 2.0,  c: 0xffe9b8, y: 950, mc: 0xffe9b8 },
+                   dusk:  { i: 1.6,  c: 0xffb877, y: 420, mc: 0xffbb88 },
+                   night: { i: 1.3,  c: 0x9fb6e8, y: 780, mc: 0xdfe6ff } })[ph] || { i: 1.8, c: 0xffe9b8, y: 900, mc: 0xffe9b8 };
+        W3.keyLight.intensity += (P.i - W3.keyLight.intensity) * 0.1;   // ease, no snap
+        W3.keyLight.color.setHex(P.c);
+        if (W3.sun) { W3.sun.position.y += (P.y - W3.sun.position.y) * 0.1; W3.sun.material.color.setHex(P.mc); }
+      }
+    } catch (_edn) {}
     var C = W3.proj.camPos(), S = W3.proj.state;
     W3.camera.aspect = (S.W || 900) / (S.H || 600);
     W3.camera.fov = S.fov;
@@ -1708,8 +1766,16 @@
       // AK-TILT 2026-07-19: `c.phi || 0` slammed a restored camera back to dead overhead whenever the
       // saved value was absent OR a legacy 0 from before the tilt default existed. Honour a real
       // saved number, otherwise fall back to the shipping tilt rather than to flat.
-      W3.proj.setPhi(typeof c.phi === 'number' && c.phi > 0.01 ? c.phi : DEFAULT_PHI);
-      W3.proj.setZoom(c.zoom || 1); W3.proj.dolly((c.dist || 620) - W3.proj.state.dist);
+      /* AK-CAMSCALE 2026-07-28 (operator: "hero is a tiny speck, camera too high/far -- no sense of
+       * scale"). The hub restored to dist 620 (far + top-down), shrinking the hero to a dot. Pull the
+       * camera IN to a close third-person view with real presence, and CLAMP stale saves so a bad
+       * saved camera can never re-shrink the hero or flatten the district into a top-down map. */
+      var _phi = (typeof c.phi === 'number' && c.phi > 0.01) ? c.phi : DEFAULT_PHI;
+      _phi = Math.max(58 * DEG, Math.min(72 * DEG, _phi));            // moderate 3rd-person tilt: never top-down-map, never so flat you lose the street
+      W3.proj.setPhi(_phi);
+      W3.proj.setZoom(c.zoom || 1);
+      var _hd = (typeof c.dist === 'number' && c.dist > 0.01) ? Math.min(c.dist, 380) : 300;   // close: hero has presence (was 620); cap stale far saves
+      W3.proj.dolly(_hd - W3.proj.state.dist);
       return true;
     } catch (_e) { return false; }
   }
