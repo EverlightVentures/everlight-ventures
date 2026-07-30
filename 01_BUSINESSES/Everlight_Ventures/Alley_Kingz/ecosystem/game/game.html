@@ -2457,6 +2457,11 @@
      total no-op without it, so the Canvas2D battler is unaffected if three.js fails. -->
 <script src="systems/three_boot.js?v=1"></script>
 <script src="systems/arena3d.js?v=1"></script>
+<!-- AK-3DC-tower 2026-07-29: <model-viewer> web component for the Phase-4 tower-lane 3D unit overlay
+     (window.AK_ARENA3D_UNITS, defined in arena3d.js). Loads async as a module; until it registers,
+     or if this file 404s, the unit pool's mvReady() guard returns false and the lane keeps its 2D
+     drawUnit tokens -- byte-identical to today. Same vendored build index.html already ships. -->
+<script type="module" src="assets/vendor/model-viewer.min.js?v=350"></script>
 <script src="ak_25d.js?v=1"></script>
 <script src="lobby.js?v=1781486888"></script>
 <!-- AK-PRELOAD-GATE 2026-07-11 (JOB 2, BATTLER): mirror index.html (the hub). Build the battle
@@ -3974,6 +3979,34 @@
     const tokShape = tokenShapeOf(c);   // AK-SHAPES: range-class shape token
     const clsCol   = classOutlineOf(c); // AK-SHAPES: class lane outline color
 
+    /* AK-3DC-tower 2026-07-29: PHASE 4 -- walking GLB overlay for this lane unit. This is the tower
+       lane's own capped 3D-unit pool (arena3d.js:AK_ARENA3D_UNITS), mirroring hub3d.js:__ak3d but
+       SEPARATE (game.html never loads hub3d). Only the 6 hero cards resolve a model; EVERY other card
+       -- and any miss (model-viewer not loaded, pool at cap, GLB still downloading) -- returns false
+       and keeps the full 2D token drawn below. The GLB replaces ONLY the flat body chassis: the
+       shadow, faction/rarity glows, class rings, HP bar and ownership ring all still draw, so nothing
+       the player reads for gameplay is lost (and the glows the operator asked us to keep stay on).
+       Canvas coords are scaled to viewport px so the model tracks the unit even when #board (a fixed
+       540x900 backing) is CSS-scaled down on a phone; k==1 on an unscaled board. */
+    let render3d = false;
+    if(u.alive){
+      try{
+        const _pool = window.AK_ARENA3D_UNITS;
+        if(_pool && _pool.unit){
+          const _url = _pool.modelFor(c);
+          if(_url){
+            const _rc = canvas.getBoundingClientRect();
+            const _k  = _rc.width / (canvas.width || ARENA_W);   // canvas units -> on-screen px
+            render3d = _pool.unit(
+              (u.id!=null ? ('tu'+u.id) : ('tn'+(c.cardNumber||c.name||''))),
+              _url, _rc.left + px*_k, _rc.top + py*_k,
+              { r: r*_k, faceAngle: u.angle, moving: (u.state==='move'), engaging: !!u.target }
+            );
+          }
+        }
+      }catch(_e){ render3d = false; }
+    }
+
     // ---- CHARGE TRAIL: fast movers leave a fading streak behind (-angle) ----
     if(u.alive && u.state==='move'){
       const fast = (c.weaponType==='bullet'||c.weaponType==='lance'||c.bodyShape==='scout'||c.bodyShape==='blade');
@@ -4049,7 +4082,7 @@
     // like the hub roamer _vx mirror). Absent/not-ready clip OR an idle/attacking unit
     // -> total no-op, falls through to today's PNG/procedural render (zero behavior change).
     let _walkVid = null;
-    if(u.alive && u.state==='move' && window.AK_CARDFX){
+    if(!render3d && u.alive && u.state==='move' && window.AK_CARDFX){   // AK-3DC-tower: 3D unit owns its own walk clip
       try{
         var _wp = AK_CARDFX.resolve(u,'walk');
         if(_wp){
@@ -4059,7 +4092,8 @@
         }
       }catch(_e){}
     }
-    if(_walkVid){
+    if(render3d){ /* AK-3DC-tower: body is the walking 3D GLB overlay -- skip the flat 2D chassis */ }
+    else if(_walkVid){
       const d = r*2.4;                                  // token diameter ~ shape footprint (same envelope as the portrait)
       ctx.save();
       ctx.rotate(-(u.angle - Math.PI/2));               // orient the walking dog UP, not along travel
@@ -4152,7 +4186,7 @@
     ctx.restore();
 
     // ---- glyph (upright, not rotated) -- procedural fallback ONLY; PNG art reads on its own ----
-    if(!unitIconReady(c.cardNumber)){
+    if(!unitIconReady(c.cardNumber) && !render3d){   // AK-3DC-tower: no glyph under a 3D GLB body
       ctx.fillStyle='#0a0a0a'; ctx.font='700 '+(0.62*sx)+'px Cinzel,serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(c.glyph||'M',px,py);

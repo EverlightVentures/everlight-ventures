@@ -1874,12 +1874,41 @@
     // OFF by default -- the painted maps ALREADY draw the fences/cars/trains, so
     // we don't double-draw them in normal play.
     onDrawWorld: function (ctx) {
-      if (!global.AK_WM_DEBUG) return;
-      var g = ctx.world.g, obs = obstaclesFor(ctx.activeZone); if (!obs.length) return;
-      g.save(); g.strokeStyle = 'rgba(192,57,43,.8)'; g.lineWidth = 2;
+      var g = ctx.world.g, W = ctx.world, obs = obstaclesFor(ctx.activeZone); if (!obs.length) return;
+      // AK-OBSTVIS 2026-07-29: the solid scenery (cars/trains/fences/rubble/planters/pipes) rendered
+      // NOWHERE in normal play -- only a debug-gated red outline -- so in the angled 3D camera the player
+      // hit "invisible walls" (operator: "i run into invisible objects"). Draw a subtle ground footprint
+      // (dark fill + faint gold rim) for every obstacle, 3D-projected through the SAME wx(x,y)/wy(y,x) the
+      // hero uses, so the shadow sits exactly under the collision body.
+      g.save();
       for (var i = 0; i < obs.length; i++) { var o = obs[i];
-        if (o.type === 'circle') { g.beginPath(); g.arc(ctx.world.wx(o.x), ctx.world.wy(o.y), o.r, 0, 7); g.stroke(); }
-        else { g.strokeRect(ctx.world.wx(o.x), ctx.world.wy(o.y), o.w, o.h); } }
+        try {
+          if (o.type === 'circle') {
+            var sx = W.wx(o.x, o.y), sy = W.wy(o.y, o.x);
+            if (!isFinite(sx) || !isFinite(sy)) continue;
+            var rpx = Math.max(7, Math.abs(W.wx(o.x + o.r, o.y) - sx));
+            g.globalAlpha = 0.40; g.fillStyle = '#0b0b0d';
+            g.beginPath(); g.ellipse(sx, sy, rpx, rpx * 0.52, 0, 0, 7); g.fill();
+            g.globalAlpha = 0.5; g.strokeStyle = 'rgba(201,168,76,.55)'; g.lineWidth = 2;
+            g.beginPath(); g.ellipse(sx, sy, rpx, rpx * 0.52, 0, 0, 7); g.stroke();
+          } else {
+            var c = [[o.x, o.y], [o.x + o.w, o.y], [o.x + o.w, o.y + o.h], [o.x, o.y + o.h]];
+            var p0x = W.wx(c[0][0], c[0][1]), p0y = W.wy(c[0][1], c[0][0]);
+            if (!isFinite(p0x) || !isFinite(p0y)) continue;
+            g.beginPath(); g.moveTo(p0x, p0y);
+            for (var k = 1; k < 4; k++) { g.lineTo(W.wx(c[k][0], c[k][1]), W.wy(c[k][1], c[k][0])); }
+            g.closePath();
+            g.globalAlpha = 0.40; g.fillStyle = '#0b0b0d'; g.fill();
+            g.globalAlpha = 0.5; g.strokeStyle = 'rgba(201,168,76,.5)'; g.lineWidth = 2; g.stroke();
+          }
+        } catch (_e) {}
+      }
+      g.globalAlpha = 1; g.restore();
+      if (!global.AK_WM_DEBUG) return;
+      g.save(); g.strokeStyle = 'rgba(192,57,43,.8)'; g.lineWidth = 2;
+      for (var j = 0; j < obs.length; j++) { var d = obs[j];
+        if (d.type === 'circle') { g.beginPath(); g.arc(W.wx(d.x, d.y), W.wy(d.y, d.x), d.r, 0, 7); g.stroke(); }
+        else { g.strokeRect(W.wx(d.x, d.y), W.wy(d.y, d.x), d.w, d.h); } }
       g.restore();
     }
   });

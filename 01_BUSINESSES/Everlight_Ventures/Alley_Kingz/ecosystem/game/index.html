@@ -17,16 +17,16 @@
   #fight{position:fixed;right:12px;bottom:14px;padding:12px 18px;border-radius:14px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#1a1206;font-weight:800;font-size:13px;border:none;box-shadow:0 4px 14px rgba(201,168,76,.4);letter-spacing:.05em;z-index:5;}
   #stick{position:fixed;left:16px;bottom:16px;width:116px;height:116px;border-radius:50%;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);touch-action:none;z-index:5;pointer-events:none;transition:opacity .15s;}
   #nub{position:absolute;left:33px;top:33px;width:50px;height:50px;border-radius:50%;background:rgba(201,168,76,.55);}
-  #runbtn{position:fixed;right:14px;bottom:150px;width:60px;height:60px;border-radius:50%;z-index:6;
+  #runbtn{position:fixed;right:16px;bottom:116px;width:60px;height:60px;border-radius:50%;z-index:6;/*AK-BTNFIX row*/
     background:radial-gradient(circle at 40% 30%,rgba(255,255,255,.28),#2a2313 55%,#17110a 130%);
     border:2.5px solid rgba(232,197,90,.6);color:#e8c55a;font:800 13px Inter,sans-serif;letter-spacing:.04em;
     box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}
   #runbtn.on{background:radial-gradient(circle at 40% 30%,#ffe6a0,#e8c55a 55%,#c9a84c 130%);color:#15110a;border-color:#fff;box-shadow:0 0 16px rgba(232,197,90,.8);}
-  #punchbtn{position:fixed;right:82px;bottom:150px;width:66px;height:66px;border-radius:50%;z-index:6;
+  #punchbtn{position:fixed;right:84px;bottom:114px;width:62px;height:62px;border-radius:50%;z-index:6;/*AK-BTNFIX row*/
     background:radial-gradient(circle at 40% 30%,rgba(255,120,90,.35),#3a1a12 55%,#1a0d0a 130%);
     border:2.5px solid rgba(255,120,90,.7);font-size:26px;box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}
   #punchbtn:active{transform:scale(.9);}
-  #jumpbtn{position:fixed;right:20px;bottom:220px;width:56px;height:56px;border-radius:50%;z-index:6;
+  #jumpbtn{position:fixed;right:154px;bottom:116px;width:58px;height:58px;border-radius:50%;z-index:6;/*AK-BTNFIX row, clear of the emote rail*/
     background:radial-gradient(circle at 40% 30%,rgba(120,200,255,.32),#122636 55%,#0a141c 130%);
     border:2.5px solid rgba(127,200,255,.7);color:#9fd8ff;font:800 12px Inter,sans-serif;letter-spacing:.04em;
     box-shadow:0 4px 12px rgba(0,0,0,.5);touch-action:manipulation;}   /* AK-P2Z: JUMP (hold to glide) */
@@ -997,7 +997,7 @@ let activeZone=getZone(localStorage.getItem('ak_hub_zone')||'HOME_TURF');
 function curBuildings(){return activeZone.buildings;}
 function curGround(){var d=districtBg[activeZone.id]; if(d&&d.complete&&d.naturalWidth>0)return d; return groundImg[activeZone.ground];}
 function curTint(){var c=activeZone.tint;return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
-const me={x:850,y:650,tx:null,ty:null,r:23,spd:300,z:0,vz:0}; // AK-SPAWN: centre of the active zone (empty tile). AK-P2Z: z=jump height, vz=vertical velocity (Prototype-2 verticality via world3d.project height arg)
+const me={x:850,y:650,tx:null,ty:null,r:23,spd:200,z:0,vz:0}; // AK-SPAWN. AK-SPEEDFIX 2026-07-29: walk 300->200 (camera pulled in dist 620->300 makes ground fill ~2x more screen, so 300 read as 'runs too fast')
 let spawnGrace=0.8;
 let cam={x:0,y:0};
 // AK-CAMCENTRE 2026-07-19 (operator bug 1): "my player needs to move across the map while walking in
@@ -1624,6 +1624,34 @@ function akBldgDmg(id){ try{ if(!window.AK_ECON||!AK_ECON.buildingDamage)return 
   if(!_dmgCache || (last-_dmgAt)>1000){ _dmgAt=last; _dmgCache={}; var p=AK_ECON.loadProfile?AK_ECON.loadProfile():null, now=Date.now();
     if(p&&p.baseDmg){ for(var i=0;i<_DMG_IDS.length;i++){ var d=AK_ECON.buildingDamage(p,_DMG_IDS[i],now); if(d>0.04)_dmgCache[_DMG_IDS[i]]=d; } } }
   return _dmgCache[id]||0; }catch(_e){ return 0; } }
+/* AK-3DC-index PHASE3 2026-07-29: the shop keeper INSIDE a building is the hero the player assigned to run it
+   (profile.buildingDogs -> akBuildingDog.assignedFor). Over the MP4/PNG interior background we pin a dedicated
+   <model-viewer> of that hero's GLB (resolved through the pool's own name->model map), standing between the
+   backdrop (#int-bg, z0) and the info card (#int-card, z2). Nothing assigned, or a dog with no GLB, or a missing
+   engine -> the element hides and the existing 2D keeper card carries it (fallback preserved). These idle indices
+   MIRROR hub3d.js CLIP_BY_MODEL (its measured, per-model single source of truth); HANDOFF: expose a getter on
+   __ak3d so this duplication can be dropped. */
+var _AK_KEEPER_IDLE={ bcardd:5, balboa:15, jagged:9, bulldog:1, rottweiler:4, malamute:11 };
+function akInteriorKeeper3D(b){ try{
+  var host=document.getElementById('interior'); if(!host||!b)return;
+  var el=document.getElementById('int-keeper3d');
+  var name=null; try{ if(window.akBuildingDog&&akBuildingDog.assignedFor)name=akBuildingDog.assignedFor(b.id); }catch(_e){}
+  var url=(name&&window.__ak3d&&__ak3d.modelFor)?__ak3d.modelFor(name):'';
+  if(!url){ if(el)el.style.display='none'; return; }   // no assigned hero with a GLB -> keep the 2D keeper portrait
+  if(!el){ el=document.createElement('model-viewer'); el.id='int-keeper3d';
+    ['autoplay','interaction-prompt','disable-zoom','disable-tap','disable-pan'].forEach(function(a){ el.setAttribute(a, a==='interaction-prompt'?'none':''); });
+    el.setAttribute('shadow-intensity','0'); el.setAttribute('exposure','1.05'); el.setAttribute('camera-target','0m 0.95m 0m'); el.setAttribute('field-of-view','32deg');
+    el.style.cssText='position:absolute;left:50%;bottom:150px;transform:translateX(-50%);width:min(58vw,300px);height:min(60vh,440px);z-index:1;pointer-events:none;--poster-color:transparent;background:transparent;';
+    el.addEventListener('load',function(){ try{ var c=el.getBoundingBoxCenter&&el.getBoundingBoxCenter(); if(c&&isFinite(c.x))el.cameraTarget=c.x.toFixed(3)+'m '+c.y.toFixed(3)+'m '+c.z.toFixed(3)+'m'; }catch(_e){}
+      try{ var nm=el.availableAnimations||[], idle=nm.find(function(n){return /idle|stand|relax/i.test(n);});
+        if(!idle){ var ix=parseInt(el.getAttribute('data-idle'),10); if(isFinite(ix)&&nm[ix])idle=nm[ix]; }
+        if(!idle)idle=nm[0]; if(idle){ el.animationName=idle; el.play(); } }catch(_e){} });
+    host.insertBefore(el, host.firstChild?host.firstChild.nextSibling:null); }   // after #int-bg, before #int-card
+  var ix=''; for(var k in _AK_KEEPER_IDLE){ if(url.indexOf(k)!==-1){ ix=_AK_KEEPER_IDLE[k]; break; } }
+  el.setAttribute('data-idle', ix);
+  if(el.getAttribute('src')!==url){ el.setAttribute('src',url); }
+  el.style.display='';
+}catch(_e){} }
 function enterInterior(b){ if(interiorOpen)return; interiorB=b; try{ akPlayTransition('transition_wipe'); }catch(_e){}   // AK-INTBG (#9): set early so ctx.ui.keeperCard can resolve THIS building's bg
   try{ if(window.AK_TUTORIAL&&AK_TUTORIAL.firstVisit) AK_TUTORIAL.firstVisit('interior'); }catch(_e){}  // first time the player steps inside any building -- explain keeper / assign / collect
   try{ if(b&&b.id==='ARCADE'&&window.AK_NEEDS&&AK_NEEDS.boostMorale)AK_NEEDS.boostMorale('arcade'); }catch(_e){}   // AK-NEEDS (bible 10.1): arcade play feeds MORALE (before the AK_SYSTEMS branch so arcade.js taking over still counts)
@@ -1652,6 +1680,7 @@ function enterInterior(b){ if(interiorOpen)return; interiorB=b; try{ akPlayTrans
   // AK-BUILDINGDOG: if the player assigned a deck dog to this building, OVERRIDE the keeper greeter with that
   // card's portrait + name (story-mode). Always expose the assign affordance (pill + tappable portrait).
   try{ if(window.akBuildingDog){ window.akBuildingDog.applyGreeter(b); window.akBuildingDog.syncAssignBtn(b); } }catch(_e){}
+  akInteriorKeeper3D(b);                                     // AK-3DC-index PHASE3: pin the assigned hero's GLB over the MP4 (2D keeper card is the fallback)
   akBldgStory(b,'enter');                                    // AK-W7: street greeting on the way in
   // AK-STORIES 2026-07-09: the CURRENT RUNNER (heroCard()) occasionally (~25%) speaks his own
   // keeperGreeting line right under the keeper's greeting -- flagship-dog flavor, once per
@@ -1684,6 +1713,7 @@ function interiorGo(){ if(!interiorB||interiorB.url==='soon')return;
   if(interiorB.id==='INFIRMARY'){ exitInterior(); try{ if(window.akOpenInfirmary)akOpenInfirmary(); }catch(_e){} return; }   // AK-INFIRMARY: the interior's action opens the heal/wake panel (then exit -> district)
   doEnter(interiorB.url, interiorB.label); }
 function exitInterior(){ try{ akPlayTransition('transition_wipe_rev'); }catch(_e){} akBldgStory(interiorB,'exit');      // AK-W7: goodbye on the way out (interiorB still set)
+  try{ var _k3=document.getElementById('int-keeper3d'); if(_k3)_k3.style.display='none'; }catch(_e){}   // AK-3DC-index PHASE3: park the keeper GLB (model-viewer stops rendering while hidden; src stays warm for re-entry)
   interiorOpen=false; document.getElementById('interior').style.display='none';
   if(interiorB){ var b=interiorB; me.x=b.x; me.y=b.y+b.h/2+(me.r+85); } // land OFF the door so the dwell can't re-enter
   interiorB=null; dwellB=null; dwellT=0; spawnGrace=0.5; }
@@ -2295,6 +2325,7 @@ window.akEnterRaid=function(target){
   try{ var _pp=(window.AK_ECON&&AK_ECON.loadProfile)?AK_ECON.loadProfile():null; var _own=(_pp&&Array.isArray(_pp.owned))?_pp.owned:[];
     var an=Math.min(2,_own.length); for(var a2=0;a2<an;a2++){ RAID.allies.push({ x:me.x+(a2?44:-44), y:me.y-26, r:16, hp:160, maxHp:160, spd:118, atkT:0, name:_own[a2], dead:false }); } }catch(_e){}
   if(!_mgCall)akPlayTransition('transition_glitch');   // AK-MANGA (W1) double-fire guard: the Battle Call REPLACES the glitch wipe for raids (glitch stays for every non-raid use); no AK_MANGA = the wipe, exactly as today
+  try{ if(window.__ak3d&&__ak3d.clear)__ak3d.clear(); }catch(_e){}   // AK-3DC-index: clear leftover street-roamer avatars so the raid crew/defenders own all 4 shared 3D-unit slots
   state='RAID'; spawnGrace=0.3; akRaidMakeUI(); akDeployMakeBar(); akRaidHudChrome(false);   // AK-DEPLOYBAR: the deck deploy bar rides the raid UI
   try{ showBanner('BREACH -- wreck the Town Hall, take their stash',2.2); }catch(_e){}
   // AK-NEEDS (bible 10.1): entering a raid STARVING = the one-time 'RUNNING ON EMPTY' tell (after the BREACH banner clears)
@@ -2536,6 +2567,7 @@ function akExitRaid(win,stars){ var oR=RAID; if(!oR)return; RAID=null; akRaidKil
   me.x=oR.prevPos.x; me.y=oR.prevPos.y; me.tx=me.ty=null; me.vx=me.vy=0;
   akCamFollow();   // AK-CAMCENTRE: re-centre on the hub position the raid was launched from
   genProps(); try{ distEl.textContent=activeZone.name; }catch(_e){} spawnGrace=0.6; state=oR.prevState||'IN_ZONE'; akRaidHudChrome(true);
+  try{ if(window.__ak3d&&__ak3d.clear)__ak3d.clear(); }catch(_e){}   // AK-3DC-index: drop the raid fighter avatars on exit so the street pool starts clean back in the hub
   // AK-RAIDV2 2026-07-18: THE STAKES. This used to bank the bag on win, retreat AND loss, so a
   // total wipe still paid out and raiding risked nothing. Now what you carry OUT depends on how you
   // left, and anything you already SECURED at the extraction point is always yours:
@@ -2637,22 +2669,45 @@ function akRaidDraw(g,dt){ if(!RAID)return; var blds=RAID.zone.buildings;
     // AK-LOOTTAG 2026-07-18: name it, so a raider knows what he is swinging at BEFORE he spends the swing
     var _nk=(N.loot&&N.loot.kind)||'scrap', _ntag=(PROP_MAT[N.type]&&PROP_MAT[N.type].tag)||RAID_NODE_TAG[N.type]||String(_nk).toUpperCase();
     akTagDraw(g,NX,NY-nr-14,_ntag,LOOT_COL[_nk]||'#7CFFb0',Math.hypot(N.x-me.x,N.y-me.y)<130?0.95:0.6); }
+  /* AK-3DC-index PHASE2 2026-07-29: render the NEAREST raid fighters (your crew + their defenders) as walking
+     GLB avatars via the shared pool -- the player hero is already __hero3d. Nearest-first feed; bodies past
+     CAP-4, with no model, or while the engine is blocked keep their existing 2D card art (guarded fallback).
+     al._mv (1=advancing / 0=engaging) picks walk vs idle; a landed hit/wind flags a strike so the combat clip
+     lights up the instant hub3d's pool gains a combat-clip opt (HANDOFF -- __ak3d.unit ignores it until then). */
+  var _rframe=window.__akRaidFrame=(window.__akRaidFrame||0)+1;
+  var _r3=(window.__ak3d&&__ak3d.unit&&__ak3d.modelFor)?__ak3d:null;
+  if(_r3){ try{ var _rc3=[],_rz=(RAID.zi|0),_qi;
+    for(_qi=0;_qi<RAID.defenders.length;_qi++){ var _qe=RAID.defenders[_qi]; if(_qe.dead||((_qe.zi|0)!==_rz))continue;
+      var _qu=_r3.modelFor(_qe.name); if(_qu)_rc3.push({o:_qe,url:_qu,ally:0,d:(_qe.x-me.x)*(_qe.x-me.x)+(_qe.y-me.y)*(_qe.y-me.y)}); }
+    for(_qi=0;_qi<RAID.allies.length;_qi++){ var _qa=RAID.allies[_qi]; if(_qa.dead)continue;
+      var _qau=_r3.modelFor(_qa.name); if(_qau)_rc3.push({o:_qa,url:_qau,ally:1,d:(_qa.x-me.x)*(_qa.x-me.x)+(_qa.y-me.y)*(_qa.y-me.y)}); }
+    if(_rc3.length){ _rc3.sort(function(a,b){return a.d-b.d;});
+      for(_qi=0;_qi<_rc3.length;_qi++){ var _cc=_rc3[_qi], _ro=_cc.o;
+        if(!_ro.__akKey)_ro.__akKey='ru:'+(++_akKeySeq);
+        var _rmv=akRoamerMove(_ro.__akKey,_ro.x,_ro.y);
+        var _rmoving=_cc.ally?(_ro._mv?true:false):_rmv.moving;                      // crew ride the engine's walk/engage flag; defenders read world delta
+        var _rstrike=_cc.ally?(!_ro._mv&&(_ro.atkT||0)>0.55):((_ro.wind||0)>0);       // just-landed bite window -> combat clip (consumed by the pool once it supports it)
+        var _rok=false; try{ _rok=_r3.unit(_ro.__akKey,_cc.url,wx(_ro.x,_ro.y),wy(_ro.y,_ro.x),{r:_ro.r||16,moving:_rmoving,faceAngle:_rmv.faceAngle,combat:_rstrike}); }catch(_e){}
+        if(_rok)_ro.__ak3dUp=_rframe; } } }catch(_e){} }
   // defenders: lock ring (aggro tell) + white outline when winding up a bite
   for(var d=0;d<RAID.defenders.length;d++){ var e=RAID.defenders[d]; if(e.dead||((e.zi|0)!==(RAID.zi|0)))continue; var X=wx(e.x,e.y),Y=wy(e.y,e.x), im=akRaidImg(e.name);
     if(e.lock){ g.save(); g.globalAlpha=0.7; g.strokeStyle='#ff3b3b'; g.lineWidth=1.5; g.beginPath(); g.arc(X,Y,e.r+5,0,7); g.stroke(); g.restore(); }
     if(e.rwind>0){ var _rc=6+(0.5-e.rwind)/0.5*14; g.save(); g.globalAlpha=0.85; g.strokeStyle='#ff9d5c'; g.lineWidth=2; g.beginPath(); g.arc(X,Y,Math.max(5,e.r+_rc),0,7); g.stroke(); g.restore(); }   // GOAL 9: ranged defender charge tell
-    g.save(); g.beginPath(); g.arc(X,Y,e.r,0,7); g.closePath();
-    if(im&&im.complete&&im.naturalWidth>0){ g.save(); g.clip(); g.drawImage(im,X-e.r,Y-e.r-3,e.r*2,e.r*2+6); g.restore(); } else { g.fillStyle='#3a1414'; g.fill(); }
-    g.lineWidth=2; g.strokeStyle=(e.wind>0)?'#fff':'#ff5b5b'; g.stroke(); g.restore();
-    akRaidBar(g,X-e.r,Y-e.r-9,e.r*2,e.hp/e.maxHp,'#ff5b5b'); }
+    var _e3d=(e.__ak3dUp===_rframe);   // AK-3DC-index: 3D body up -> skip the 2D card blit, float the HP bar over the model's head; rings above stay as aggro tells
+    if(!_e3d){ g.save(); g.beginPath(); g.arc(X,Y,e.r,0,7); g.closePath();
+      if(im&&im.complete&&im.naturalWidth>0){ g.save(); g.clip(); g.drawImage(im,X-e.r,Y-e.r-3,e.r*2,e.r*2+6); g.restore(); } else { g.fillStyle='#3a1414'; g.fill(); }
+      g.lineWidth=2; g.strokeStyle=(e.wind>0)?'#fff':'#ff5b5b'; g.stroke(); g.restore(); }
+    akRaidBar(g,X-e.r,_e3d?((Y+e.r*0.9-Math.max(70,Math.min(340,e.r*5)))-4):(Y-e.r-9),e.r*2,e.hp/e.maxHp,'#ff5b5b'); }
   // YOUR crew allies (green-ringed, card art) fighting alongside the hero; DEPLOYED deck dogs ride the same
   // recipe with a GOLD ring + their cardfx walk/engage clip when AK_CARDFX resolves one (AK-DEPLOYBAR 2026-07-05)
   for(var ay=0;ay<RAID.allies.length;ay++){ var al2=RAID.allies[ay]; if(al2.dead)continue; var AX=wx(al2.x,al2.y),AY=wy(al2.y,al2.x), aim=akRaidImg(al2.name);
     var _vfx=al2.deploy?akDeployClip(al2):null, _acol=al2.deploy?'#e8c55a':'#7CFFb0';
-    g.save(); g.beginPath(); g.arc(AX,AY,al2.r,0,7); g.closePath();
-    if(_vfx){ g.save(); g.clip(); try{ g.drawImage(_vfx,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); }catch(_e){ if(aim&&aim.complete&&aim.naturalWidth>0)g.drawImage(aim,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); } g.restore(); }
-    else if(aim&&aim.complete&&aim.naturalWidth>0){ g.save(); g.clip(); g.drawImage(aim,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); g.restore(); } else { g.fillStyle='#143a18'; g.fill(); }
-    g.lineWidth=2; g.strokeStyle=_acol; g.stroke(); g.restore(); akRaidBar(g,AX-al2.r,AY-al2.r-9,al2.r*2,al2.hp/al2.maxHp,_acol); }
+    var _al3d=(al2.__ak3dUp===_rframe);   // AK-3DC-index: 3D crew avatar up -> skip the 2D circle-clip art, keep the gold/green HP bar over its head
+    if(!_al3d){ g.save(); g.beginPath(); g.arc(AX,AY,al2.r,0,7); g.closePath();
+      if(_vfx){ g.save(); g.clip(); try{ g.drawImage(_vfx,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); }catch(_e){ if(aim&&aim.complete&&aim.naturalWidth>0)g.drawImage(aim,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); } g.restore(); }
+      else if(aim&&aim.complete&&aim.naturalWidth>0){ g.save(); g.clip(); g.drawImage(aim,AX-al2.r,AY-al2.r-3,al2.r*2,al2.r*2+6); g.restore(); } else { g.fillStyle='#143a18'; g.fill(); }
+      g.lineWidth=2; g.strokeStyle=_acol; g.stroke(); g.restore(); }
+    akRaidBar(g,AX-al2.r,_al3d?((AY+al2.r*0.9-Math.max(70,Math.min(340,al2.r*5)))-4):(AY-al2.r-9),al2.r*2,al2.hp/al2.maxHp,_acol); }
   // enemy shots
   for(var s=0;s<RAID.shots.length;s++){ var sh=RAID.shots[s]; g.save(); g.fillStyle='#ff9d5c'; g.shadowColor='#ff9d5c'; g.shadowBlur=8; g.beginPath(); g.arc(wx(sh.x,sh.y),wy(sh.y,sh.x),3.5,0,7); g.fill(); g.restore(); }
   // YOUR projectiles (FIRE)
@@ -2730,7 +2785,8 @@ function loop(now){let dt=Math.min(.05,(now-last)/1000);last=now;
   if(window.__akHitstop>0){ window.__akHitstop-=dt; dt*=0.12; }   // AK-FIX-lane-A 2026-07-28: combat hitstop -- nearly freeze the frame for a few ms so a landed hit reads with weight
   var _sf=akStoryFocus();   // AK-STORYFOCUS: computed once per frame, gates every world interrupt below
   // AK-BOXBTN: show RUN/PUNCH only while actually walking a district or in a raid
-  try{ var _bx=(state==='IN_ZONE'||state==='RAID')&&!interiorOpen&&!entering;
+  try{ var _bmR=!!(window.AK_BUILDMODE&&((AK_BUILDMODE.isOn&&AK_BUILDMODE.isOn())||(AK_BUILDMODE.isActive&&AK_BUILDMODE.isActive())));   // AK-3DC-index PHASE5: BUILD MODE = district management -> the fight rail is not a district control, so gate it out (mode-scoped HUD, hide not delete)
+    var _bx=(state==='IN_ZONE'||state==='RAID')&&!interiorOpen&&!entering&&!_bmR;
     var _rb=document.getElementById('runbtn'), _pb=document.getElementById('punchbtn'), _jb=document.getElementById('jumpbtn');
     if(_rb)_rb.style.display=_bx?'block':'none'; if(_pb)_pb.style.display=_bx?'block':'none'; if(_jb)_jb.style.display=_bx?'block':'none'; }catch(_e){}   // AK-P2Z: JUMP shows with RUN/PUNCH in zones + raids
   // AK-BM-DPAD 2026-07-09: cheap per-frame poll -- hide the touch stick while BUILD MODE is on
@@ -2739,6 +2795,11 @@ function loop(now){let dt=Math.min(.05,(now-last)/1000);last=now;
     if(_bmOn!==window.__akBmStickHid){ window.__akBmStickHid=_bmOn;
       if(_bmOn){ stickEnd(null); stick.style.left='16px'; stick.style.top='auto'; stick.style.bottom='16px'; stick.style.display='none'; }
       else stick.style.display=''; } }catch(_e){}
+  // AK-3DC-index PHASE5: the joystick drives nothing inside a building or mid-transition (movement is gated to
+  // IN_ZONE/RAID) -- hide the dead control so each mode shows only its own inputs. Build mode owns its own hide
+  // above (window.__akBmStickHid), so defer to it; otherwise gate the stick to the moving states.
+  try{ if(!window.__akBmStickHid){ var _skOK=(state==='IN_ZONE'||state==='RAID')&&!interiorOpen&&!entering, _skV=_skOK?'':'none';
+    if(stick&&stick.style.display!==_skV)stick.style.display=_skV; } }catch(_e){}
   let vx=0,vy=0;
   if(keys['a']||keys['arrowleft']||keys['h'])vx-=1; if(keys['d']||keys['arrowright']||keys['l'])vx+=1;
   if(keys['w']||keys['arrowup']||keys['k'])vy-=1; if(keys['s']||keys['arrowdown']||keys['j'])vy+=1;
@@ -2763,7 +2824,7 @@ function loop(now){let dt=Math.min(.05,(now-last)/1000);last=now;
   if(!entering && !interiorOpen && (state==='IN_ZONE'||state==='RAID')){
     if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} running=((runArmed&&stickOn)||!!keys['shift']||!!window.__akRunToggle);
       /* AK-P2RUN 2026-07-28: sprint no longer SNAPS to 1.75x -- it RAMPS up over ~0.5s so speed reads as building power (Prototype-2 surge), and a slightly higher 1.9x top. Ramp up slow, drop fast. */
-      var _rtgt=running?1.9:1; var _rk=1-Math.exp(-(running?4.5:9)*dt); window.__runRamp=(window.__runRamp||1)+(_rtgt-(window.__runRamp||1))*_rk; var _rs=window.__runRamp;   /* AK-BOXBTN: explicit RUN button */ tvx=vx*me.spd*_rs; tvy=vy*me.spd*_rs; me.tx=me.ty=null;}   // AK-RUN: double-held stick (or Shift) = ramped sprint
+      var _rtgt=running?1.4:1;   /* AK-SPEEDFIX: sprint 1.9->1.4, calmer at the close camera */ var _rk=1-Math.exp(-(running?4.5:9)*dt); window.__runRamp=(window.__runRamp||1)+(_rtgt-(window.__runRamp||1))*_rk; var _rs=window.__runRamp;   /* AK-BOXBTN: explicit RUN button */ tvx=vx*me.spd*_rs; tvy=vy*me.spd*_rs; me.tx=me.ty=null;}   // AK-RUN: double-held stick (or Shift) = ramped sprint
     else if(me.tx!=null){var dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy); if(d>6){tvx=dx/d*me.spd; tvy=dy/d*me.spd;} else me.tx=me.ty=null;}
   }
   // AK-MOVE3 2026-06-20: smoothing branched by input. JOYSTICK = DIRECT -- the analog magnitude IS the ramp; lerping it again added ~190ms lag (the floaty/drifty feel). Keyboard/tap get a quick ramp so digital input isn't jarring; fast decel so you stop crisply.
@@ -3770,10 +3831,45 @@ try{ if(window.AK_CAMERAS) AK_CAMERAS.attach(AK_CTX); }catch(_e){}
   }catch(_e){}
   if(tries>40) clearInterval(t);       // ~20s at 500ms: no WebGL on this device, stay 2D
 }, 500); })();
+/* AK-3DC-index 2026-07-29: shared helpers for the 3D-unit wiring (street roamers + raid fighters).
+   _akMovePrev remembers each pooled unit's WORLD position across frames so the avatar knows when it is
+   walking (-> walk clip) vs standing (-> idle) and which way it faces. akRoamerModel resolves a
+   hero-breed GLB for a roamer through the pool's OWN name->model map (returns '' -> the roamer stays 2D).
+   Every path here is additive: no __ak3d, no model, pool full or still loading -> the caller draws 2D. */
+var _akMovePrev={}, _akKeySeq=0;
+function akRoamerMove(key,x,y){ var p=_akMovePrev[key], out={moving:false,faceAngle:0};
+  if(p){ var dx=x-p.x, dy=y-p.y; if((dx*dx+dy*dy)>0.09){ out.moving=true; out.faceAngle=Math.atan2(dy,dx); } else { out.faceAngle=(p.fa||0); } }
+  _akMovePrev[key]={x:x,y:y,fa:out.faceAngle}; return out; }
+function akRoamerModel(r){ var u3=window.__ak3d; if(!r||!u3||!u3.modelFor)return '';
+  if(r.model3d)return r.model3d;                                    // explicit per-roamer override (a system can tag its own GLB)
+  var nm=(r.card&&(r.card.name||r.card.id))||r.name||(r.aggressor&&r.aggressor.name)||'';
+  var url=nm?u3.modelFor(nm):''; if(url)return url;
+  if(r._km){ if(window.AK_GIVER_MODEL)return window.AK_GIVER_MODEL; var g=u3.modelFor('fang'); if(g)return g; }   // mission-giver (Fang / Guild Master) stands as a GLB once fang.glb ships + is mapped in hub3d
+  return ''; }
 function akTickSystems(dt){ if(!window.AK_SYSTEMS)return; AK_SYSTEMS.tickAll(dt, AK_CTX);
   var rs=AK_CTX._roamers; for(var i=0;i<rs.length;i++){ var r=rs[i]; if(r.zone && r.zone!==activeZone.id) continue; try{ r.update&&r.update(dt,r,AK_CTX);}catch(_e){} } }
 function akDrawSystems(){ if(!window.AK_SYSTEMS)return; var rs=AK_CTX._roamers;
-  for(var i=0;i<rs.length;i++){ var r=rs[i]; if(r.zone&&r.zone!==activeZone.id)continue; var X=r.x-cam.x,Y=r.y-cam.y; if(X<-60||X>W+60||Y<-60||Y>H+60)continue; try{ r.draw&&r.draw(ctx,r,AK_CTX);}catch(_e){} }
+  /* AK-3DC-index PHASE1 2026-07-29: route the NEAREST roamers that resolve to a hero GLB through the shared
+     3D-unit pool so they walk the street as real 3D avatars. Nearest-first feed -> the pool's CAP-4 keeps the
+     closest as GLB and returns false for the rest, which then keep their own 2D self-draw (graceful, never a
+     black screen). WORLD-ONLY (state IN_ZONE, not inside a building) so a raid never loses pool slots to
+     street roamers, and the pool is untouched while the engine is blocked or a roamer has no GLB. */
+  var _frame=window.__akSysFrame=(window.__akSysFrame||0)+1;
+  var _u3=(state==='IN_ZONE'&&!interiorOpen&&window.__ak3d&&__ak3d.unit)?__ak3d:null;
+  if(_u3){ try{ var _cand=[];
+    for(var _ci=0;_ci<rs.length;_ci++){ var _rr=rs[_ci]; if(_rr.zone&&_rr.zone!==activeZone.id)continue;
+      var _cx=_rr.x-cam.x,_cy=_rr.y-cam.y; if(_cx<-60||_cx>W+60||_cy<-60||_cy>H+60)continue;
+      var _url=akRoamerModel(_rr); if(!_url)continue;
+      _cand.push({r:_rr,url:_url,d:(_rr.x-me.x)*(_rr.x-me.x)+(_rr.y-me.y)*(_rr.y-me.y)}); }
+    if(_cand.length){ _cand.sort(function(a,b){return a.d-b.d;});
+      for(var _pi=0;_pi<_cand.length;_pi++){ var _c=_cand[_pi], _r2=_c.r;
+        if(!_r2.__akKey)_r2.__akKey='rm:'+(++_akKeySeq);
+        var _mvm=akRoamerMove(_r2.__akKey,_r2.x,_r2.y), _ok=false;
+        try{ _ok=_u3.unit(_r2.__akKey,_c.url,wx(_r2.x,_r2.y),wy(_r2.y,_r2.x),{r:_r2.r||_r2.rr||16,moving:_mvm.moving,faceAngle:_mvm.faceAngle}); }catch(_e){}
+        if(_ok)_r2.__ak3dUp=_frame; } } }catch(_e){} }
+  for(var i=0;i<rs.length;i++){ var r=rs[i]; if(r.zone&&r.zone!==activeZone.id)continue; var X=r.x-cam.x,Y=r.y-cam.y; if(X<-60||X>W+60||Y<-60||Y>H+60)continue;
+    if(r.__ak3dUp===_frame)continue;   // AK-3DC-index: the 3D avatar is confirmed on-screen -> skip this roamer's 2D self-draw; 2D runs whenever unit() returned false
+    try{ r.draw&&r.draw(ctx,r,AK_CTX);}catch(_e){} }
   AK_SYSTEMS.drawAll(AK_CTX); }
 // ============================================================================
 // AK-BLOCKWAR 2026-07-05: the BLOCK WAR hub surfaces. systems/defense.js owns the

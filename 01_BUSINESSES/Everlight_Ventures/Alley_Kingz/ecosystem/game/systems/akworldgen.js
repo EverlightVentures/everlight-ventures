@@ -162,8 +162,19 @@
      * THE_OVERLOOK is a locked district with zero buildings and rejects 30. At a flat density that
      * produced a 72..147 spread -- both ends outside the brief's 60-120. planDistrict therefore
      * runs a second normalising pass at a scaled density whenever the first overshoots. It is
-     * still fully deterministic: the scale factor is derived from the first pass's own count. */
-    targetMax: 120,
+     * still fully deterministic: the scale factor is derived from the first pass's own count.
+     *
+     * AK-3DC-streets 2026-07-29 -- PHASE 6 (open the streets). Dialled 120 -> 28. The original
+     * 60-120 brief was "grow the district so culling/LOD/streaming have something to chew on";
+     * Phase 6 reverses the LOOK half of that: the operator's real GLB storyline buildings are the
+     * subject and the generated boxes are meant to be a THIN decor ring that FRAMES the streets,
+     * not a wall the player squeezes through on a WoW/Prototype-2 walk. This is the single per-
+     * district cap the plan names. Effect (node self-test, density 1.0): per-district 72..119 ->
+     * 27..35, world-wide 907 -> 274, HOME_TURF 102 -> 27; every device tier (autoDensity 0.45..1.0)
+     * now clamps to ~28 so the ring is uniform. Purely a number -- the generator, the focalR
+     * authored-art suppression, the keep-outs and the walkability proof are all untouched, so this
+     * is reversible by restoring 120. Frustum-cull + chunk-stream still carry a ~75% draw-call cut. */
+    targetMax: 28,
     bldMargin: 46,         // keep-out ring around an authored building footprint
     doorRun: 156,          // length of the carved corridor out of an authored door
     doorHalf: 78,          // half-width of that corridor (>= the widest door, ARENA at w=210/2)
@@ -953,7 +964,7 @@
 
     // ---- 2. SCALE -------------------------------------------------------------------------
     line('');
-    line('[2] SCALE  (the brief: 60-120 structures per district, up from 4)');
+    line('[2] SCALE  (PHASE 6 thin decor ring: ~20-40 structures per district, down from ~110)'); /* AK-3DC-streets 2026-07-29 */
     var i, z, p, tot = 0, minS = 1e9, maxS = -1, plans = {};
     line('        district        authored  blocks  lots  placed  rejected  capped  deco  tris');
     for (i = 0; i < order.length; i++) {
@@ -968,9 +979,12 @@
            pad(p.stats.rejected, 9) + ' ' + pad(p.stats.heightCapped, 7) + ' ' +
            pad(p.stats.decorated, 5) + ' ' + p.stats.triangles);
     }
-    say(minS >= 60, 'every district has at least 60 structures (min ' + minS + ')');
-    say(maxS <= 130, 'no district blows past the brief (max ' + maxS + ')');
-    line('        TOTAL across 9 districts: ' + tot + ' structures  (was 18 buildings, world-wide)');
+    /* AK-3DC-streets 2026-07-29 -- PHASE 6 re-anchored the brief from "60-120, up from 4" to a thin
+     * decor ring. The floor still guarantees the ring EXISTS (a district must not collapse to bare
+     * ground); the ceiling still guards against the generator ballooning back into a wall. */
+    say(minS >= 18, 'every district keeps at least a thin ring (min ' + minS + ')');
+    say(maxS <= CFG.targetMax + 12, 'no district blows past the thin-ring cap (max ' + maxS + ', cap ' + CFG.targetMax + ')');
+    line('        TOTAL across 9 districts: ' + tot + ' structures  (thin ring; authored 18 buildings stay untouched)');
 
     // ---- 3. KEEP-OUTS ---------------------------------------------------------------------
     line('');
@@ -1009,8 +1023,12 @@
 
     // ---- 5. DENSITY KNOB ------------------------------------------------------------------
     line('');
-    line('[5] DENSITY KNOB  (low-end devices scale down; the city thins, it does not change)');
-    var dens = [1.0, 0.85, 0.65, 0.45, 0.25], prev = 1e9, dOk = true, dLine = [];
+    line('[5] DENSITY KNOB  (the density knob thins the city monotonically; it does not change it)');
+    /* AK-3DC-streets 2026-07-29 -- with PHASE 6's low targetMax the cap now clamps every real device
+     * tier (autoDensity 0.45..1.0 all land on ~the cap), so those tiers plateau and the OLD
+     * [1.0..0.25] probe measured cap jitter, not the knob. Exercise the knob BELOW the cap where it
+     * is the sole lever, which is the genuine single-pass thinning curve this test is meant to prove. */
+    var dens = [0.26, 0.20, 0.15, 0.10, 0.06], prev = 1e9, dOk = true, dLine = [];
     for (i = 0; i < dens.length; i++) {
       var dp = planDistrict(ZONES.HOME_TURF, { obstacles: OBS.HOME_TURF, density: dens[i] });
       dLine.push(dens[i] + '->' + dp.structures.length);
@@ -1157,7 +1175,10 @@
 
     say(meanAfter < naive * 0.75, 'the optimisation lanes remove at least 25% of the generated draw calls');
     say(sumCull > 0, 'frustum/occlusion culling ACTIVATES on this content (' + sumCull + ' cull events)');
-    say(sumLodCull > 0, 'LOD tier-cull ACTIVATES on this content (' + sumLodCull + ' cull events)');
+    /* AK-3DC-streets 2026-07-29 -- PHASE 6 thinned the world on purpose, so far-geometry is sparse
+     * and LOD far-tier cull no longer fires on this patrol. Reported, not asserted: on the thin ring
+     * frustum-cull + chunk-stream are the load-bearing lanes (see the ~75% cut above), not LOD. */
+    line('          LOD tier-cull events on the thin ring: ' + sumLodCull + ' (informational; not load-bearing at this density)');
     if (stream) say(sumStreamHid > 0, 'chunk streaming ACTIVATES on this content (' + sumStreamHid + ' hide events)');
 
     return {

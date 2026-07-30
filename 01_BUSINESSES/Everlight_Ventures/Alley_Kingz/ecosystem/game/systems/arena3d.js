@@ -311,3 +311,200 @@ window.AK_ARENA3D = (function (root) {
     }
   };
 })(window);
+
+/* AK-3DC-tower 2026-07-29 ===========================================================================
+ * PHASE 4 -- TOWER-LANE 3D UNIT POOL  (window.AK_ARENA3D_UNITS)
+ *
+ * game.html draws every lane unit as a flat Canvas2D token (drawUnit, game.html:3842). This pins a
+ * live WALKING GLB over the tilted board at each unit's SCREEN position -- the same additive-overlay
+ * trick hub3d.js:__ak3d(:352) runs in the hub, but a SEPARATE pool on purpose:
+ *   - game.html never loads hub3d.js, so window.__ak3d does not exist in the battler.
+ *   - the battler already carries the arena3d STADIUM WebGL context above, so this pool is capped on
+ *     its own budget: stadium + CAP model-viewer contexts + the cardfx <video> pool must stay under
+ *     the phone ~8-context wall.
+ *
+ * FALLBACK-FIRST, FULLY GUARDED. unit() returns TRUE only when a GLB is actually on screen. On ANY
+ * miss it returns FALSE and the caller keeps its full 2D drawUnit token:
+ *   - <model-viewer> not registered  (game.html loads it async as a module, and it may 404)
+ *   - the card has no hero GLB        (only the 6 hero cards resolve at first; every other card = 2D)
+ *   - pool at CAP                     (the extra units stay 2D)
+ *   - the GLB is still downloading    (2D covers until the clip is ready)
+ * If model-viewer never loads, the lane is byte-identical to today. This module NEVER touches the
+ * board canvas, the arena3d stadium, or AK_ARENA3D -- a failure here cannot black-screen the fight.
+ *
+ * Mirrors the hub pool's model / clip / yaw / lifecycle logic so the two cannot drift.
+ */
+(function (root, doc) {
+  'use strict';
+
+  // Hero slug -> GLB, copied from hub3d.js HERO_MODELS (the battler cannot read hub3d's private map).
+  var HERO_MODELS = {
+    bcardd:     'assets/models/bcardd.glb',
+    jagged:     'assets/models/jagged.glb',
+    balboa:     'assets/models/balboa.glb',
+    rottweiler: 'assets/models/rottweiler.glb',   // Iron Rottweiler
+    bulldog:    'assets/models/bulldog.glb',       // Grit Bulldog
+    malamute:   'assets/models/malamute.glb'       // Blackout Malamute
+  };
+  // GLB-verified idle/walk/run clip INDICES per model (copied from hub3d.js CLIP_BY_MODEL -- clips
+  // export as NlaTrack.00N carrying zero info, so indices are MEASURED, never guessed; a wrong index
+  // plays the wrong animation). An unknown model falls back to the safe 4-clip Tripo set.
+  var CLIP_BY_MODEL = {
+    'bcardd.glb':     { idle: 5,  walk: 10, run: 2 },
+    'balboa.glb':     { idle: 15, walk: 4,  run: 5 },
+    'jagged.glb':     { idle: 9,  walk: 1,  run: 12 },
+    'bulldog.glb':    { idle: 1,  walk: 3,  run: 7 },
+    'rottweiler.glb': { idle: 4,  walk: 9,  run: 5 },
+    'malamute.glb':   { idle: 11, walk: 7,  run: 0 }
+  };
+  var CLIP_DEFAULT = { idle: 3, walk: 1, run: 0 };   // safe on any 4-clip Tripo export
+  function clipsForModel(url) {
+    var u = String(url || '');
+    for (var k in CLIP_BY_MODEL) { if (u.indexOf(k) !== -1) return CLIP_BY_MODEL[k]; }
+    return CLIP_DEFAULT;
+  }
+  // Same yaw mapping the hub hero is tuned on (hub3d.js:32-34).
+  var THETA_BASE = -90, THETA_SIGN = 1, PHI = 72;
+  var UNIT_CAP = 4, units = {}, unitN = 0;
+
+  function mvReady() {
+    // <model-viewer> must be a REGISTERED custom element, or createElement yields an inert node with
+    // no .play()/.availableAnimations. Until it upgrades (async module) or if the vendor 404s -> 2D.
+    try { return !!(root.customElements && root.customElements.get('model-viewer')); }
+    catch (_e) { return false; }
+  }
+  function nowMs() { try { return root.performance.now(); } catch (_e) { return Date.now(); } }
+
+  // Resolve idle/walk/run/combat clip NAMES from this GLB's list. Name-match wins (future heroes with
+  // named clips); else the measured index. COMBAT prefers a punch/attack-named clip and otherwise
+  // reuses the (measured, always in-range) run clip, so engage never plays an out-of-range animation.
+  function pickClips(names, url) {
+    var CI = clipsForModel(url);
+    var _i = names.find(function (n){ return /idle|stand|relax/i.test(n); }) || names[CI.idle] || names[0] || '';
+    var _w = names.find(function (n){ return /walk|move|trot/i.test(n); })   || names[CI.walk] || (names.length > 1 ? names[1] : names[0]) || '';
+    var _r = names.find(function (n){ return /run|sprint|dash/i.test(n); })  || names[CI.run]  || _w || '';
+    var _c = names.find(function (n){ return /punch|attack|kick|hook|jab|combat|fight|strike|power/i.test(n); }) || _r || _w || '';
+    return { idle: _i, walk: _w, run: _r, combat: _c };
+  }
+
+  function unitBuild(rg, url) {
+    var el = doc.createElement('model-viewer');
+    el.setAttribute('src', url);
+    el.setAttribute('autoplay', '');
+    el.setAttribute('interaction-prompt', 'none');
+    el.setAttribute('disable-zoom', '');
+    el.setAttribute('disable-tap', '');
+    el.setAttribute('disable-pan', '');
+    el.setAttribute('shadow-intensity', '0');
+    el.setAttribute('exposure', '1.0');
+    el.setAttribute('camera-orbit', '0deg ' + PHI + 'deg 3.4m');
+    el.setAttribute('camera-target', '0m 0.95m 0m');
+    el.setAttribute('field-of-view', '26deg');
+    // position:fixed over the board; canvas coords are converted to viewport px by the caller, the
+    // same convention the killstreak / cardfx overlays use. z-index 40: above the board + stadium,
+    // below the killstreak tier-up videos (z-index 50) so those still pop over a fighter.
+    el.style.cssText = 'position:fixed;left:0;top:0;width:90px;height:150px;' +
+      'pointer-events:none;z-index:40;opacity:0;transition:opacity .15s;' +
+      '--poster-color:transparent;background:transparent;';
+    doc.body.appendChild(el);
+    el.addEventListener('load', function () {
+      // orbit the model's REAL bbox centre + widen FOV so a big turn never clips it (hub AK-FRAME).
+      try {
+        var c = el.getBoundingBoxCenter && el.getBoundingBoxCenter();
+        if (c && isFinite(c.x)) el.cameraTarget = c.x.toFixed(3) + 'm ' + c.y.toFixed(3) + 'm ' + c.z.toFixed(3) + 'm';
+        el.fieldOfView = '34deg';
+      } catch (_e) {}
+      var cl = pickClips(el.availableAnimations || [], url);
+      rg.idle = cl.idle; rg.walk = cl.walk; rg.run = cl.run; rg.combat = cl.combat; rg.ready = true;
+    });
+    rg.mv = el; rg.url = url;
+  }
+
+  function unitKill(k) {
+    var rg = units[k]; if (!rg) return;
+    try { if (rg.mv) { rg.mv.removeAttribute('src'); if (rg.mv.parentNode) rg.mv.parentNode.removeChild(rg.mv); } } catch (_e) {}
+    delete units[k]; unitN--; if (unitN < 0) unitN = 0;
+  }
+
+  // sweep: hide the cold, destroy the frozen (mirrors hub3d unitLoop + the hero hideLoop). A unit not
+  // fed for ~200ms is HIDDEN; still cold at 2.5s is DESTROYED so the context + slot free -- which also
+  // cleans the pool when the match ends and drawUnit stops feeding.
+  (function unitLoop() {
+    try {
+      var t = nowMs();
+      for (var k in units) {
+        var rg = units[k], age = t - rg.last;
+        if (age > 2500) unitKill(k);
+        else if (age > 200 && rg.mv && rg.mv.style.opacity !== '0') rg.mv.style.opacity = '0';
+      }
+    } catch (_e) {}
+    try { root.requestAnimationFrame(unitLoop); } catch (_e) {}
+  })();
+
+  var POOL = {
+    on: true,
+    cap: UNIT_CAP,
+    // card (object or name) -> hero GLB via the same substring match hub3d uses. '' = keep 2D.
+    modelFor: function (card) {
+      var s = '';
+      if (card && typeof card === 'object') s = (card.name || '') + ' ' + (card.id || '') + ' ' + (card.cardNumber || '');
+      else s = String(card || '');
+      s = s.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!s) return '';
+      for (var slug in HERO_MODELS) { if (s.indexOf(slug) !== -1) return HERO_MODELS[slug]; }
+      return '';
+    },
+    // Feed one unit this frame. TRUE only when the GLB is on screen; on FALSE the caller draws 2D.
+    // x,y are ON-SCREEN (viewport) px of the unit's body point; o = {r, faceAngle, moving, engaging, running}.
+    unit: function (key, modelUrl, x, y, o) {
+      if (!this.on || !key || !modelUrl) return false;
+      if (!mvReady()) return false;                         // web component not registered yet -> 2D
+      o = o || {};
+      var rg = units[key];
+      if (!rg) {
+        if (unitN >= UNIT_CAP) return false;                // over cap -> 2D, no crash
+        rg = units[key] = { mv: null, url: '', ready: false, cur: '', idle: '', walk: '', run: '',
+                            combat: '', last: 0, theta: 0, tgt: 0, have: false };
+        unitN++;
+        try { unitBuild(rg, modelUrl); } catch (_e) { delete units[key]; unitN--; return false; }
+      } else if (modelUrl !== rg.url) {
+        try { rg.mv.setAttribute('src', modelUrl); } catch (_e) {}
+        rg.url = modelUrl; rg.ready = false; rg.cur = '';
+      }
+      if (!rg.mv) return false;
+      rg.last = nowMs();
+      var r = o.r || 20;
+      // same footprint math as the hub pool: feet land at y + r*0.9, clamped screen height 70..340.
+      var h = Math.max(70, Math.min(340, r * 5)), w = h * 0.6, st = rg.mv.style;
+      st.width = w + 'px'; st.height = h + 'px';
+      st.left = (x - w / 2) + 'px'; st.top = ((y + r * 0.9) - h) + 'px';
+      // real-time yaw toward the travel heading, same THETA_BASE/SIGN/PHI mapping the hero is tuned on.
+      if (typeof o.faceAngle === 'number' && o.moving) {
+        rg.tgt = THETA_BASE + THETA_SIGN * (o.faceAngle * 180 / Math.PI);
+        rg.have = true;
+      }
+      if (rg.have) {
+        var _d = ((rg.tgt - rg.theta + 540) % 360) - 180;   // shortest arc
+        rg.theta += _d * 0.3;
+        try { rg.mv.cameraOrbit = rg.theta.toFixed(1) + 'deg ' + PHI + 'deg 3.4m'; } catch (_e) {}
+      }
+      if (!rg.ready) return false;                          // glb still loading -> 2D covers it
+      if (st.opacity !== '1') st.opacity = '1';
+      // engage (stopped on a target) fires the combat clip; moving plays walk/run; else idle.
+      var want;
+      if (o.engaging && !o.moving) want = rg.combat || rg.run || rg.idle;
+      else if (o.moving) want = (o.running && rg.run) ? rg.run : (rg.walk || rg.idle);
+      else want = rg.idle;
+      if (want && rg.cur !== want) {
+        try { rg.mv.animationName = want; rg.mv.play(); } catch (_e) {}
+        rg.cur = want;
+      }
+      return true;
+    },
+    // drop one key now (a unit goes down); clear the whole pool on match exit.
+    drop: function (key) { try { unitKill(key); } catch (_e) {} },
+    clear: function () { try { for (var k in units) unitKill(k); } catch (_e) {} },
+    diag: function () { return { on: this.on, cap: UNIT_CAP, live: unitN, mv: mvReady() }; }
+  };
+  root.AK_ARENA3D_UNITS = POOL;
+})(window, document);

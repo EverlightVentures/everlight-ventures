@@ -234,10 +234,32 @@ window.AK_HEROACTIONS = (function (root) {
     if (model === S.model && S.bar && S.bar.childNodes.length) return true;   // already built for this hero
     S.model = model; S.names = names; S.idleName = idleNameFor(model, names);
     var bar = ensureBar(); clearKids(bar);
+    /* AK-EMOTE-COLLAPSE 2026-07-29 (contextual-UI declutter): the 9-button rail crowded the roam view.
+     * It now defaults COLLAPSED to a single glove chip; tap to expand the fight/emote buttons, tap to
+     * close. Every action stays one tap away, but a district walk isn't buried under 9 buttons. Persisted. */
+    var open = false; try { open = localStorage.getItem('ak_emote_open') === '1'; } catch (_e) {}
+    var list = document.createElement('div');
+    list.id = 'ak-heroact-list';
+    list.style.cssText = 'display:' + (open ? 'flex' : 'none') + ';flex-direction:column;gap:5px;';
+    var tog = document.createElement('button');
+    tog.type = 'button'; tog.setAttribute('aria-label', 'toggle fight moves');
+    tog.textContent = open ? '▾' : '🥊';
+    tog.style.cssText = 'pointer-events:auto;width:44px;height:44px;border-radius:12px;flex:0 0 auto;font-size:18px;' +
+      'display:flex;align-items:center;justify-content:center;color:#e8c55a;' +
+      'background:radial-gradient(circle at 40% 28%,rgba(255,255,255,.16),#241d10 60%,#140f08 130%);' +
+      'border:2px solid rgba(232,197,90,.6);box-shadow:0 3px 9px rgba(0,0,0,.5);touch-action:manipulation;';
+    tog.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      var o = list.style.display === 'none';         // currently hidden -> open it
+      list.style.display = o ? 'flex' : 'none';
+      tog.textContent = o ? '▾' : '🥊';
+      try { localStorage.setItem('ak_emote_open', o ? '1' : '0'); } catch (_e) {}
+    }, { passive: false });
+    bar.appendChild(tog); bar.appendChild(list);
     for (var i = 0; i < acts.length; i++) {
       var a = acts[i], nm = names[a.idx];
       if (!nm) continue;                             // this export lacks that index -> skip, no crash
-      bar.appendChild(makeButton(nm, a));
+      list.appendChild(makeButton(nm, a));
     }
     return true;
   }

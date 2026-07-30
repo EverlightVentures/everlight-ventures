@@ -158,7 +158,24 @@
     // down in the street. height = dist*cos(phi) + eye; behind = dist*sin(phi).
     tpp: { phi: 78, dist: 175, eye:  60, follow: 0.014 },
     fpp: { phi: 87, dist:  22, eye:  52, follow: 0.05 },
-    map: { phi: 46, dist: 820, eye:   0, follow: 0.00 }
+    map: { phi: 46, dist: 820, eye:   0, follow: 0.00 },
+    /* AK-3DC-world3d 2026-07-29 -- Phase 5: one camera rig per GAMEPLAY surface. The index.html HUD
+     * lane switches these with AK_WORLD3D.setMode(name). PURELY ADDITIVE -- tpp/fpp/map above keep
+     * their exact numbers, so every existing caller and the boot default are untouched.
+     *   district -- roaming isometric-mid (Clash/Sunflower). dist 300 PRESERVES the AK-CAMSCALE
+     *               close-3rd-person default (makeProjector dist||300 / loadCam cap 380); phi 62
+     *               sits inside loadCam's persistable [58,72] band, so the district reads as it ships.
+     *   street   -- over-the-shoulder (GTA/Prototype-2). Same rig as tpp, named for the mobs surface.
+     *   gulag    -- first person (survival FPS). Same rig as fpp.
+     *   tower    -- top-down lane (Clash Royale): near-overhead, pulled back to read a whole lane.
+     *   interior -- framed close on the assigned keeper (Sims): tight, gentle tilt, no follow.
+     * persist:false marks a TRANSIENT combat/framed rig that must NEVER be saved as the roaming
+     * camera -- loadCam would otherwise restore the whole district at e.g. gulag's dist 22. */
+    district: { phi: 62, dist: 300, eye: 60, follow: 0.014 },
+    street:   { phi: 78, dist: 175, eye: 60, follow: 0.014 },
+    gulag:    { phi: 87, dist:  22, eye: 52, follow: 0.05, persist: false },
+    tower:    { phi: 34, dist: 720, eye:  0, follow: 0.00, persist: false },
+    interior: { phi: 66, dist: 150, eye: 48, follow: 0.00, persist: false }
   };
   var DEFAULT_MODE = 'tpp';
 
@@ -653,7 +670,12 @@
     plr: [], plrMass: [], plrSig: '', plrAt: 0, doors: [], doorMat: [],
     // id -> 1 for every AUTHORED building that currently has a real box in the scene. Backs the
     // O(1) hasBox() the host calls per building per frame; see the API note on hasBox.
-    bldIds: {}
+    bldIds: {},
+    // AK-3DC-world3d 2026-07-29 (Phase 6): optional bloom+FXAA post-processing. DEFAULT OFF. The
+    // composer is built lazily + async; until it exists (addons not vendored) the plain renderer
+    // runs UNCHANGED. _postFailed latches any build/render failure so we never retry-spam or throw.
+    postOn: false, _composer: null, _composerTried: false, _postFailed: false,
+    _composerSize: { w: 0, h: 0 }, _bloom: null, _fxaa: null
   };
 
   // AK-WORLD3D 2026-07-18: teardown drops OUR scene but leaves the SHARED renderer
@@ -669,6 +691,7 @@
     // permanently stop painting its 2D facades -- buildings would simply vanish.
     W3.bldIds = {};
     try { if (W3.renderer && W3.renderer.domElement) W3.renderer.domElement.style.display = 'none'; } catch (_e) {}
+    disposeComposer();   // AK-3DC-world3d 2026-07-29: the composer holds this renderer + scene; drop it with them
     W3.renderer = null;
     restorePool(); bodyBg(false);   // AK-WORLD3D-FIX: never leave body transparent behind us
   }
@@ -1491,6 +1514,151 @@
     doc.addEventListener('pointercancel', up, { passive: true });
   }
 
+  /* =====================================================================
+   * AK-3DC-world3d 2026-07-29 -- PHASE 6: OPTIONAL BLOOM + FXAA DEPTH PASS
+   * =====================================================================
+   * A guarded post-processing chain around the SHARED renderer. DEFAULT OFF (W3.postOn), so the
+   * shipped game renders EXACTLY as today. When enabled it lazily + asynchronously loads the three
+   * post-processing addons and, only if the core chain plus at least one effect is reachable, routes
+   * frame() through an EffectComposer (RenderPass -> UnrealBloomPass -> FXAA -> OutputPass). If ANY
+   * required addon is missing, or the build/render throws, W3._postFailed latches and frame() falls
+   * straight back to the plain W3.renderer.render() -- this can NEVER black-screen.
+   *
+   * The post-processing addons are NOT vendored yet (three_boot.js ADDONS is only
+   * {OrbitControls, GLTFLoader}). This lane does NOT vendor them -- see the handoff. The moment the
+   * main session drops the flat vendor files (and/or adds the names to three_boot's ADDONS map),
+   * ppLoad() finds them and this lights up with zero further edits here.
+   */
+
+  // The vendor dir the flat post-processing files load from -- mirrors three_boot's coreUrl/addonUrl
+  // so a post-processing module's own `import './three.module.min.js'` resolves to the SAME singleton
+  // (a query-free URL is one module identity; a second copy makes every instanceof silently false).
+  function vendorDir() {
+    try {
+      var raw = (root && root.AK_THREE_SRC) || 'assets/vendor/three.module.min.js';
+      var base = (root.document && root.document.baseURI) ||
+                 (root.location && root.location.href) || '';
+      var u = base ? new URL(raw, base).href : raw;
+      var i = u.lastIndexOf('/');
+      return (i === -1 ? '' : u.slice(0, i + 1));
+    } catch (_e) { return 'assets/vendor/'; }
+  }
+
+  // Resolve ONE post-processing export, three ways, most-preferred first. Always resolves (null on
+  // miss), never rejects, so the Promise.all below cannot blow up:
+  //   1. already on the THREE namespace (a UMD-style vendored build attaches it)
+  //   2. three_boot's addon() -- lights up if the main session adds the name to its ADDONS map
+  //   3. a direct guarded ESM import from the flat vendor dir (mirrors three_boot's own addon path)
+  function ppImport(name, file) {
+    try {
+      var p = import(vendorDir() + file);      // guarded: an absent/unrewritten file rejects -> null
+      if (!p || typeof p.then !== 'function') return Promise.resolve(null);
+      return p.then(function (ns) { return (ns && (ns[name] || ns['default'])) || null; },
+                    function () { return null; });
+    } catch (_e) { return Promise.resolve(null); }
+  }
+  function ppLoad(THREE, name, file) {
+    try { if (THREE && THREE[name]) return Promise.resolve(THREE[name]); } catch (_e) {}
+    try {
+      var T = root && root.AK_THREE;
+      if (T && typeof T.addon === 'function') {
+        return T.addon(name).then(function (c) { return c || ppImport(name, file); },
+                                  function () { return ppImport(name, file); });
+      }
+    } catch (_e) {}
+    return ppImport(name, file);
+  }
+
+  function buildComposerFrom(THREE, parts) {
+    var EffectComposer = parts[0], RenderPass = parts[1], UnrealBloomPass = parts[2],
+        ShaderPass = parts[3], FXAAShader = parts[4], OutputPass = parts[5];
+    // Need the core chain AND at least one real effect, or the composer is a pure-cost passthrough.
+    if (!EffectComposer || !RenderPass || (!UnrealBloomPass && !(ShaderPass && FXAAShader))) {
+      W3._postFailed = true; return;
+    }
+    if (!W3.renderer || !W3.scene || !W3.camera) { W3._composerTried = false; return; }  // not booted: retry
+    var S = W3.proj.state;
+    var pr = (W3.renderer.getPixelRatio && W3.renderer.getPixelRatio()) || 1;
+    var comp = new EffectComposer(W3.renderer);
+    comp.setSize(S.W, S.H);
+    comp.addPass(new RenderPass(W3.scene, W3.camera));
+    if (UnrealBloomPass) {
+      // Subtle NIGHT-ALLEY glow: strength/radius/threshold tuned so lit signs + door beams bloom
+      // without washing the murky scene. Bloom-heavy would fight the AK-LIGHTUP tone floor.
+      var bloom = new UnrealBloomPass(new THREE.Vector2(S.W, S.H), 0.55, 0.4, 0.85);
+      comp.addPass(bloom); W3._bloom = bloom;
+    }
+    if (ShaderPass && FXAAShader) {
+      var fxaa = new ShaderPass(FXAAShader);
+      try { fxaa.material.uniforms['resolution'].value.set(1 / (S.W * pr), 1 / (S.H * pr)); } catch (_e) {}
+      comp.addPass(fxaa); W3._fxaa = fxaa;
+    }
+    // OutputPass (if vendored) does tonemap + sRGB at the END of the chain, which is where three r160
+    // wants it once a composer intercepts the frame. Absent, the renderer's own ACES tonemap still
+    // applies at RenderPass time -- slightly less correct, never broken.
+    if (OutputPass) { try { comp.addPass(new OutputPass()); } catch (_e) {} }
+    W3._composer = comp; W3._composerSize = { w: S.W, h: S.H };
+  }
+
+  // One-shot async composer build. Guarded end to end; a failure latches _postFailed so frame()
+  // stops trying and stays on the plain renderer.
+  function ensureComposer() {
+    if (W3._composer || W3._composerTried || W3._postFailed) return;
+    var THREE = engine();
+    if (!THREE || !W3.renderer || !W3.scene || !W3.camera) return;   // not booted yet: retry later
+    W3._composerTried = true;
+    try {
+      Promise.all([
+        ppLoad(THREE, 'EffectComposer',  'EffectComposer.js'),
+        ppLoad(THREE, 'RenderPass',      'RenderPass.js'),
+        ppLoad(THREE, 'UnrealBloomPass', 'UnrealBloomPass.js'),
+        ppLoad(THREE, 'ShaderPass',      'ShaderPass.js'),
+        ppLoad(THREE, 'FXAAShader',      'FXAAShader.js'),
+        ppLoad(THREE, 'OutputPass',      'OutputPass.js')
+      ]).then(function (parts) {
+        try { buildComposerFrom(THREE, parts); }
+        catch (_e) { W3._composer = null; W3._bloom = null; W3._fxaa = null; W3._postFailed = true; }
+      }, function () { W3._postFailed = true; });
+    } catch (_e) { W3._postFailed = true; }
+  }
+
+  // Enable/disable the post pass. DEFAULT OFF. Enabling kicks the one-shot addon load; the plain
+  // renderer keeps running every frame until (and unless) the composer actually comes up.
+  function setPostOn(on) {
+    W3.postOn = !!on;
+    if (W3.postOn && !W3._composer) { W3._postFailed = false; W3._composerTried = false; ensureComposer(); }
+    return W3.postOn;
+  }
+
+  // Called from frame(). Returns TRUE only if it rendered through a live composer; the caller does
+  // the plain render whenever this returns false. Any throw here degrades to the plain render.
+  function renderPost(S) {
+    try {
+      if (!W3.postOn || W3._postFailed) return false;
+      if (!W3._composer) { ensureComposer(); return false; }   // pending / plain until it comes up
+      if (W3._composerSize.w !== S.W || W3._composerSize.h !== S.H) {
+        var pr = (W3.renderer.getPixelRatio && W3.renderer.getPixelRatio()) || 1;
+        W3._composer.setSize(S.W, S.H);
+        if (W3._bloom && W3._bloom.setSize) { try { W3._bloom.setSize(S.W, S.H); } catch (_e) {} }
+        if (W3._fxaa && W3._fxaa.material) {
+          try { W3._fxaa.material.uniforms['resolution'].value.set(1 / (S.W * pr), 1 / (S.H * pr)); } catch (_e) {}
+        }
+        W3._composerSize = { w: S.W, h: S.H };
+      }
+      W3._composer.render();
+      return true;
+    } catch (_e) {
+      W3._composer = null; W3._bloom = null; W3._fxaa = null; W3._postFailed = true;   // never twice
+      return false;
+    }
+  }
+
+  function disposeComposer() {
+    try { if (W3._composer && W3._composer.dispose) W3._composer.dispose(); } catch (_e) {}
+    W3._composer = null; W3._bloom = null; W3._fxaa = null;
+    W3._composerTried = false; W3._composerSize = { w: 0, h: 0 };
+  }
+
   /* --- Public lifecycle. Every entry point re-checks the gate. --- */
 
   function boot(ctx) {
@@ -1715,7 +1883,10 @@
     W3.camera.lookAt(W3.proj.camCx(), 0, W3.proj.camCy());
     W3.camera.updateProjectionMatrix();
     W3.renderer.setSize(S.W, S.H, false);
-    W3.renderer.render(W3.scene, W3.camera);
+    // AK-3DC-world3d 2026-07-29 (Phase 6): route through the bloom+FXAA composer when it is enabled
+    // AND live; otherwise render plain. renderPost() never throws -- it degrades to false, and the
+    // plain path below is the EXACT behaviour the game ships with today.
+    if (!renderPost(S)) { W3.renderer.render(W3.scene, W3.camera); }
     return true;
   }
 
@@ -1788,9 +1959,21 @@
     unwx: function (sx) { return W3.proj.unwx(sx); },
     unwy: function (sy) { return W3.proj.unwy(sy); },
     project: function (x, y, h) { return W3.proj.project(x, y, h); },
-    // AK-CAMWALK 2026-07-20: 'tpp' (over-shoulder, default) | 'fpp' (first person) | 'map' (survey).
-    setMode: function (m) { var r = W3.proj.setMode(m); if (r) { try { saveCam(); } catch (_e) {} } return r; },
+    // AK-CAMWALK 2026-07-20 / AK-3DC-world3d 2026-07-29: gameplay-mode camera rigs. Roaming:
+    // 'district' (isometric mid) | 'street'/'tpp' (over-shoulder) | 'map' (survey). Transient:
+    // 'gulag'/'fpp' (first person) | 'tower' (top-down lane) | 'interior' (framed keeper). The
+    // index.html HUD lane calls this on a mode switch. Guarded: W3.proj always exists, so this is
+    // safe to call BEFORE boot -- it just sets the projector state the first frame will honour.
+    setMode: function (m) {
+      var r = W3.proj.setMode(m);
+      // Persist ONLY the roaming family. A transient rig (persist:false) must never be written as
+      // the saved district camera -- loadCam would otherwise restore the whole district at e.g.
+      // gulag's dist 22 on the next boot.
+      if (r) { try { var M = CAM_MODES[r]; if (!M || M.persist !== false) saveCam(); } catch (_e) {} }
+      return r;
+    },
     camMode: function () { return W3.proj.mode(); },
+    camModes: function () { try { return Object.keys(CAM_MODES); } catch (_e) { return []; } },
     camYaw: function () { return W3.proj.state.yaw; },
     // --- lifecycle ---
     available: function () { return !!engine(); },
@@ -1798,6 +1981,15 @@
     renderer: function () { return W3.renderer || (root && root.AK_R3D) || null; },
     init: init, boot: boot, setZone: setZone, frame: frame, setOn: setOn, dispose: disposeScene,
     saveCam: saveCam, loadCam: loadCam,
+    // AK-3DC-world3d 2026-07-29 (Phase 6): optional bloom+FXAA. DEFAULT OFF; the shipped game must
+    // leave it off. setPostFx(true) / setQuality('high') kick a one-shot addon load and light the
+    // pass ONLY if the post-processing addons are vendored -- otherwise the plain renderer keeps
+    // running. postFxActive() reports whether the pass is actually live (vendored + enabled + built).
+    setPostFx: function (on) { return setPostOn(on); },
+    setQuality: function (level) {
+      return setPostOn(level === true || level === 'high' || level === 'ultra' || level === 'on');
+    },
+    postFxActive: function () { return !!(W3.postOn && W3._composer && !W3._postFailed); },
     proj: W3.proj, makeProjector: makeProjector, makeHeading: makeHeading, selfTest: selfTest,
     plateUrl: plateUrl, plateFallbackUrl: plateFallbackUrl, facadeUrl: facadeUrl,
 

@@ -69,6 +69,10 @@
     'malamute.glb':   { idle: 11, walk: 7,  run: 0 }    // Blackout Malamute 0127, 12 clips
   };
   var CLIP_DEFAULT = { idle: 3, walk: 1, run: 0 }; // safe on any 4-clip Tripo export
+  /* AK-3DC-COMBAT 2026-07-29: strike (JAB) clip RAW-index per hero for the 3D-unit pool, taken from
+   * akheroactions' measured combat set. Lets a deployed/raid/lane GLB throw a real punch on a landed
+   * hit (index.html/game.html pass opts.combat). Missing model -> no combat clip -> unit stays on walk. */
+  var COMBAT_BY_MODEL = { 'bcardd.glb': 3, 'balboa.glb': 14, 'jagged.glb': 5, 'bulldog.glb': 10, 'rottweiler.glb': 2, 'malamute.glb': 9 };
   function clipsForModel(url) {
     var u = String(url || '');
     for (var k in CLIP_BY_MODEL) { if (u.indexOf(k) !== -1) return CLIP_BY_MODEL[k]; }
@@ -310,6 +314,8 @@
       } catch (_e) {}
       var cl = pickClips(el.availableAnimations || []);
       rg.idle = cl.idle; rg.walk = cl.walk; rg.run = cl.run; rg.ready = true;
+      // AK-3DC-COMBAT: resolve the strike clip by RAW index (the same indexing akheroactions/CLIP_BY_MODEL use)
+      try { var _bn = (rg.url || '').split('/').pop(); var _ci = COMBAT_BY_MODEL[_bn]; var _av = el.availableAnimations || []; if (_ci != null && _av[_ci]) rg.combat = _av[_ci]; } catch (_e) {}
     });
     rg.mv = el; rg.url = url;
   }
@@ -364,6 +370,7 @@
         rg.url = modelUrl; rg.ready = false; rg.cur = '';
       }
       rg.last = nowMs();
+      if (o.combat && rg.combat) rg.combatT = nowMs() + 450;   // AK-3DC-COMBAT: a landed hit latches a ~450ms strike window
       var r = o.r || 16;
       // same footprint math as the hero (feet land at y + r*0.9), lower floor because a crew
       // dog rides r=16 against the hero's much larger me.r*ds
@@ -383,7 +390,9 @@
       }
       if (!rg.ready) return false;                           // glb still loading -> 2D covers it
       if (st.opacity !== '1') st.opacity = '1';
-      var want = !o.moving ? rg.idle : (o.running && rg.run ? rg.run : rg.walk);
+      // AK-3DC-COMBAT: throwing a strike overrides walk/idle until the latched window elapses, then eases back
+      var want = (rg.combat && rg.combatT && nowMs() < rg.combatT) ? rg.combat
+               : (!o.moving ? rg.idle : (o.running && rg.run ? rg.run : rg.walk));
       if (want && rg.cur !== want) {
         try { rg.mv.animationName = want; rg.mv.play(); } catch (_e) {}
         rg.cur = want;

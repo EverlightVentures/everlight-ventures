@@ -30,6 +30,12 @@
   // ============================ TUNABLES =====================================
   var MAX_PER_ZONE  = 3;        // visible strays per district
   var MAX_TOTAL     = 14;       // hard cap across all zones (prune off-screen strays)
+  /* AK-3DC-encounters 2026-07-29: nearest-first budget for routing roaming strays through the
+     shared 3D unit pool (window.__ak3d, hub3d.js:352 -- CAP 4 shared with raids/NPCs). Only the
+     closest few wild dogs that resolve a hero-model GLB render as walking models; the pool's own
+     CAP 4 is the hard ceiling (returns false past it), so every other stray keeps its 2D token
+     draw. Held under CAP 4 to leave a slot for the NPC/mission-giver lane on the same street. */
+  var GLB_NEAR_MAX  = 3;
   var SPAWN_MIN     = 3.5;      // seconds between spawn attempts (random)
   var SPAWN_MAX     = 7.5;
   var SPAWN_AWAY    = 220;      // never spawn within this px of the player
@@ -91,7 +97,8 @@
   };
 
   // ============================ MODULE STATE =================================
-  var S = { pool: null, seed: 1, spawnCD: 1.5, lastZone: '', engaging: false, sinceSave: 0 };
+  var S = { pool: null, seed: 1, spawnCD: 1.5, lastZone: '', engaging: false, sinceSave: 0,
+            glbRank: null, glbRankT: 0 };   // AK-3DC-encounters: per-frame nearest-3D roamer set + its stamp
   var imgCache = {};
 
   function profile(ctx) { try { return ctx.econ ? ctx.econ.loadProfile() : null; } catch (_) { return null; } }
@@ -292,28 +299,96 @@
     }
   }
 
+  /* AK-3DC-encounters 2026-07-29: 3D-unit bridge for roaming strays ------------------------------
+   * Route the nearest wild dogs through the shared pool (window.__ak3d.unit, hub3d.js:352) so the
+   * stray you walk up on is a real WALKING GLB, not a flat card token. Every call is guarded and
+   * FALLS BACK to the 2D token draw when the pool is absent, the card has no hero-model GLB, the
+   * nearest-budget / pool CAP 4 is spent, or the model is still loading -- never a hole in the
+   * world. Pins the GLB at the SAME one-arg screen pos the 2D body uses (no jump across the line). */
+  function enc3dNow() {
+    try { return (global.performance && global.performance.now) ? global.performance.now() : Date.now(); }
+    catch (_) { return Date.now(); }
+  }
+  // Rank the on-screen wild strays that resolve a hero-model GLB by nearness to the player; return
+  // the closest GLB_NEAR_MAX as an id->modelUrl map. Memoized per frame on S.glbRankT (cheap: <=14
+  // roamers). __ak3d.modelFor('') returns '' for any card with no model -> that stray stays 2D.
+  function enc3dNearest(ctx) {
+    var out = {};
+    var P = global.__ak3d;
+    if (!P || !P.on || typeof P.unit !== 'function' || typeof P.modelFor !== 'function') return out;
+    var rs = ctx.world.roamers(), cand = [], i;
+    for (i = 0; i < rs.length; i++) {
+      var r = rs[i];
+      if (!r || !r._enc || r.dead || r.zone !== ctx.zoneId || !r.card) continue;
+      var url = P.modelFor(r.card.name);
+      if (!url) continue;                                    // no GLB for this card -> keep it 2D
+      cand.push({ id: r.id, url: url, d: ctx.world.distToMe(r.x, r.y) });
+    }
+    cand.sort(function (a, b) { return a.d - b.d; });
+    var n = Math.min(cand.length, GLB_NEAR_MAX);
+    for (i = 0; i < n; i++) out[cand[i].id] = cand[i].url;
+    return out;
+  }
+  // Screen-space heading + moving flag for a stray, from its OWN world motion. The previous world
+  // pos is projected with the CURRENT one-arg wx/wy (the same projection the body draw uses), so the
+  // camera term cancels and only the dog's real movement remains. Matches the hero's faceAngle
+  // convention (atan2 of screen dy,dx: right=0, down=+90). Also refreshes the prev-pos each frame.
+  function enc3dHeading(self, X, Y, ctx) {
+    var moving = false, angle = 0;
+    if (typeof self._p3x === 'number') {
+      var dsx = X - ctx.world.wx(self._p3x), dsy = Y - ctx.world.wy(self._p3y);
+      if ((dsx * dsx + dsy * dsy) > 0.0225) { moving = true; angle = Math.atan2(dsy, dsx); }   // > ~0.15px
+    }
+    self._p3x = self.x; self._p3y = self.y;
+    return { moving: moving, angle: angle };
+  }
+
   // host calls this once per rAF (g = the hub canvas 2D ctx; auto-culled off-screen)
   function roamerDraw(g, self, ctx) {
     var X = ctx.world.wx(self.x), Y = ctx.world.wy(self.y), r = self.r;
+
+    /* AK-3DC-encounters 2026-07-29: try to pin this stray as a walking GLB (nearest-first, guarded).
+       glb3d is TRUE only when the model is actually on screen; on FALSE the 2D body draw below runs
+       unchanged. enc3dHeading runs every frame (even for non-3D strays) to keep the prev-pos fresh
+       so the heading is correct the moment a stray crosses into the nearest-3D set. */
+    var mv3 = enc3dHeading(self, X, Y, ctx), glb3d = false;
+    try {
+      if (global.__ak3d && global.__ak3d.unit && !self.dead) {
+        var nowT = enc3dNow();
+        if (!S.glbRank || (nowT - S.glbRankT) > 4) { S.glbRank = enc3dNearest(ctx); S.glbRankT = nowT; }
+        var url = S.glbRank[self.id];
+        if (url) {
+          glb3d = global.__ak3d.unit('enc:' + self.id, url, X, Y, {
+            r: r, moving: mv3.moving, running: (self.state === 'chase'),
+            faceAngle: mv3.moving ? mv3.angle : undefined
+          });
+        }
+      }
+    } catch (_) { glb3d = false; }
+
     g.save();
-    // ground shadow
+    // ground shadow (kept under the GLB too -- grounds the model on the street)
     g.globalAlpha = 0.35; g.fillStyle = '#000';
     g.beginPath(); g.ellipse(X, Y + r * 0.8, r * 0.9, r * 0.4, 0, 0, 6.2832); g.fill();
     g.globalAlpha = 1;
-    // body: real card art if loaded, else a faction-color token w/ breed initial
-    var im = dogImg(self.card), drew = false;
-    if (im && im.complete && im.naturalWidth > 0) {
-      g.save();
-      g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.closePath(); g.clip();
-      try { g.drawImage(im, X - r, Y - r, r * 2, r * 2); drew = true; } catch (_) {}
-      g.restore();
-    }
-    if (!drew) {
-      g.fillStyle = self.card.color || '#c9a84c';
-      g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.fill();
-      g.fillStyle = '#0c0a08'; g.font = '900 ' + Math.round(r * 1.1) + 'px Inter,system-ui';
-      g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText((self.card.breed || self.card.name || '?').charAt(0).toUpperCase(), X, Y + 1);
+    // body: real card art if loaded, else a faction-color token w/ breed initial.
+    // Drawn ONLY when the 3D unit is NOT on screen -- the walking GLB replaces the 2D body when
+    // glb3d, while the shadow, ring, name tag and alert glyph stay 2D over it (the gameplay tells).
+    if (!glb3d) {
+      var im = dogImg(self.card), drew = false;
+      if (im && im.complete && im.naturalWidth > 0) {
+        g.save();
+        g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.closePath(); g.clip();
+        try { g.drawImage(im, X - r, Y - r, r * 2, r * 2); drew = true; } catch (_) {}
+        g.restore();
+      }
+      if (!drew) {
+        g.fillStyle = self.card.color || '#c9a84c';
+        g.beginPath(); g.arc(X, Y, r, 0, 6.2832); g.fill();
+        g.fillStyle = '#0c0a08'; g.font = '900 ' + Math.round(r * 1.1) + 'px Inter,system-ui';
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText((self.card.breed || self.card.name || '?').charAt(0).toUpperCase(), X, Y + 1);
+      }
     }
     // ring -- gold idle, red when chasing
     g.lineWidth = 2; g.strokeStyle = self.state === 'chase' ? '#ff5a4d' : 'rgba(201,168,76,.85)';
@@ -422,6 +497,10 @@
   function startEncounter(self, ctx) {
     if (S.engaging) return;
     S.engaging = true;
+    /* AK-3DC-encounters 2026-07-29: free this stray's pooled GLB the instant the standoff opens so
+       the walking model can never bleed over the (flat) capture overlay. Guarded no-op if the pool
+       or this key is absent; on BACK OFF the roamer resumes drawing and re-acquires a slot. */
+    try { if (global.__ak3d && global.__ak3d.drop) global.__ak3d.drop('enc:' + self.id); } catch (_) {}
     var card = self.card;
     var maxStam = 100, stam = 100, throws = THROWS;
     var phase = 'standoff';            // standoff | aim | shake | mercy
