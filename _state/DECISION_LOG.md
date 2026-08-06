@@ -319,3 +319,31 @@ the RECONCILIATION block is what makes the file safe to read.
 **Why:** The underlying reasoning still holds even though my facts were wrong. `sync_finisher.sh` checked whether the PC was reachable but never whether it was capable, and reachable-but-incapable is the bad state: it enters a 6h loop holding `systemd-inhibit` against sleep while polling a number that cannot move. That hazard is real whenever syncthing is absent or broken. A correct probe keeps the protection without the false positive. Verified live against the PC: gate passes, sync proceeds.
 **Gave up:** One extra SSH round trip per run, cached so it happens once rather than per poll cycle.
 **Revisit when:** Syncthing moves to a system package on PATH, making the absolute-path list unnecessary.
+
+
+## [2026-08-06 13:24 PT] Retire SSH-pull, standardize phone<->PC sync on Syncthing
+
+**Context:** Rich wanted phone->PC catch-up to be autonomous on turn-on. The existing `claude_sync_pull.sh` (hourly :17) SSHes PC->phone and was failing every run.
+**Options:** A) fix the SSH path (find phone sshd port, keep it alive) / B) drop SSH, lean on Syncthing which already shares /AA_MY_DRIVE / C) run both.
+**Chose:** B -- retired SSH-pull, added `hive_catchup.sh` (rescan + runner health) on a boot service + hourly cron.
+**Why:** The phone's sshd is fundamentally unreachable under Android Doze (proot suspends on screen-lock; ports 22/8022 refuse). No amount of port-fixing survives the phone locking. Syncthing keeps its own always-on connection, was already fully in sync (needFiles=0), and survives sleep/wake. Fighting SSH would be effort spent on a transport that structurally can't be reliable on a phone.
+**Gave up:** SSH as an independent fallback if Syncthing itself goes down. Accepted that risk because Syncthing is the more reliable of the two here.
+**Revisit when:** Syncthing proves flaky, or the phone gains a persistent always-on sshd (e.g. native Termux sshd with a wake-lock that survives Doze).
+
+## [2026-08-06 13:24 PT] Rebind KDE global shortcuts to match Rich's cheatsheet (not the reverse)
+
+**Context:** Rich's keybinding card claimed `Meta+arrow` = switch desktop, but reality had it on focus-window; `Ctrl+arrow` was the real switch. Card was "lying."
+**Options:** A) rebind KDE so the card becomes true (touch 8 shortcuts) / B) leave KDE, correct the card text (zero risk).
+**Chose:** A (Rich's explicit pick when asked).
+**Why:** Rich uses the card as his source of truth and wanted muscle memory to work; he chose the rebind over relabeling.
+**Gave up:** The zero-risk option; rebinding 8 global shortcuts + a kglobalacceld restart carried small conflict risk.
+**Revisit when:** Meta+arrow doesn't grab after a relogin, or a shortcut conflict surfaces.
+
+## [2026-08-06 13:24 PT] Append session summary to mailbox manually, bypassing the export script
+
+**Context:** `/exit` doctrine says pipe the summary through `session_export_to_mailbox.py`. That script hardcodes `WORKSPACE = /mnt/sdcard/AA_MY_DRIVE` (phone path) and reads no env override, so it cannot target the PC's synced mailbox.
+**Options:** A) run the script anyway (writes to a non-existent phone path / wrong copy) / B) append directly to `/AA_MY_DRIVE/_state/AGENT_MAILBOX.md` in the same format / C) patch the script to be path-agnostic first.
+**Chose:** B, and flagged the broken script in the mailbox entry as an open item.
+**Why:** The goal is the summary reaching peers; Syncthing already propagates /AA_MY_DRIVE, so a direct append achieves that without depending on a phone-only script. Patching the script (C) is the right permanent fix but wasn't worth blocking the exit on -- logged it instead.
+**Gave up:** The script's atomic-write + explicit sync_queue enqueue (redundant with Syncthing here).
+**Revisit when:** Next session -- make `session_export_to_mailbox.py` derive WORKSPACE from the script location or an env var so it works on both phone and PC.
