@@ -89,6 +89,20 @@ pc_completion() {
     || echo "0 0 0"
 }
 
+# ---- helper: does the PC actually have syncthing? ----
+# Cached per-run: one SSH round trip, not one per poll cycle.
+_pc_st_checked=""; _pc_st_result=1
+pc_has_syncthing() {
+  if [ -z "$_pc_st_checked" ]; then
+    _pc_st_checked=1
+    if timeout 15 ssh -i "$PC_KEY" -o ConnectTimeout=8 -o StrictHostKeyChecking=no \
+         "$PC_USER@$PC_IP" "command -v syncthing" >/dev/null 2>&1; then
+      _pc_st_result=0
+    fi
+  fi
+  return $_pc_st_result
+}
+
 # ---- helper: trigger the PC-side acknowledger ----
 trigger_pc_helper() {
   timeout 30 ssh -i "$PC_KEY" -o ConnectTimeout=8 "$PC_USER@$PC_IP" \
@@ -110,6 +124,22 @@ while true; do
     sleep "$POLL_SECONDS"
     cycle=$((cycle+1))
     continue
+  fi
+
+  # ---- readiness gate (added 2026-08-06) ----
+  # Reachable != capable. The Tri-Device Vault audit (2026-06-19) confirmed
+  # syncthing is NOT installed on the PC, and doctrine retired the Syncthing
+  # leg in favour of rsync-on-wake (TRI_DEVICE_VAULT_DESIGN.md:151-154).
+  # Without this gate, a reachable-but-incapable PC sends us into the full 6h
+  # loop: trigger_pc_helper holds systemd-inhibit (blocking PC sleep) while
+  # pc_completion polls a number that can never reach 100. Fail loud, exit
+  # clean, leave the PC free to sleep.
+  if ! pc_has_syncthing; then
+    log "!! PC is reachable but has NO syncthing binary -- refusing to drive a"
+    log "!! transfer that cannot complete. Not holding the PC awake."
+    log "!! Use rsync-on-wake instead (claude_sync_acemagician.sh --full),"
+    log "!! or install syncthing on the PC if this leg is meant to be revived."
+    exit 0
   fi
 
   # PC is up: every PC_ACK_REFRESH cycles, (re)trigger the PC helper to keep it awake

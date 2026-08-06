@@ -4,7 +4,74 @@
 **Audience:** the Claude/Lucrex agent running on the AceMagician PC (Arch Linux, user `richgee`, tailnet `100.93.253.49`, workspace `/home/richgee/AA_MY_DRIVE`, global config `/home/richgee/.claude`).
 **Purpose:** the PC has been powered off for roughly three months. This file is the delta: what the PC does not have, why, and how to get it.
 
-> **Read this first, act second.** Section 1 is the situation. Section 2 is the one-shot catch-up. Sections 3 through 7 are the detailed inventory. Section 8 is what you must NOT do.
+> **Read this first, act second.** Section 0 is the landmines. Section 1 is the situation. Section 2 is the one-shot catch-up. Sections 3 through 7 are the detailed inventory. Section 8 is what you must NOT do.
+
+---
+
+## 0. Landmines, resolve these before you sync anything
+
+The doctrine on disk is **three generations layered on top of each other**, two still wired and firing, and the newest one (which retires the middle one) was never implemented. These are the specific traps, each verified against the live filesystem today, not read out of a doc.
+
+### 0.1 The workspace path is genuinely ambiguous and it gates everything
+
+`03_AUTOMATION_CORE/01_Scripts/mesh/MESH_PLAN.md:169-171`, open decision #4, verbatim and still unresolved:
+
+> "**Two workspace copies on the PC**, `/AA_MY_DRIVE` (git root) and `/home/richgee/AA_MY_DRIVE` are *different* directories. Pick one canonical, reconcile the other, before wiring PC sync, otherwise sync ping-pongs."
+
+The scripts split down the middle. `/AA_MY_DRIVE` is assumed by `mesh/hive_hosts.env:43-44` and `docs/REMOTE_WORKFLOW.md`. `/home/richgee/AA_MY_DRIVE` is assumed by `claude_sync_acemagician.sh:41`, `sync_on_reconnect.sh:43`, `install_acemagician_triggers.sh:31`, `setup_arch_pc.sh:34`. A third opinion, `TRI_DEVICE_VAULT_DESIGN.md:28`, measured `/home/richgee/AA_MY_DRIVE` at 31 GB / 117k files and called it *"stale and incomplete (missing media), confirms the false-full-picture risk."*
+
+**Your first job on the PC is to run `ls -la /AA_MY_DRIVE /home/richgee/AA_MY_DRIVE` and report both back before syncing.** Do not pick one on your own. If you sync into the wrong one you create a second divergent tree on the same disk.
+
+### 0.2 The Syncthing cron would have held the PC awake for 6 hours (FIXED today)
+
+`sync_finisher.sh` runs from phone cron every 5 minutes. Its own header: *"the PC acknowledges by waking its Syncthing + blocking sleep for the transfer window,"* with `PC_ACK_REFRESH=5 # keeps PC awake` and a 6-hour cap.
+
+But `TRI_DEVICE_VAULT_DESIGN.md:151-154` retired the Syncthing leg in favour of rsync-on-wake, and the 2026-06-19 hardware audit confirmed **syncthing is not installed on the PC**. Reachable but incapable is the worst state: the loop enters, holds `systemd-inhibit` against sleep, and polls a completion percentage that can never rise.
+
+**Fixed 2026-08-06.** A `pc_has_syncthing()` readiness gate now sits between the reachability check and the transfer loop. If the PC has no syncthing binary the script logs loudly and exits 0 instead of camping on the machine. Liveness is not readiness; the original only checked the former.
+
+### 0.3 Doctrine says one git repo, reality is another
+
+| Source | Repo | Branch |
+|---|---|---|
+| `MESH_PLAN.md:22` and `hive_hosts.env:47-48` | `aa-my-drive.git` | `main` |
+| `PC_TRANSFER_GUIDE.md:11-13` | `everlight-ventures.git` | `server-auth-blackjack` |
+| `LUCREX_PC_BOOTSTRAP.html:361` | `everlight-ventures.git` | `everlightventures.io` |
+| `setup_arch_pc.sh:35` | `everlight-ventures.git` | default |
+| **Measured on the phone today** | **`everlight-ventures.git`** | **`solano-live-desk`** |
+
+Trust the measured row. The remote is `git@github.com:EverlightVentures/everlight-ventures.git`, verified by `git remote -v`. Every doc that says `aa-my-drive` is stale.
+
+### 0.4 An auto-install fires within 2 minutes of the PC answering SSH
+
+Phone cron runs `device_update_runner.sh` every 2 minutes. It scp's any `.sh` from `03_AUTOMATION_CORE/04_PendingUpdates/acemagician/` to the PC, executes it, and moves it to `_done/`. **One task has been queued since 2026-05-13: `install_open_webui.sh`** (Open WebUI on port 2800, user service, Linger).
+
+This is intentional, per the auto-install HARD LAW ("never tell Rich to run X manually"). Do not run it by hand, and do not be surprised when it fires. Watch `03_AUTOMATION_CORE/04_PendingUpdates/_logs/runner.log`.
+
+### 0.5 The Slack notification path was dead for the life of the script (FIXED today)
+
+`claude_sync_acemagician.sh` `slack_ping()` had two independent bugs, and because the function returns 0 on any miss, both failed silently:
+
+1. Read the token from `${PHONE_WORKSPACE}/03_Credentials/.env`. That directory does not exist; the real one is `03_AUTOMATION_CORE/03_Credentials/`.
+2. Looked for `SLACK_BOT_TOKEN_WARROOM`. The `.env` actually defines `SLACK_WARROOM_TOKEN`.
+
+**No sync has ever posted to `#deploy-log`.** Both fixed 2026-08-06, with a fallback to `SLACK_BOT_TOKEN`. Verified the token now resolves (`xoxb-`, 58 chars). Note `setup_arch_pc.sh:297,364` carries the same wrong path in its `sync_creds_from_phone` alias, so that alias copies nothing either. **Not yet fixed, it needs the path decision from 0.1 first.**
+
+### 0.6 Do not run the warm-standby script
+
+`mesh/acemagician_warm_standby.sh:57` runs `rsync -az --delete` over the tailnet, excludes `_logs/` and `__pycache__/` from a supposed *full-state* capture, and hot-tars a **live Postgres volume**. Its own successor design, `TRI_DEVICE_VAULT_DESIGN.md:288-291`, names the file specifically: *"a corruption amplifier, scope-incomplete, and a producer of unrestorable DB artifacts."* The rewrite is specified but was never applied. `MESH_PLAN.md:192` still tells you to run it. Do not.
+
+### 0.7 `PC_TRANSFER_GUIDE.md` will build you a broken SSH config
+
+Lines 69-70 set `Host oracle-e5 / HostName 129.159.38.250`. **That box was terminated 2026-04-30.** Line 121 curls it, line 134 calls it "always running." The same guide tells you to expect `n8n` and `hive-django` up; n8n is PARKED and Django is DEFERRED to Phase 7. Its agent-count check ("should be 85") disagrees with every other source (79 / 94 / 119 / 120). Treat that guide as archive, not instruction.
+
+`MIGRATION_CHECKLIST.md`, `START_HERE.md` and `QUICK_COMMANDS.md` are the January 2026 file-reorg plan (Proton Drive, GPG vault, `A_Rich/` tree). None of it touches the PC and Proton is superseded by Vaultwarden. Archive too.
+
+### 0.8 The reverse leg (PC pulls from phone hourly) is not wired
+
+`docs/REMOTE_WORKFLOW.md:51-55` is honest about it: *"AceMagician auto-pull side: NOT YET WIRED... the auto-push timer only PUSHES."* `SERVICE_TIERS.md:71` describes the `:17` hourly pull as though it exists. It does not; there is only a `.template`.
+
+Before installing it, check its SSH target. The phone's Termux `sshd` listens on **8022**, not 22, and runs as an Android app user, not root. Verify the template's port and user against that or the hourly pull will fail its handshake every hour and exit 0 silently.
 
 ---
 
@@ -136,6 +203,80 @@ Do **not** rsync venvs or `node_modules`. Rebuild them. Eight venvs exist on the
 ```
 
 18 `requirements*.txt` files exist across the tree. The PC is a real Arch box with no proot limits, so unlike the phone it *can* `npm install` and compile native modules. This is the machine to do heavy builds on.
+
+### Step 5, toolchain bootstrap if anything is stale
+
+`03_AUTOMATION_CORE/01_Scripts/setup_arch_pc.sh` is idempotent and safe to re-run. It refuses to run as root; run it as `richgee`. What it installs:
+
+```bash
+sudo pacman -Sy --needed --noconfirm git openssh rsync curl wget jq \
+  python python-pip python-virtualenv nodejs npm base-devel tailscale
+npm config set prefix "$HOME/.npm-global"      # PATH gets ~/.npm-global/bin
+curl -fsSL https://claude.ai/install.sh | bash # fallback: npm i -g @anthropic-ai/claude-code
+npm install -g @google/gemini-cli @openai/codex
+```
+
+Python venv at `$EL_HOME/.venv`: `requests, google-auth, google-auth-oauthlib, google-api-python-client, slack-sdk, anthropic, openai, google-generativeai, python-dotenv, rich, httpx, pyyaml`. Keep venvs inside the workspace, never on the root filesystem.
+
+**Confirmed present** as of the 2026-06-19 audit: rsync 3.4.2, rclone 1.74, sqlite3 3.53, pg_dump 18, docker 29, `systemd --user` with Linger. **Confirmed missing:** restic, borg, kopia, b3sum, syncthing. `sudo` needs a password, so any install is operator-gated.
+
+Hardware, for planning: ACEMAGICIAN S3A, Ryzen 7 8745HS 8C/16T, Radeon 780M (**no NVIDIA, no CUDA**), 32 GB DDR5, 1 TB NVMe. Vault disk `nvme0n1p3` btrfs 953 G with 333 G free, **no LUKS**.
+
+---
+
+## 2.5 What the PC is supposed to run
+
+Bind law applies to every one of these: `127.0.0.1` unless `EV_BIND=0.0.0.0` is set deliberately.
+
+| Service | Port | Status |
+|---|---|---|
+| `blinko-lite.service` (user) | 1111 | |
+| `langfuse.service` (+ postgres/clickhouse/redis/minio) | 3100 web, rest loopback | |
+| `homarr` container | 7575 | |
+| `n8n` container | 5678 | doctrine says PARKED, do not build on it |
+| `open-webui.service` (user, Linger) | 2800 | **queued to auto-install, see 0.4** |
+| `sync-conflict-resolver.timer` + udev rule | n/a | via `install_acemagician_triggers.sh` |
+| `~/bin/claude_sync_pull.sh` cron `17 * * * *` | n/a | **not wired, see 0.8** |
+| `syncthing-everlight.service` | 8384 | **retired by doctrine, binary absent** |
+| `lucrex-auto-push.timer` (git push every 5 min) | n/a | |
+| `lucrex-email-triage.service` (Gmail poll) | n/a | |
+| MCP fleet election (`mcp_elect.sh`, cron `*/2`) | 3101-3107 | PC is **priority 2** |
+| Hermes browser harness (docker + headless Chrome) | n/a | host LOCKED to this PC since 2026-05-19 |
+
+`install_acemagician_triggers.sh` installs a udev rule on Samsung vendor `04e8` (products 6860/6863/6865) so plugging the phone in by USB triggers the conflict resolver, plus an hourly timer. Run it once as root on the PC. It has an undo block at the bottom.
+
+---
+
+## 2.6 Hand-carry list, things no sync will ever move
+
+Every sync path excludes secrets by design (`*.token`, `*.key`, `*credentials*`, `.env*`). These must move by deliberate rsync or by hand:
+
+| Item | Phone path | PC destination |
+|---|---|---|
+| Master `.env` (5.7 KB, 2026-06-11) | `03_AUTOMATION_CORE/03_Credentials/.env` | same relative path, `chmod 600` |
+| Hive Mind SaaS `.env` | `06_DEVELOPMENT/hivemind_saas/backend/.env` | same |
+| Solano Live Desk `.env` | `06_DEVELOPMENT/solano_live_desk/.env` | same |
+| Oracle Micro key | `/root/.ssh/oracle_key.pem` | `~/.ssh/`, 600 |
+| GitHub deploy key | `/root/.ssh/github_deploy` | `~/.ssh/`, 600 |
+| PC to phone key | must exist as `~/.ssh/arch_to_phone` on the PC | matching pubkey already in the phone's `authorized_keys` |
+| Claude Code auth | **not syncable** | re-auth on the PC: `claude login` |
+| restic repo password | by design lives outside every mirrored path | Vaultwarden + a printed offline copy |
+
+Also excluded from `~/.claude/` on purpose and never to be copied: `sessions/`, `history.jsonl`, `telemetry/`, `statsig/`, `cache/`, `paste-cache/`, `projects/`, `plans/`, `settings.local.json`, `.credentials.json`, `tasks/`, `todos/`, `debug/`.
+
+**Cloud denylist** (never reaches any cloud remote, so never reaches the PC by a cloud path): all `*seed_phrase*` / `*_sp.py` / `SEED_VAULT*`, `03_Credentials/**`, `*.pem`, `*.key`, `.env*`, `leads_db*`, all `*_prospects.csv`, `_logs/enrichment/**`, `_state/TN_TOP_TARGETS_*.json`, and the MMA medical paperwork.
+
+---
+
+## 2.7 Conflict backlog waiting on the PC
+
+`sync_conflict_resolver.sh` archives, never deletes, into `08_BACKUPS/sync_conflicts_archive_<date>/`. Run `--dry-run` first, per verify-before-delete doctrine. Known backlog:
+
+- 128 files in `.claude/.sync_conflicts/20260508T114933Z/`
+- 36 files / 10.7 MB in `_sync_conflicts_quarantine_20260513/`
+- **~1.7 GB in `_sync_conflicts_quarantine_20260514_110205/`**, needs a manifest pass before any bulk archive
+
+Dashboard sqlite conflicts are deliberately skipped for manual row-count comparison. Do not auto-resolve those.
 
 ---
 
@@ -286,6 +427,10 @@ Meaning: the queue is backed up against e5, not against the AceMagician. Drainin
 6. **Do not commit any `.env`, key, or credential.** Policy was reversed on 2026-05-16: secrets move via tailnet/rsync, never git, even in a private repo.
 7. **Do not treat the PC as a cron host yet** without checking `03_AUTOMATION_CORE/01_Scripts/install_acemagician_triggers.sh` first. Cron doctrine is e5-first, and duplicate crons across hosts cause double-sends on outbound email.
 8. **Do not delete anything to reclaim space.** Standing rule: nothing gets reclaimed without a `memory_pipeline.ingest_before_delete()` pass, and there is a hard "no trash until Deal 1" hold in effect.
+9. **Do not use `--mirror-from-pc` or `--mirror-to-pc`.** Those are `rsync --delete`. The PC has been off for three months, so its copy is the stale one; mirroring the wrong way destroys 90 days of work.
+10. **Do not run `mesh/acemagician_warm_standby.sh`.** See 0.6. Its own successor design calls it a corruption amplifier.
+11. **Do not follow `PC_TRANSFER_GUIDE.md`, `MIGRATION_CHECKLIST.md`, `START_HERE.md`, or `QUICK_COMMANDS.md`.** See 0.7. Dead hosts and a January file-reorg plan. This file supersedes them for PC catch-up purposes.
+12. **Do not pick a workspace path on your own.** See 0.1. Report both directories back and let the operator decide.
 
 ---
 

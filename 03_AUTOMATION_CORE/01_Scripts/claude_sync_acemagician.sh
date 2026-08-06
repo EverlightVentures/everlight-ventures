@@ -140,11 +140,18 @@ queue_for_later() {
 # is fine for short ops pings, branded_slack is for full reports).
 slack_ping() {
   local text="$1"
-  local token_file="${PHONE_WORKSPACE}/03_Credentials/.env"
+  # 2026-08-06 fix: this had TWO bugs and so had never once posted to Slack.
+  #   1. path was ${PHONE_WORKSPACE}/03_Credentials/ -- that dir does not exist.
+  #      Real location is 03_AUTOMATION_CORE/03_Credentials/.
+  #   2. var was SLACK_BOT_TOKEN_WARROOM -- the .env defines SLACK_WARROOM_TOKEN.
+  # Both were silent no-ops because the function returns 0 on any miss.
+  local token_file="${PHONE_WORKSPACE}/03_AUTOMATION_CORE/03_Credentials/.env"
   [ -f "$token_file" ] || return 0
   # shellcheck disable=SC1090
   local token
-  token=$(grep -E '^SLACK_BOT_TOKEN_WARROOM=' "$token_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")
+  token=$(grep -E '^SLACK_WARROOM_TOKEN=' "$token_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")
+  # fall back to the generic bot token if the warroom-specific one is absent
+  [ -z "$token" ] && token=$(grep -E '^SLACK_BOT_TOKEN=' "$token_file" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'")
   [ -z "$token" ] && return 0
   curl -s -X POST https://slack.com/api/chat.postMessage \
     -H "Authorization: Bearer ${token}" \
