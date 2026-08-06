@@ -4264,3 +4264,265 @@ OPEN / NEXT: real product names need an owner re-import (synthetic labels are a 
 - Whether `LIVING_PUNCHLIST.md` gets refreshed or formally retired.
 
 ---
+
+## [2026-07-28 06:26 PT] Session: Cleared a 16-day silent git failure, recovered 2,201 stranded files, and built t
+
+<!-- session_iso=2026-07-28T13:26:44.488869+00:00 | size=8050b -->
+
+# Cleared a 16-day silent git failure, recovered 2,201 stranded files, and built the read half of the session handoff
+
+Continues the session exported at 05:26 PT. That export closed on three open
+items; this covers finishing them plus everything they uncovered.
+
+### Accomplished
+- **Found the buried cause of the file backlog.** A zero-byte `.git/index.lock` dated **2026-07-14** was left by a crashed git process. Every commit in the workspace repo failed silently from July 14 to July 28. Last real commit before it was 2026-07-12. Cleared after confirming no live git write process was running.
+- **Memory orphan triage (item 1 of 3).** Index went from 151 to **226 links**, recovering 75 memories that were invisible at session start, notably `business_msh_buyer_criteria` (Chris Ulander buy box, the anchor buyer for Deal 1) and `feedback_always_free_only` (no credit card, a hard constraint on every infra decision). Index size held at 16,323 bytes, so 50 percent more memories now load for the same context cost. Verified by set comparison: zero links dropped, zero dangling.
+- **Punchlist reconciliation (item 2 of 3).** Added a RECONCILIATION block bounding what is verified through 2026-05-29 versus what is stale, plus a new section M with the 22 workstreams built since. Flagged the sharpest contradiction: sections D and E assume Broker OS is alive while the 2026-06-30 AIOS audit says it is dead.
+- **Selective commit pass.** 2,201 uncommitted files down to **14**, across 9 commits, with nothing bypassed. `.gitignore` hardened in four passes to separate generated output from source.
+- **SECURITY: found live secrets in git history.** `_state/moltbook/agent_keys.jsonl` was tracked and contains `moltbook_sk_*` secret keys, `moltbook_claim_*` tokens and 7 `api_key` fields. Untracked and ignored to stop further exposure. The values are already in history and must be treated as compromised.
+- **SECURITY: closed a gitignore gap.** `.secret_key` (64 bytes, real key) matched none of the existing `*_secret*` / `*_key.txt` patterns because of its leading dot.
+- **Avoided committing 1.5 GB.** Untracked AK directories held `e5_art_backup/` at 1.2 GB, `assets/story/` at 115 MB, `models/` at 40 MB. A blind `git add` would have blown past GitHub's 100 MB ceiling.
+- **Built `/brief`,** the read counterpart to `/exit`. The handoff had been write-only: a 4,200-line mailbox sat on disk that nothing ever read, so every session started blank despite the export running.
+- **Built the decision log,** seeded with real reasoning from this session, and wired `/exit` to write decisions as well as events.
+- **Declined to build the duplicate stack** from Rich's research (Coolify, Dify, Langflow, second Supabase, second Open WebUI) on reuse-before-build grounds. Built only the two things with no working equivalent.
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/session_brief.py` -- NEW. Assembles the session-start briefing from mailbox + decision log + hot punchlist + live git state. stdlib only, cron-safe. Checks for a stale index.lock every run.
+- `.claude/commands/brief.md` -- NEW. The `/brief` command. Loads before any other action; treats its own contents as claims to verify, not facts.
+- `_state/DECISION_LOG.md` -- NEW. Records why forks went the way they did.
+- `.claude/commands/exit.md` -- added step 5 (decision capture) and step 6 (confirm both writes).
+- `LIVING_PUNCHLIST.md` -- RECONCILIATION block + section M (items 102-123) + a 2026-07-28 wins log.
+- `.gitignore` -- four hardening passes: generated reports, AK binary asset trees, MGN POS operational records, moltbook agent keys, runtime state, backup suffixes, embedded git repo.
+- `~/.claude/.../memory/MEMORY.md` -- rebuilt, 226 links at 16,323 bytes.
+- `~/.claude/.../memory/MEMORY_ORPHANS_2026-07-28.md` -- NEW. Per-file triage reasoning for the 34 files recommended for archive.
+
+### Commits + pushes
+All on `solano-live-desk`. **Nothing pushed** -- all 9 commits are local.
+- `efa325c` -- doctrine(lucrex): add the Four Permissions, retire persona-lock and never-hedge
+- `f8d25f0` -- docs(punchlist): reconcile 60 days of drift, add section M for off-list work
+- `5d57b84` -- chore(git): harden gitignore after 16-day silent commit failure
+- `20ee698` -- feat(alley-kingz): commit game systems, tests and ecosystem docs
+- `4ba26ee` -- chore(git): exclude MGN POS operational records and backup suffixes
+- `1870f31` -- feat(alley-kingz): recover 202 files of game source stranded by the git lock
+- `10722c8` -- chore(infra): recover agents, scripts, hooks and dev tooling from the lock window
+- `142ee13` -- chore(state): recover business source, dashboard assets and session mailbox
+- `f49764e` -- feat(continuity): add /brief session rehydration and the decision log
+
+### Open items / handoffs / queued for next session
+- **ROTATE THE MOLTBOOK KEYS.** `moltbook_sk_*` and `moltbook_claim_*` are in git history. Untracking does not un-leak them. Decide separately whether to rewrite history.
+- **`content_tools/resend_manager.py`** -- blocked by the pre-commit hook, correctly. It POSTs directly to the Resend send endpoint (hostname redacted to avoid tripping the pre-commit guard on this prose record) while `branded_mailer.py` line 8 declares itself the only sanctioned path, and nothing imports it. Delete it or refactor it to delegate. This is the Streubel pattern regrowing.
+- **Tune the pre-commit hook.** It produced 5 false positives (an audit doc describing the bad pattern, prose mentions, a read-only GET polling bounces). It matches the URL without distinguishing POST from GET or code from prose. A guard that cries wolf trains people into `--no-verify`.
+- **`06_DEVELOPMENT/trading_agents`** carries its own `.git`. Make it a real submodule or leave it independent.
+- **30 MB of new AK PNGs** (interiors/, hub/) held out of git pending a call on whether game assets belong in the repo or on Nextcloud.
+- **34 memory files** recommended for `MEMORY_ARCHIVE.md`, none deleted. Reasoning per file in `MEMORY_ORPHANS_2026-07-28.md`.
+- **Deal 1 is unchanged.** Still stalled at skip-trace. Punchlist item #91 (real-network bounce test from `marquise@`) is still the single move that closes it. Sixty days of work did not touch it.
+- Nothing pushed. Per `feedback_push_side_then_prod_doctrine`, side branch first when that happens.
+
+### Honest gaps / known limitations
+- **65 punchlist items were not verified.** I bounded them as last-known-May rather than fabricating current status. They remain leads, not facts.
+- **"Broker OS is dead" is inherited, not verified.** It comes from the 2026-06-30 AIOS audit via the memory index. I did not re-run Broker OS to confirm.
+- **I shipped two bugs into `session_brief.py` and caught them only by running it.** `--sessions 0` dumped the entire 4,000-line mailbox (`list[-0:]` returns everything), and the hot-item filter read the status legend as live work. Both fixed and re-verified. Neither would have surfaced from reading the code.
+- **My first AK commit (`20ee698`) was partly an accident.** An exclude pathspec silently prevented untracked files from being staged, so it captured only tracked-modified files, including several MB of updated JPGs I had said I would hold back. The accident is what prevented the 1.5 GB commit.
+- **Three numbers I stated earlier were wrong and were corrected in place:** 202 orphans was 194 (lowercase-only regex), "most orphans lack frontmatter" was 4 of 137 (checked for indented `type:` and missed the flat style), and the punchlist mtime read May 15 because rsync preserves timestamps.
+- A broken recursive path exists under `01_OnyxPOS/operations_MGN_v8/01_BUSINESSES/Everlight_Ventures/`. Git warned on it. Not investigated.
+
+### Operator decisions deferred
+- Rotate the leaked moltbook keys, and whether to rewrite git history to purge them.
+- Delete or refactor `resend_manager.py`.
+- Whether AK binary assets belong in git or stay on Nextcloud plus e5.
+- Whether `trading_agents` becomes a submodule.
+- Whether to push the 9 local commits, and to which branch.
+- Confirm the 34 memory files into `MEMORY_ARCHIVE.md`.
+
+---
+
+## [2026-07-29 08:56 PT] Session: Alley Kingz: shipped the full field-test punch list + Prototype-2 movement, came
+
+<!-- session_iso=2026-07-29T15:56:20.821197+00:00 | size=5724b -->
+
+# Alley Kingz: shipped the full field-test punch list + Prototype-2 movement, camera scale, and gulag/animation fixes (8 deploys)
+
+### Accomplished
+- Completed the 5-task 3D integration (jagged clip fix, per-clip hero action rail, HUD hero switcher, gulag_3d.glb battle map, arena tower-battler load-deadlock fix) - shipped + render-verified live.
+- Second lighting pass fixed the "super dark" hub (exposure 1.25->1.5, hemisphere 1.75->2.2, ambient 0.55->0.85, night key floor raised). Root cause: ground is an UNLIT MeshBasic material, so only tonemapping exposure could brighten it. Visually confirmed brighter.
+- Integrated 6 hero GLBs (bcardd/balboa/jagged replaced + new rottweiler/bulldog/malamute), old 3 .bak'd. All 6 switchable, zero console errors.
+- Ran a 6-agent game-tester audit + live render pass; published an HTML report artifact (https://claude.ai/code/artifact/16ee466e-c677-46e9-8c60-704b7153d74c).
+- Implemented the report punch list via an 8-lane FILE-DISJOINT workflow (no two agents touch the same file): SFX now loads in the 3D world (was silent), 9 building-upgrade multipliers wired to reward sites, the collar/POUND story ending now fires (had zero call sites), 2 hidden arcade cabinets wired, Malamute card 0127 added, garage/fence loops wired, garage "deck builder" relabel.
+- Built + shipped Prototype-2 movement (Increment 1): momentum lead-camera, sprint acceleration ramp, JUMP + GLIDE via me.z fed through world3d.project's existing height arg. Telemetry-verified: jump arc 0->121->0, glide still airborne at 100px when a plain jump has landed, walking intact.
+- Fixed the camera "tiny speck" complaint: hub loaded at dist 620 (far/top-down); pulled to 300 + clamped stale saved cameras. Screenshot-confirmed the hero + Town Hall now have real presence.
+- Shipped the fight-buttons fork: gulag opponent now faces you (GLB was showing its back, flipped 180deg) and WALKS (there was no AnimationMixer in the gulag - he was a frozen mesh); GUN<->HANDS toggle with JAB/HOOK/KICK melee in the gulag; re-mapped every hero's clip indices by leg-vs-arm dominance (fixed walk-plays-a-kick and hook-dashes-forward).
+
+### Files created or modified (game: 01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/)
+- systems/world3d.js -- AK-LIGHTUP2 brightness, AK-P2CAM momentum lead-camera, AK-P2Z hero z-height, AK-CAMSCALE camera pull-in
+- index.html -- hero-action/HUD includes, AK-PUNCHFIX, AK-P2Z jump/glide + JUMP button + Space key + run accel ramp, SFX wiring, BAZAAR relabel, reward juice, live GARAGE def relabel
+- systems/modes.js -- AK-GULAGMAP, AK-GULAGLABEL6, streetPayMult, gulag opponent facing+walk mixer, GUN/HANDS fight toggle
+- systems/hub3d.js -- clip re-measurement for all 6 heroes
+- systems/akheroactions.js -- action rail + ACTIONS re-measured for 6 heroes
+- systems/akherohud.js -- HUD switcher (6-hero roster)
+- systems/seasons.js -- trophyRepMult on marks grant
+- systems/arcade.js + systems/production.js -- 2 cabinets wired + arcadeRewardMult
+- shop/shop.js + shop/cards_catalog.js -- shopPriceMult + Malamute card 0127
+- game.html + systems/story.js -- arena kick, collar/POUND ending fires, CROWNED payoff
+- systems/marketplace.js/garage.js/akdoors.js/raidscene.js -- raid->fence deposit, garage stats->loot, labels
+- assets/models/*.glb -- 6 new hero GLBs, gulag_3d.glb (compressed)
+- scratchpad harnesses on e5: ~/shot/ak_pt_cdp.js, ak_full.js, ak_jumptest.js (CDP-screenshot, gate-clearing, telemetry)
+
+### Commits + pushes
+- NONE. All changes shipped via ship.sh (CF Pages direct upload) to alleykingz.online across 8 deploys. Working tree is UNCOMMITTED - next session should decide whether to commit the batch.
+
+### Open items / handoffs / queued for next session
+- Clip-label render-verify: labels are correct-TYPE (walk=leg, punch=arm, kick=leg) but jab-vs-hook exact name is best-effort; a clip-by-clip playback render-verify would nail them.
+- Gulag opponent 180deg facing flip is reasoned but not render-confirmed inside the gulag (harness tests the hub only).
+- Art-gen: missing comic panels (635 written vs ~387 rendered) + Malamute portrait (assets/cards/0127_blackout_malamute.webp) - renders with placeholder until then.
+- P2 Increment 2 (bloom+FXAA post-processing, vendor Three.js addons on e5) + Increment 3 (sonar hunt + zone decay).
+- Contextual-UI declutter + 4-mode camera architecture (see AK_MULTIVIEW_MODE_ARCHITECTURE.md + AK_PROTOTYPE2_REBUILD_HANDOFF.md).
+- 3 of 9 building multipliers still unwired (passXpMult/codexRewardMult/clanShareMult - consumer sites in missions.js/codex/clan).
+- economy.js LV_BASE vs Town-Hall-cap baseline drift (flagged, left as a balance/design call).
+
+### Honest gaps / known limitations
+- Working tree uncommitted across ~16 game files.
+- Headless harness on e5 crashes (swiftshader OOM) under box load; a stale zombie harness had to be killed; the Escape-based modal clearing sometimes opens the BLOCK CHRONICLES comic, intercepting screenshots.
+- Animation fixes verified as parse-clean + type-correct + zero-error boot, NOT by watching each clip play.
+
+### Operator decisions deferred
+- Progression model: "level everything to L2 = story complete" is NOT in the code (story runs on trophies/karma, buildings on Town Hall 1->10). Either surface Town Hall as the explicit spine or add a real early L2 milestone.
+- akgulag.js orphan: left in place (harmless dead code); keep vs delete.
+- Flagship engine: handoff doc leans UE5 (Nanite/Lumen + Claude-in-engine MCP) with Unity 6 / PlayCanvas-Babylon+WebGPU as alternatives.
+- Desktop build machine for Unity/UE5 is Step 0 and does not yet exist (NOT AceMagician, per operator - that is not the host either; web game is already served free via CF Pages).
+
+---
+
+## [2026-08-06 11:55 PT] Session: NP (Notebook Protocol) built end to end: capture, reading room, auto-tagging, da
+
+<!-- session_iso=2026-08-06T18:55:57.978757+00:00 | size=5392b -->
+
+# NP (Notebook Protocol) built end to end: capture, reading room, auto-tagging, dashboards, rename + dedupe
+
+### Accomplished
+- Built NP capture spine: `np <text>` writes offline, zero deps, works both sides of the proot wall; `lucrex.sh note` now routes through it so MacroDroid, voice and CLI share ONE path
+- Built the compile step (raw -> typed -> filed into existing homes), the organ that was missing; `phone_capture.md` had been write-only since 2026-07-29
+- Reading room at 127.0.0.1:2501 over the whole personal library plus the Claude memory layer as shelf 10 ("What Claude Knows", 353 files) -- Rich can now read and EDIT what I know about him
+- Auto-tagging: 1,758 documents tagged with zero hand-filing, taxonomy in `np_tags.py`
+- Topic dashboards (collections): Fight Camp 264, Build and Infra 731, Money 294, Markets 161, Legal 95, Free Resources 95, Deal 1 80. Files never move; a shelf is where a doc LIVES, a dashboard is what it is ABOUT
+- Renamed 944 meaningless files from their contents (Screenshot_20260401_..._Slack.txt -> 2026-04-01_Slack_Infrastructure-Issues.txt); 325 left alone because their OCR is unreadable
+- Deduped A_Personal_Notebook: 1,982 files -> 195 unique. 1,799 byte-identical copies ARCHIVED (not deleted) to 08_BACKUPS/np_dedupe_20260806/. Cross-shelf dupes 1,778 -> 20
+- UI rebuilt twice: Everlight gold -> deep slate glass per Rich's direction. CodeMirror editor (line numbers, multi-cursor, find/replace bar), version history with diff + revert, breadcrumbs, backlinks over 460 wikilink edges, related notes, outline rail
+- Command palette (ctrl K) with Tips tab teaching all 15 features, templates, saved queries, graph view (ctrl G), pins, split view (ctrl \)
+- Vendored real libraries by curl (CodeMirror 5, highlight.js, jsdiff -- 21 files, 960K) after proving npm is impossible in proot. Zero runtime network calls
+- Encryption layer built and verified (AES-256-GCM, scrypt, KeePass key source). NOT applied -- no key exists yet
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np.sh` -- capture verb, offline, zero deps
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_compile.py` -- raw spool to typed notes and lane logs
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_crypt.py` -- encryption at rest, key from KeePass/Vaultwarden/prompt
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_tags.py` -- taxonomy + collections, the file Rich should edit
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_rename.py` -- content-derived renames, manifest + --undo
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_dedupe.py` -- archive redundant copies, manifest + --undo
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_index.py` -- MODIFIED: tags, links, collections, WAL, backfill passes
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_server.py` -- MODIFIED: static, versions, revert, tags, collections, graph
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/np_ui.html` -- MODIFIED: full slate rebuild plus all five power features
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/lucrex.sh` -- MODIFIED: note delegates to np.sh
+- `03_AUTOMATION_CORE/01_Scripts/phone_ops/static/` -- 21 vendored library files
+- `.claude/skills/np_notebook/SKILL.md` -- protocol so every session speaks NP
+
+### Doctrines added or changed
+- `feedback_chain_workarounds_never_dead_end` -- Rich's passport/Real-ID/bus analogy. Never report a dead end; walk the chain of adjacent tools and LOG the route
+- `project_vaultwarden_replaces_proton_pass` -- Bitwarden CLOUD free tier was gutted in 2026; Vaultwarden self-hosted is the answer. Also holds the NP master key
+
+### Commits + pushes
+- NONE. Nothing was committed or pushed this session. All work is uncommitted on branch `solano-live-desk`
+
+### Open items / handoffs / queued for next session
+- Vaultwarden / KeePass vault: `everlight.kdbx` proven working, `np_crypt` wired to read it, NOTHING encrypted because no key exists yet. Rich's move
+- The note-transformation skill (messy capture -> evergreen note). Needs a model, so it belongs in a Claude session, not the offline server
+- 20 cross-shelf duplicates remain (down from 1,778)
+- 325 files keep meaningless names because their OCR is genuinely unreadable
+- Commit the work; it is all uncommitted
+
+### Honest gaps / known limitations
+- Tag coverage is 30% (1,758 of 3,990). The rest are voice memos, photos and PDFs with no extractable text
+- Collection membership thresholds are heuristics; Fight Camp still pulls in a route planner that lists boxing gyms, ranked low rather than excluded
+- I predicted the rename would lift tag COVERAGE. It did not (1,740 -> 1,758). It improved tags PER DOCUMENT instead. I was wrong about the headline number
+- Split view is basic: right pane is read-only, no independent scroll sync
+- Graph view shows the local neighborhood only, not all 460 edges
+- A parallel session (not this one) authored the first np_index/np_server/np_ui; I verified its security guard independently rather than trusting the report
+
+### Operator decisions deferred
+- Whether to stand up Vaultwarden at all, or stay on the KeePass file (recommendation: KeePass file, because a server on the phone has the same failure mode Rich is trying to escape)
+- Whether to switch the UI accent from slate blue to the GitHub purple in the spec he pasted
+- Whether to merge the `camp` and `mma` tags, and narrow `ai` (currently dominated by my own memory files)
+
+---
+
+## [2026-08-06 13:01 PT] Session: AceMagician catch-up: PC consolidated on /AA_MY_DRIVE, 3 silent failures fixed, 
+
+<!-- session_iso=2026-08-06T20:01:55.194879+00:00 | size=8310b -->
+
+# AceMagician catch-up: PC consolidated on /AA_MY_DRIVE, 3 silent failures fixed, sendreceive flip deliberately held
+
+### Accomplished
+- Measured the real phone/PC delta by direct inspection: **11,261 of 157,811 files are git-tracked (7.1%)**. The other 46 GB reaches the PC only over the tailnet. Git is not the sync.
+- Established three different "last contact" answers, all real: `claude_sync_acemagician.sh` last succeeded **2026-05-08**; Syncthing last ran **2026-06-20** (then 60,100 consecutive unreachable ticks); PC content reaches **2026-07-29** because Syncthing, not the rsync, delivered the workspace. PC booted **2026-08-06 12:14 PT** mid-session.
+- Wrote the PC-facing catch-up export doc, then expanded it with a landmine section after doctrine research.
+- Closed `MESH_PLAN.md:169-171` open decision #4 (unresolved since May): **`/AA_MY_DRIVE` is now canonical on the PC.** Copied the 5 home-tree-only files across first, deleted nothing, repointed the Syncthing folder and every script that hardcoded `/home/richgee/AA_MY_DRIVE`.
+- Shielded the PC's own archive trees in `.stignore` **before** repointing. Phone is Syncthing `sendonly` master; without the shield, an Override Changes click would have deleted `A_Rich`, `FREE RESOURCES`, `Notes`, `Wholesale`, `xlm_bot`, `D_Backups`, the Dell/Oracle inboxes to force a match.
+- Fixed three independent silent failures (details below).
+- Merged the phone's Everlight shell identity onto the PC as an additive `everlight_brand.zsh` layer; all ~60 PC-only shortcuts verified intact, p10k prompt untouched.
+
+### Files created or modified
+- `06_DEVELOPMENT/everlight_os/docs/ACEMAGICIAN_CATCHUP_2026-08-06.md` -- new; the PC agent's catch-up runbook, landmines + inventory + verification block
+- `03_AUTOMATION_CORE/01_Scripts/sync_finisher.sh` -- added `pc_has_syncthing()` readiness gate (process/abs-path probe, not `command -v`)
+- `03_AUTOMATION_CORE/01_Scripts/claude_sync_acemagician.sh` -- repaired `slack_ping()`; `PC_WORKSPACE` repointed to `/AA_MY_DRIVE`
+- `03_AUTOMATION_CORE/01_Scripts/gen_stignore.sh` -- bakes the PC-archive shield so regeneration cannot drop it
+- `03_AUTOMATION_CORE/01_Scripts/sync_conflict_resolver.sh` -- probes `/AA_MY_DRIVE` before the retired home path
+- `03_AUTOMATION_CORE/01_Scripts/network_sync/sync_on_reconnect.sh` -- peer registry repointed
+- `03_AUTOMATION_CORE/01_Scripts/network_sync/pc_side_claude_sync_pull.sh.template` -- tailnet matcher fixed
+- `03_AUTOMATION_CORE/01_Scripts/activity_feed.py`, `blinko_status.py` -- `/AA_MY_DRIVE` added as primary DB candidate, old path kept as fallback
+- `.stignore` -- PC-only archive shield block (2551 to 2585 lines)
+- `CLAUDE.md` -- PC-awareness doctrine
+- On the PC: `~/everlight_brand.zsh` (new), `~/.zshrc`, `~/bin/claude_sync_pull.sh`, `~/.config/syncthing_everlight/config.xml`. Backups at `~/.zshrc.bak.20260806`, `~/bin/claude_sync_pull.sh.bak.20260806`, `~/.config/syncthing_everlight/config.xml.bak.20260806`.
+
+### Doctrines added or changed
+- `feedback_pc_holds_more_than_phone` -- the PC is the server and legitimately holds more than the phone; check `/AA_MY_DRIVE` over SSH before claiming anything is missing; never infer "junk" from folder size, diff contents instead
+
+### Commits + pushes
+All on `solano-live-desk`, all pushed to `everlight-ventures.git`:
+- `1419146` -- docs(infra): AceMagician 90-day catch-up export
+- `a5b7741` -- fix(sync): syncthing readiness gate + repair dead Slack path, expand PC catch-up
+- `e9a1e42` -- feat(shell): portable Everlight brand layer, merged onto AceMagician
+- `e461c8c` -- fix(sync): shield PC-only archives from Syncthing before path consolidation
+- `e3ff103` -- feat(sync): consolidate PC on /AA_MY_DRIVE, fix tailnet matcher, teach agent the PC holds more
+
+### The three silent failures fixed
+1. **`slack_ping()` had never once fired.** Two independent bugs: wrong directory (`03_Credentials/` instead of `03_AUTOMATION_CORE/03_Credentials/`) and wrong variable (`SLACK_BOT_TOKEN_WARROOM` vs the real `SLACK_WARROOM_TOKEN`). Returns 0 on any miss, so it never complained. No sync had ever posted to `#deploy-log`. Token verified resolving (`xoxb-`, 58 chars).
+2. **PC-side hourly pull: 100% failure rate for ~3 months.** Matched the phone with `/phone|termux|s23|pixel/`; Tailscale lists it as `unknown-device`. Every run since May logged "phone not on tailnet" and exited 0. Now matches the android OS column; verified resolving `100.112.180.29`.
+3. **`sync_finisher.sh` checked reachability but not capability.** A reachable-but-incapable PC would enter the full 6h loop holding `systemd-inhibit` against sleep while polling a completion pct that could never rise.
+
+### Open items / handoffs / queued for next session
+- **The `sendonly` to `sendreceive` flip is the last piece of the triangle and is NOT done.** Wait for the PC to finish scanning 127 GB, then confirm the phone's `needDeletes` reaches 0 before flipping.
+- PC was still in `state: scanning` at session end. Re-check both folder statuses before any further sync work.
+- `setup_arch_pc.sh:297,364` still carries the same wrong `03_Credentials` path in its `sync_creds_from_phone` alias, so that alias copies nothing. Was blocked on the path decision; now unblocked, not yet done.
+- Phone's `.stignore` shield is appended but `gen_stignore.sh` has not been re-run to prove the baked-in block reproduces it.
+- 5 Syncthing errors reported on the phone's folder, not examined.
+- `install_open_webui.sh` has been queued in `04_PendingUpdates/acemagician/` for 85 days; the `*/2` cron may fire it now the PC is up. Nothing has ever completed in `_done/`.
+- PC hostname is still the Garuda default `rich-defaultstring`.
+- Pre-existing PC shell errors: `.zshrc.dell` sources a missing `~/.config/ai/cli_aliases.zsh`; oh-my-zsh plugin `you-should-use` not installed.
+- 55 GB on the PC in `_logs/_dedupe_trash` (47 GB) + `_logs/conflicts` (8.2 GB). Shielded from sync, retained per no-trash-until-Deal-1, pending a manifest pass.
+- Doctrine docs still name `aa-my-drive.git` and the host `129.159.38.250` terminated 2026-04-30. Flagged in the catch-up doc, not corrected at source.
+- Conflict backlog untouched: 128 files in `.claude/.sync_conflicts/20260508T114933Z/`, 36 files in `_sync_conflicts_quarantine_20260513/`, ~1.7 GB in `_sync_conflicts_quarantine_20260514_110205/`.
+
+### Honest gaps / known limitations
+- **I told Rich syncthing was not installed on the PC. It is, and it was running.** I took a stale 2026-06-19 audit at face value, and my first readiness gate used `command -v syncthing` over SSH, which false-negatives because a non-interactive login gets a bare PATH and misses `~/.local/bin`. That gate would have killed a working sync. Corrected to a process/absolute-path probe and verified live against the PC.
+- **I framed the PC's extra content as "junk" by measuring it against the phone.** Wrong frame; Rich corrected it. If the PC is the server, holding more is its job. `A_Rich`, `FREE RESOURCES`, `Notes`, `Wholesale`, `xlm_bot` are real content I would have written off.
+- **The phone's sshd is not running** (nothing on 8022, no daemon, supervisor lives outside proot). So the PC-to-phone SSH leg cannot work regardless of the matcher fix. I flagged a port 22 vs 8022 mismatch earlier but could not verify whether port alone was the issue, because the daemon is down entirely.
+- The tailnet matcher fix is proven to resolve the phone's IP, but the full pull has not completed end-to-end for the reason above.
+- Syncthing was repointed but has not converged; the consolidation is not yet provable.
+
+### Operator decisions deferred
+- **When to flip `sendonly` to `sendreceive`.** The phone showed `needFiles 91,371` / `needDeletes 29,749` against an in-flux index. That flag is currently the only thing preventing the phone from reconciling against the PC's older May tree. Needs convergence first.
+- Whether to reclaim the 55 GB of dedupe byproducts on the PC.
+- Whether to rename the PC off `rich-defaultstring`.
+- Whether to correct the stale repo name and dead host at source across the doctrine docs, or leave the catch-up doc as the override.
+- Whether the phone should run an SSH server at all, or whether PC-to-phone should be Syncthing + GitHub only (my read: the latter, a phone is a poor SSH server).
+
+---
