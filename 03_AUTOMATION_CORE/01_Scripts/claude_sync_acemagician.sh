@@ -121,12 +121,35 @@ RSYNC_EXCLUDES=(
 )
 
 # Common rsync flags. -a = archive (perms, times, recursive). -z compress.
-# --backup + --backup-dir = the receiver tucks the older copy into a quarantine
-# dir before overwriting (only triggers when --update lets a transfer happen).
-# --update = skip if dest is newer (this is the merge policy).
+# --backup = the receiver tucks the older copy aside before overwriting.
+#
+# 2026-08-06 -- REPLACED --update WITH --checksum. This was the root cause of
+# the phone/PC drift, and it is not obvious, so read before "fixing" it back.
+#
+# The sdcard is a FUSE mount that does NOT advance mtime on write. Measured:
+# CLAUDE.md was edited twice, grew to 26,897 bytes, and its mtime stayed
+# frozen at 2026-05-16 until an explicit `touch` moved it. Every file Rich
+# edits on the phone therefore still LOOKS three months old.
+#
+# --update means "skip if the destination is newer". On frozen mtimes that
+# produced two failures at once, in opposite directions:
+#   push (phone -> PC):  phone files look old  -> PC looks newer -> SKIPPED.
+#                        Nothing ever transferred. The 3-month doctrine gap.
+#   pull (PC -> phone):  phone files look old  -> PC always wins -> phone
+#                        gets CLOBBERED by stale PC copies. Actively unsafe.
+#
+# --checksum compares content hashes and ignores mtime entirely, which is the
+# only correct comparator when one side's clock cannot be trusted. Cost is a
+# hash of both sides, negligible here: this script moves .claude/ plus a
+# handful of dotfiles, single-digit MB, not the 46 GB workspace.
+#
+# Conflict semantics after this change: --sync runs pull then push, so on a
+# genuine two-sided edit the phone's content lands last and wins. That matches
+# the standing doctrine that the phone is source of truth. --backup keeps the
+# overwritten copy either way, so nothing is destroyed.
 RSYNC_BASE_FLAGS=(
   -avz
-  --update
+  --checksum
   --backup
   --partial
   --human-readable

@@ -188,6 +188,21 @@ The PC also carries the heavy roles the phone cannot: Nextcloud (replacing Proto
 
 **The data triangle:** phone ↔ GitHub ↔ PC. Git owns version-controlled files. Syncthing carries only untracked data. They never touch the same file, which is what prevents conflict storms. That contract is written at the top of `.stignore` and is enforced by `gen_stignore.sh`.
 
+**MAILBOX READ-STATE (added 2026-08-06, HARD LAW):**
+`_state/AGENT_MAILBOX.md` is read AND written by **every** agent on **every** device, not just this one. It is the accountability record: when one machine claims work shipped, the other machine's mailbox entry is how that gets verified. A claim with no mailbox entry behind it is unverified.
+
+Every device carries its own read watermark in `_state/mailbox_readstate.json`, so an agent knows exactly where it left off instead of re-reading 450 KB or skipping it entirely:
+
+```bash
+python3 03_AUTOMATION_CORE/01_Scripts/mailbox_readstate.py --status       # am I behind?
+python3 03_AUTOMATION_CORE/01_Scripts/mailbox_readstate.py --catch-up     # read unread, then mark
+python3 03_AUTOMATION_CORE/01_Scripts/mailbox_readstate.py --all-devices  # who across the fleet is behind
+```
+
+Exit code is **2** when unread entries exist and **0** when current, so a session hook can branch on it. **Run `--status` at session start on any device; run `--catch-up` before acting on anything cross-device.** The watermark stores a hash of the last-read entry, so if the mailbox is ever edited in place rather than appended, the tool detects it and re-reads from the top instead of silently skipping.
+
+Devices are keyed by workspace path, not hostname, because the AceMagician still reports the Garuda default `rich-defaultstring` and proot hostnames are generic.
+
 **Standing caution:** the phone's Syncthing folder is `sendonly` deliberately. As of 2026-08-06 the phone shows ~29,700 pending deletes against the in-flux global index. **Do not flip it to `sendreceive`** until the PC has fully converged on `/AA_MY_DRIVE` and that count reaches zero. Flipping early makes the phone reconcile against the PC's older May tree and destroy current work.
 - **Phone** (Termux + proot Debian on sdcard): workspace SOT, control plane only, NEVER a cron host.
 - Blinko RAG: `http://e5-mother:1111` (tailnet) — populated from `_logs/blinko_lite.db` via `blinko_restore_from_lite.py` (614 notes Mar-Apr).
