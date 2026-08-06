@@ -84,6 +84,14 @@ SYNC_EXTRAS=(
   "/root/.emacs.d/lisp/lucrex-dashboard.el|~/.emacs.d/lisp/lucrex-dashboard.el"
   "/root/.zshrc|~/.zshrc"
   "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/everlight_shell.zsh|~/everlight_shell.zsh"
+  # Portable brand layer (added 2026-08-06). Palette + banner + dashboard
+  # bands, host-agnostic. Safe to push anywhere: every alias/function it
+  # defines is guarded, and it never touches PROMPT. The AceMagician sources
+  # it as the LAST line of ~/.zshrc so p10k and the PC-local shortcuts win.
+  # NOTE: everlight_shell.zsh above stays phone-only in practice (termux,
+  # proot and /mnt/sdcard assumptions); everlight_brand.zsh is the half that
+  # was split out to travel.
+  "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/everlight_brand.zsh|~/everlight_brand.zsh"
   "/root/.config/fastfetch/config.jsonc|~/.config/fastfetch/config.jsonc"
   "/root/.config/starship.toml|~/.config/starship.toml"
   # Agent mailbox -- the family coordination board. Lives in _state/, outside

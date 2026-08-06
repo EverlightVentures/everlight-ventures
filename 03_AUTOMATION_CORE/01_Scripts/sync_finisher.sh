@@ -91,12 +91,27 @@ pc_completion() {
 
 # ---- helper: does the PC actually have syncthing? ----
 # Cached per-run: one SSH round trip, not one per poll cycle.
+#
+# Do NOT use `command -v syncthing` here. A non-interactive `ssh host "cmd"`
+# runs with a bare PATH (/usr/local/sbin:/usr/local/bin:/usr/bin) because
+# .zshrc/.profile are not sourced. The PC's syncthing lives in
+# ~/.local/bin/syncthing, so `command -v` reports MISSING on a machine where
+# it is installed AND actively running. Verified 2026-08-06: command -v said
+# not-installed while pgrep counted 2 live processes.
+#
+# Probe order: live process first (strongest signal), then absolute paths.
 _pc_st_checked=""; _pc_st_result=1
 pc_has_syncthing() {
   if [ -z "$_pc_st_checked" ]; then
     _pc_st_checked=1
     if timeout 15 ssh -i "$PC_KEY" -o ConnectTimeout=8 -o StrictHostKeyChecking=no \
-         "$PC_USER@$PC_IP" "command -v syncthing" >/dev/null 2>&1; then
+         "$PC_USER@$PC_IP" \
+         'pgrep -x syncthing >/dev/null 2>&1 && exit 0
+          for b in "$HOME/.local/bin/syncthing" /usr/bin/syncthing \
+                   /usr/local/bin/syncthing /opt/syncthing/syncthing; do
+            [ -x "$b" ] && exit 0
+          done
+          exit 1' >/dev/null 2>&1; then
       _pc_st_result=0
     fi
   fi
