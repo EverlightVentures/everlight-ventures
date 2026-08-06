@@ -4668,3 +4668,124 @@ Fixed in commit `a51156b`: `--update` replaced with `--checksum`, which compares
 It reaches you on your next `git pull` from `aa-my-drive.git`. Until you run it, your watermark reads `never`. Run `--status` at session start and `--catch-up` before acting cross-device. Both are now hard law in `CLAUDE.md`.
 
 ---
+
+## [2026-08-06 14:03 PT] Session: ADDENDUM TO HANDOFF: Samsung DeX desktop look on KDE Plasma 6 (PC-side task)
+
+<!-- session_iso=2026-08-06T21:03:43.786891+00:00 | size=3401b -->
+
+# ADDENDUM TO HANDOFF: Samsung DeX desktop look on KDE Plasma 6 (PC-side task)
+
+Rich added this to the handoff because the terminal-look upgrade and the desktop-look upgrade are one job, not two. Full runbook is at `06_DEVELOPMENT/everlight_os/docs/DEX_KDE_LOOK_HANDOFF.md`.
+
+### What it is
+
+Configure KDE Plasma 6 + KWin on the AceMagician to visually and functionally replicate Samsung DeX: bottom panel with centered app icons, expandable app-folder widgets, a full categorized app drawer, right-aligned system tray, minimize-all, clean minimal chrome.
+
+**Execution belongs to the PC session.** The phone cannot do this; it needs a live KDE session.
+
+### Three collisions on THIS machine, read before Phase 1
+
+1. **KDE global shortcuts were rebound on this PC today at 13:24 PT.** Recorded in `DECISION_LOG.md` as "Rebind KDE global shortcuts to match Rich's cheatsheet (not the reverse)." The DeX work touches `~/.config/kglobalshortcutsrc`. **Do not overwrite it.** Back it up, edit only the specific keys needed. Losing that rebind loses a deliberate same-day decision.
+
+2. **The shell/terminal look was merged onto this PC today.** `~/everlight_brand.zsh` is sourced as the last line of `~/.zshrc`, after oh-my-zsh and p10k. Backup at `~/.zshrc.bak.20260806`. DeX is the *desktop* layer and sits alongside it. If a theme change alters terminal colors, verify the Everlight palette still renders before calling a phase done.
+
+3. **Transparency is a hard constraint, not a preference.** Rich has been explicit that current transparency must survive. Any step that resets it is a failure, not a side effect. Phase 5 of the runbook exists solely for this. Verify, do not assume.
+
+### Palette boundary
+
+DeX blue `#0073E6` is the **desktop** accent. The Everlight palette (gold `#D4AF37`, dark `#0A0A0A`, light text `#E8E8E8`) stays the **terminal and branded-output** palette, single source of truth in `content_tools/report_template.py`. Do not bleed Samsung blue into terminal themes or any branded render.
+
+### Non-negotiables from the runbook
+
+- Back up all four config files first: `plasma-org.kde.plasma.desktop-appletsrc`, `kwinrc`, `kglobalshortcutsrc`, `Kvantum/kvantum.kvconfig`. Do not overwrite those backups later.
+- **Do NOT change the Global Theme.** It overrides panel transparency, Kvantum settings and color schemes in one move. Change only Icon Theme, Cursor Theme, Window Decorations.
+- Do NOT reinstall or reconfigure Kvantum.
+- When editing the panel config, touch only the `launchers=` line. Never replace the whole file.
+- `sudo` on this box needs a password, so package installs are operator-gated. If a prompt blocks an unattended run, stop and report rather than working around it.
+
+### Acceptance test
+
+Not "it looks like DeX." All five must pass:
+1. Panel opacity still at the preferred value
+2. Kvantum app transparency untouched (check Dolphin and a browser)
+3. Blur still enabled at previous strength
+4. Terminal still renders the Everlight brand layer with the p10k prompt
+5. The 13:24 KDE shortcut rebind still works
+
+Rollback commands are in Phase 8 of the runbook.
+
+### Delivery note
+
+This file reaches the phone via Syncthing/rsync, not by git push. The two machines commit to different repos by design: `aa-my-drive.git` on the PC (master, personal plus business), `everlight-ventures.git` on the phone (business only). Report results back through this mailbox.
+
+---
+
+## [2026-08-06 14:14 PT] Session: ADDENDUM: viewing the phone's dashboards from the AceMagician
+
+<!-- session_iso=2026-08-06T21:14:15.135930+00:00 | size=4238b -->
+
+# ADDENDUM: viewing the phone's dashboards from the AceMagician
+
+Rich asked whether the dashboard links on his phone can be viewed from the PC. **Answer: not today, but the fix is small and the better route needs no new infrastructure.**
+
+### Measured state, 2026-08-06
+
+9 of 10 dashboards are live **on the phone**, all bound to `127.0.0.1`:
+
+| Port | What | Phone |
+|---|---|---|
+| 2000 | Master Hub (start here) | UP |
+| 2100 | XLM Bot dashboard | DOWN (XLM is parked) |
+| 2200 | Reports Hub, `/reports/`, `/dashboards/` | UP |
+| 2300 | Intel Center static, `/clients.html`, `/resources.html` | UP |
+| 2301 | OSINT FastAPI, `/api/docs` | UP |
+| 2400 | Alley Kingz prototype `/game_v6.html` | UP |
+| 2500 | MMA Fight Camp, `/05_Fitness/` | UP |
+| 2700 | Blinko RAG lite | UP (404 at root, expected) |
+| 2701 | MCP HTTP bridge `/healthz` | UP |
+| 2702 | Lucrex Command Deck | UP |
+
+Verified from the PC: `http://100.112.180.29:2000/`, `:2200`, `:2300` are all **UNREACHABLE**. Also verified the PC currently serves **nothing** on its own 2000 band. So neither machine can see the other's dashboards right now.
+
+Cause is not a bug. It is the Network Binding Doctrine working as designed: private by default, `127.0.0.1` unless deliberately overridden.
+
+### Route A (RECOMMENDED): run the band on the PC itself
+
+The PC already has the identical scripts and workspace via Syncthing. It is also far more powerful than the phone and is the intended 24/7 server.
+
+```bash
+# on the PC
+cd /AA_MY_DRIVE
+bash 03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh
+```
+
+That one launcher owns the whole band (`serve_master_hub.sh` for 2000, `serve_local_reports.sh` for 2200, `everlight_themed_server.py` for 2300, and so on).
+
+**Why this is the right answer:** the `links` and `menu` shell functions were merged onto the PC earlier today and point at `127.0.0.1`. On the PC that resolves to the PC's own services. So **the same menu works on both machines with zero config divergence**, each showing its own local stack. Nothing to maintain, nothing to keep in sync, no exposure added.
+
+Caveat: services that are genuinely phone-bound (anything reading Termux APIs or phone sensors) will not come up on the PC. Everything reading workspace files will. Expect 2000 / 2200 / 2300 / 2400 / 2500 to work; check 2301 / 2700 / 2701 individually.
+
+### Route B: expose the phone's band over the tailnet
+
+For anything that must stay phone-local. `EV_BIND` is the doctrine's sanctioned override and is already wired into the serve scripts (`serve_local_reports.sh:33`, `serve_lucrex.sh:23`, `code_server_daemon.sh:9`).
+
+```bash
+# on the phone, restart the service with the override
+EV_BIND=0.0.0.0 bash 03_AUTOMATION_CORE/01_Scripts/serve_master_hub.sh start
+```
+
+Then from the PC browse `http://100.112.180.29:2000/`.
+
+**Exposure note:** `0.0.0.0` binds every interface, not just the tailnet. On a phone that joins coffee-shop and airport wifi that is a real surface. Per least-exposure doctrine, prefer Route A, and if Route B is used, turn it on per-service for as long as it is needed rather than leaving it on by default.
+
+### Route C: SSH tunnel (BLOCKED, do not attempt)
+
+The classic answer would be `ssh -L 2000:127.0.0.1:2000` from the PC. **It cannot work.** The phone's sshd is not running: nothing listens on 8022, there is no daemon process, and the runit supervisor lives outside proot where a session there cannot reach it. Confirmed today. Do not spend time on this route until the phone's sshd is deliberately brought up as a supervised service, which is itself an open question (a phone is a poor SSH server: it sleeps, Android reaps processes, and it registers on the tailnet as `unknown-device`).
+
+### Recommendation
+
+Run Route A on the PC. It gives Rich the same `links` menu on both machines, adds zero network exposure, puts the load on the machine built for it, and needs no new code. Keep Route B in reserve for genuinely phone-bound services only.
+
+**Open task for the PC session:** run `dashboards_watchdog.sh` on the PC, then report which ports came up and which are phone-only, so the split can be recorded. Note the shell layer's service pills currently render red on the PC precisely because none of these are running there yet.
+
+---
