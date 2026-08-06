@@ -38,7 +38,12 @@ PC_USER="richgee"
 PC_HOST="100.93.253.49"             # Tailnet IP
 PC_HOST_NAME="acemagician-pc.tailfeeb43.ts.net"
 PC_KEY="/root/.ssh/phone_to_arch"
-PC_WORKSPACE="/home/richgee/AA_MY_DRIVE"
+# 2026-08-06: consolidated to /AA_MY_DRIVE. The PC held two divergent trees
+# (MESH_PLAN.md:169-171 open decision #4, unresolved since May). /AA_MY_DRIVE
+# won: it is the server tree, holds the archives the phone never had
+# (A_Rich, FREE RESOURCES, Notes, Wholesale, xlm_bot, D_Backups, the Dell and
+# Oracle inboxes), and is where the PC's own shell already pointed (EL_HOME).
+PC_WORKSPACE="/AA_MY_DRIVE"
 
 PHONE_WORKSPACE="/mnt/sdcard/AA_MY_DRIVE"
 PHONE_CLAUDE="${PHONE_WORKSPACE}/.claude"

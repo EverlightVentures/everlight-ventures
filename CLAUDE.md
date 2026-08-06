@@ -171,7 +171,24 @@ Infrastructure (reality as of 2026-05-11, post-mother-dead audit):
 - **Oracle Micro** (xlm-bot host, public IP 163.192.19.196, hostname `xlm-bot`): ONLY runs `xlm-bot.service` and `xlm-ws.service`. Nothing else. Doctrine previously over-claimed.
 - **e5-mother** (NEW Ampere ARM 4 OCPU / 16-18 GB, tailnet-only): hosts Blinko RAG + agentmemory MCP + Open WebUI + hive-voice. Provisioning kit at `03_AUTOMATION_CORE/01_Scripts/e5_mother/`. The dead "mother" at `129.159.38.250` is replaced by this. Reach via `ssh e5-mother` (tailnet) or `ssh e5-mother-public` (port 2222 break-glass).
 - **ev-box** (planned, Ampere ARM 2 OCPU / 8 GB, tailnet-only): ops control plane, DFIR-lite, cron migration target. Scripts at `03_AUTOMATION_CORE/01_Scripts/ev_box/`. Not yet launched.
-- **AceMagician PC** (Arch Linux, tailnet 100.93.253.49): peer cache. Bidirectional sync via `03_AUTOMATION_CORE/01_Scripts/claude_sync_acemagician.sh`. Phone-boot one-shot + PC-side hourly cron at :17.
+- **AceMagician PC** (Garuda/Arch, tailnet 100.93.253.49, user `richgee`): **NOT a peer cache. It is the server and it holds MORE than the phone.** Canonical workspace is **`/AA_MY_DRIVE`** (127 GB), consolidated 2026-08-06. Sync via `claude_sync_acemagician.sh` + Syncthing folder `everlight-workspace`.
+
+**PC-AWARENESS DOCTRINE (added 2026-08-06, HARD LAW):**
+The phone is where Rich works. The PC is where the mass of the work *lives*. Never assume the phone's copy is the whole picture. Before claiming a file, project, or dataset does not exist, **check the PC**:
+
+```bash
+ssh -i /root/.ssh/phone_to_arch richgee@100.93.253.49 'ls /AA_MY_DRIVE/...'
+ssh -i /root/.ssh/phone_to_arch richgee@100.93.253.49 'grep -rl "term" /AA_MY_DRIVE/...'
+```
+
+Content that exists ONLY on the PC and will never be on the phone (shielded in `.stignore` on purpose, per the archive-shield block):
+`A_Rich/` · `FREE RESOURCES/` · `Notes/` · `Wholesale/` · `xlm_bot/` · `D_Backups/` · `_dell_inbox_2026-05-04/` (15 GB) · `_phone_inbox_2026-05-04/` · `_oracle_e5_recovery/` · `_audit/` · `_audit_repo/` · `_uploads/`
+
+The PC also carries the heavy roles the phone cannot: Nextcloud (replacing Proton Drive), the Alley Kingz 3D pipeline, site hosting, and eventually 24/7 server duty. Anything 3D, media-heavy, npm-compiling, or GPU/CPU-bound belongs on the PC. Proot on the phone cannot do those.
+
+**The data triangle:** phone ↔ GitHub ↔ PC. Git owns version-controlled files. Syncthing carries only untracked data. They never touch the same file, which is what prevents conflict storms. That contract is written at the top of `.stignore` and is enforced by `gen_stignore.sh`.
+
+**Standing caution:** the phone's Syncthing folder is `sendonly` deliberately. As of 2026-08-06 the phone shows ~29,700 pending deletes against the in-flux global index. **Do not flip it to `sendreceive`** until the PC has fully converged on `/AA_MY_DRIVE` and that count reaches zero. Flipping early makes the phone reconcile against the PC's older May tree and destroy current work.
 - **Phone** (Termux + proot Debian on sdcard): workspace SOT, control plane only, NEVER a cron host.
 - Blinko RAG: `http://e5-mother:1111` (tailnet) — populated from `_logs/blinko_lite.db` via `blinko_restore_from_lite.py` (614 notes Mar-Apr).
 - agentmemory MCP: `http://e5-mother:3108` (tailnet).

@@ -38,7 +38,12 @@ log() { printf '[%s] %s\n' "$(ts)" "$*" | tee -a "$LOG"; }
 # ----- 1. Find phone on tailnet -----
 # Looking for the phone hostname or its known tailnet IP. Adjust if you renamed it.
 PHONE_TS_IP="$(tailscale status 2>/dev/null \
-  | awk '/phone|termux|s23|pixel/ && /100\./ {print $1; exit}')"
+  | awk '$1 ~ /^100\./ && $0 ~ /android/ {print $1; exit}')"
+# 2026-08-06: matched on /phone|termux|s23|pixel/ until today. The phone does
+# not advertise any of those -- Tailscale lists it as `unknown-device`. Every
+# run since install logged "phone not on tailnet" and exited 0, so this leg
+# had a 100% silent failure rate for ~3 months. Match the OS column instead:
+# android is unambiguous on this tailnet. Verified resolving 100.112.180.29.
 
 if [[ -z "$PHONE_TS_IP" ]]; then
   log "phone not on tailnet (no peer matched) -- skipping this tick"

@@ -25,10 +25,14 @@ set -euo pipefail
 # --- Locate workspace --------------------------------------------------------
 # Workspace lives on sdcard on phone, mounted differently on PC.
 # Auto-detect: try phone path first, then PC paths.
+# 2026-08-06: /AA_MY_DRIVE is now the canonical PC tree and must be probed
+# BEFORE the legacy /home/richgee one, which is being retired.
 if [ -d "/mnt/sdcard/AA_MY_DRIVE" ]; then
     WORKSPACE="/mnt/sdcard/AA_MY_DRIVE"
+elif [ -d "/AA_MY_DRIVE" ]; then
+    WORKSPACE="/AA_MY_DRIVE"
 elif [ -d "/home/richgee/AA_MY_DRIVE" ]; then
-    WORKSPACE="/home/richgee/AA_MY_DRIVE"
+    WORKSPACE="/home/richgee/AA_MY_DRIVE"   # legacy, retired 2026-08-06
 elif [ -d "$HOME/AA_MY_DRIVE" ]; then
     WORKSPACE="$HOME/AA_MY_DRIVE"
 else

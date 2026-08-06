@@ -18,7 +18,7 @@ Local fallback locations checked (first found wins):
   - /mnt/sdcard/AA_MY_DRIVE/_state/blinko_lite.db        (phone canonical)
   - /mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.db         (phone legacy)
   - /home/ubuntu/e5_data/blinko_lite.db                  (on e5-mother itself)
-  - /home/richgee/AA_MY_DRIVE/_state/blinko_lite.db      (PC canonical)
+  - /AA_MY_DRIVE/_state/blinko_lite.db                   (PC canonical, 2026-08-06)
   - $HOME/.blinko_lite.db                                (user override)
 
 Output modes (-m / --mode):
@@ -60,6 +60,7 @@ LOCAL_DBS = [
     "/mnt/sdcard/AA_MY_DRIVE/_state/blinko_lite.db",
     "/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.db",
     "/home/ubuntu/e5_data/blinko_lite.db",
+    "/AA_MY_DRIVE/_state/blinko_lite.db",
     "/home/richgee/AA_MY_DRIVE/_state/blinko_lite.db",
     str(Path.home() / ".blinko_lite.db"),
 ]

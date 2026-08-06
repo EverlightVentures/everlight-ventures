@@ -40,7 +40,7 @@ log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG"; }
 # ---------------------------------------------------------------------------
 # format: name|tailnet_alias|public_fallback|ssh_key|workspace_dest|memory_dest
 declare -a PEERS=(
-  "pc|richgee@100.93.253.49||/root/.ssh/phone_to_arch|/home/richgee/AA_MY_DRIVE|/home/richgee/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory"
+  "pc|richgee@100.93.253.49||/root/.ssh/phone_to_arch|/AA_MY_DRIVE|/home/richgee/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory"
   "mother|ubuntu@e5-mother|ubuntu@e5-mother-public|/root/.ssh/github_deploy|/home/ubuntu/AA_MY_DRIVE|/home/ubuntu/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory"
   "ev-box|ubuntu@ev-box|ubuntu@ev-box-public|/root/.ssh/github_deploy|/home/ubuntu/AA_MY_DRIVE|/home/ubuntu/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory"
   "micro|opc@oracle-e5||/root/.ssh/oracle_key.pem|/home/opc/AA_MY_DRIVE|/home/opc/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory"

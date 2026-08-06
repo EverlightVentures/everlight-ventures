@@ -45,6 +45,7 @@ BLINKO_URLS = [
 LOCAL_DBS = [
     "/mnt/sdcard/AA_MY_DRIVE/_state/blinko_lite.db",
     "/home/ubuntu/e5_data/blinko_lite.db",
+    "/AA_MY_DRIVE/_state/blinko_lite.db",
     "/home/richgee/AA_MY_DRIVE/_state/blinko_lite.db",
 ]
 MAILBOX = "/mnt/sdcard/AA_MY_DRIVE/_state/AGENT_MAILBOX.md"
