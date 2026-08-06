@@ -2549,3 +2549,37 @@ open_webui_venv
 /supabase/migrations/20260417_multiplayer_blackjack.sql
 /supabase/sql/business_os_schema.sql
 /verify_setup.sh
+
+// ============================================================
+// PC-ONLY ARCHIVE SHIELD -- added 2026-08-06
+// The AceMagician is the server and legitimately holds content the
+// phone never will. Syncthing must not treat these as "local
+// additions" -- on a sendonly master, an Override Changes click
+// would DELETE them from the PC to force a match.
+// Shielded here so the folder can be repointed at /AA_MY_DRIVE
+// without putting any of it at risk.
+// NOTE: gen_stignore.sh regenerates this file. This block must be
+// carried into that script or it will be lost on next regen.
+// ============================================================
+A_Rich
+D_Backups
+FREE RESOURCES
+Notes
+Wholesale
+xlm_bot
+_dell_inbox_2026-05-04
+_phone_inbox_2026-05-04
+_oracle_e5_recovery
+_audit
+_audit_repo
+_uploads
+_sync_conflicts_quarantine_20260514_105806
+.sync-backup-20260503-1927
+.aa_dashboard_cache
+.pnpm-store
+.venv
+
+// 55 GB of dedupe byproducts. Kept on the PC per no-trash-until-Deal-1,
+// but must never cross the wire to a phone with far less space.
+_logs/_dedupe_trash
+_logs/conflicts

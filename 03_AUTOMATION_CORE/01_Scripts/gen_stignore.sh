@@ -51,6 +51,22 @@ TMP="$(mktemp)"
   echo "**/Library/ShaderCache"
   echo "**/[Tt]emp"
   echo ""
+  echo "// ---- PC-ONLY ARCHIVE SHIELD (added 2026-08-06) ----"
+  echo "// The AceMagician is the server and legitimately holds content the"
+  echo "// phone never will. Without these rules Syncthing sees them as"
+  echo "// 'local additions'; on a sendonly master an Override Changes click"
+  echo "// would DELETE them from the PC to force a match. Non-negotiable."
+  for pc_only in \
+    "A_Rich" "D_Backups" "FREE RESOURCES" "Notes" "Wholesale" "xlm_bot" \
+    "_dell_inbox_2026-05-04" "_phone_inbox_2026-05-04" "_oracle_e5_recovery" \
+    "_audit" "_audit_repo" "_uploads" \
+    "_sync_conflicts_quarantine_20260514_105806" \
+    ".sync-backup-20260503-1927" ".aa_dashboard_cache" ".pnpm-store" ".venv" \
+    "_logs/_dedupe_trash" "_logs/conflicts"
+  do
+    echo "$pc_only"
+  done
+  echo ""
   echo "// ---- git-tracked files: git owns these, Syncthing must skip them ----"
   echo "// ($(git ls-files | wc -l) entries as of generation)"
   # git ls-files paths can contain glob metacharacters (* ? [ ] { }) -- a literal
