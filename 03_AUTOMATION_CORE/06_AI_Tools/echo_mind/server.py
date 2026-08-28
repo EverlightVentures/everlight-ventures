@@ -282,8 +282,9 @@ class ReusableHTTPServer(HTTPServer):
 
 def main():
     os.chdir(str(ROOT))
-    server = ReusableHTTPServer(("0.0.0.0", PORT), EchoMindHandler)
-    print(f"Echo Mind serving on http://0.0.0.0:{PORT}")
+    bind_host = os.environ.get("ECHO_MIND_HOST", "127.0.0.1")
+    server = ReusableHTTPServer((bind_host, PORT), EchoMindHandler)
+    print(f"Echo Mind serving on http://{bind_host}:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

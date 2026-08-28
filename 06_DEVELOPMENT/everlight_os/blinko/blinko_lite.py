@@ -342,7 +342,8 @@ def run_server() -> None:
     # Initialize database
     init_db()
 
-    server = HTTPServer(("0.0.0.0", PORT), BlinkoHandler)
+    bind_host = os.environ.get("BLINKO_HOST", "127.0.0.1")
+    server = HTTPServer((bind_host, PORT), BlinkoHandler)
     _log(f"BlinkoLite started on port {PORT} (PID {os.getpid()})")
     _log(f"Database: {DB_PATH}")
     _log(f"Health: http://localhost:{PORT}/health")
