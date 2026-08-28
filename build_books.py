@@ -8,6 +8,7 @@ Layout rules:
 """
 import os
 import re
+import sys
 import base64
 from io import BytesIO
 from PIL import Image
@@ -18,67 +19,33 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from ebooklib import epub
 
-# ============================================================
-BASE = "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM"
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY, BASE_DIR
+from shared.publishing.image_utils import compress_image
+from shared.publishing.markdown_utils import strip_md, parse_md
 
-BOOKS = [
-    {
-        "id": 1,
-        "title": "Sam's First Superpower",
-        "subtitle": "Adventures with Sam and Robo -- Book 1",
+# ============================================================
+BASE = str(BASE_DIR)
+
+# Build BOOKS list from central registry (previously duplicated inline)
+BOOKS = []
+for _bid in [1, 2, 4, 5]:
+    _b = BOOK_REGISTRY[_bid]
+    _stem = _b["title"].replace("'", "").replace(" ", "_")
+    BOOKS.append({
+        "id": _bid,
+        "title": _b["title"],
+        "subtitle": _b["subtitle"],
         "author": "Everlight Kids",
-        "md": f"{BASE}/Book1/Sams_First_Superpower_MASTER.md",
-        "img_dir": f"{BASE}/Book1/images",
-        "cover": f"{BASE}/Book1/images/1_cover.jpg",
-        "out_docx": f"{BASE}/Book1/Sams_First_Superpower_KDP.docx",
-        "out_epub": f"{BASE}/Book1/Sams_First_Superpower.epub",
-        "reader_html": f"{BASE}/Book1/Sams_First_Superpower_reader.html",
-        "prefix": "1",
-        "scenes": 12,
-    },
-    {
-        "id": 2,
-        "title": "Sam's Second Superpower",
-        "subtitle": "Adventures with Sam and Robo -- Book 2",
-        "author": "Everlight Kids",
-        "md": f"{BASE}/Book 2/Sams_Second_Superpower_MASTER.md",
-        "img_dir": f"{BASE}/Book 2/images",
-        "cover": f"{BASE}/Book 2/images/2_cover.jpg",
-        "out_docx": f"{BASE}/Book 2/Sams_Second_Superpower_KDP.docx",
-        "out_epub": f"{BASE}/Book 2/Sams_Second_Superpower.epub",
-        "reader_html": f"{BASE}/Book 2/Sams_Second_Superpower_reader.html",
-        "prefix": "2",
-        "scenes": 11,
-    },
-    {
-        "id": 4,
-        "title": "Sam's Fourth Superpower",
-        "subtitle": "Adventures with Sam and Robo -- Book 4",
-        "author": "Everlight Kids",
-        "md": f"{BASE}/book_4/manuscript/Sams_Fourth_Superpower_MASTER.md",
-        "img_dir": f"{BASE}/book_4/images",
-        "cover": f"{BASE}/book_4/images/4_cover.jpg",
-        "out_docx": f"{BASE}/book_4/Sams_Fourth_Superpower_KDP.docx",
-        "out_epub": f"{BASE}/book_4/Sams_Fourth_Superpower.epub",
-        "reader_html": f"{BASE}/book_4/Sams_Fourth_Superpower_reader.html",
-        "prefix": "4",
-        "scenes": 12,
-    },
-    {
-        "id": 5,
-        "title": "Sam's Fifth Superpower",
-        "subtitle": "Adventures with Sam and Robo -- Book 5",
-        "author": "Everlight Kids",
-        "md": f"{BASE}/book_5/manuscript/Sams_Fifth_Superpower_MASTER.md",
-        "img_dir": f"{BASE}/book_5/images",
-        "cover": f"{BASE}/book_5/images/5_cover.jpg",
-        "out_docx": f"{BASE}/book_5/Sams_Fifth_Superpower_KDP.docx",
-        "out_epub": f"{BASE}/book_5/Sams_Fifth_Superpower.epub",
-        "reader_html": f"{BASE}/book_5/Sams_Fifth_Superpower_reader.html",
-        "prefix": "5",
-        "scenes": 12,
-    },
-]
+        "md": str(_b["manuscript"]),
+        "img_dir": str(_b["img_dir"]),
+        "cover": str(_b["cover_jpg"]),
+        "out_docx": str(_b["dir"] / f"{_stem}_KDP.docx"),
+        "out_epub": str(_b["dir"] / f"{_stem}.epub"),
+        "reader_html": str(_b["dir"] / f"{_stem}_reader.html"),
+        "prefix": _b["prefix"],
+        "scenes": _b["scenes"],
+    })
 
 PAGE_WIDTH = Inches(6)
 PAGE_HEIGHT = Inches(9)
@@ -89,104 +56,13 @@ MARGIN_OUTSIDE = Inches(0.5)
 IMAGE_WIDTH = Inches(4.5)
 
 
-def compress_image(img_path, max_width=1200, quality=85):
-    img = Image.open(img_path)
-    if img.mode in ("RGBA", "P"):
-        img = img.convert("RGB")
-    w, h = img.size
-    if w > max_width:
-        ratio = max_width / w
-        img = img.resize((max_width, int(h * ratio)), Image.LANCZOS)
-    buf = BytesIO()
-    img.save(buf, format="JPEG", quality=quality, optimize=True)
-    return buf.getvalue()
+# compress_image is now imported from shared.publishing.image_utils
 
 
-def parse_md(md_path):
-    with open(md_path, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-
-    blocks = []
-    i = 0
-    in_back_matter = False
-
-    while i < len(lines):
-        line = lines[i].rstrip("\n")
-        if not line.strip():
-            i += 1
-            continue
-        if line.strip() == "---":
-            i += 1
-            continue
-
-        img_match = re.match(r"!\[([^\]]+)\]\(images/([^\)]+)\)", line.strip())
-        if img_match:
-            filename = img_match.group(2)
-            btype = "image_bw" if "_bw" in filename else "image_color"
-            blocks.append({"type": btype, "content": "", "image": filename})
-            i += 1
-            continue
-
-        if line.startswith("## CHAPTER"):
-            blocks.append({"type": "chapter_title", "content": line.lstrip("# ").strip()})
-            i += 1
-            continue
-
-        if line.startswith("## BACK MATTER"):
-            in_back_matter = True
-            i += 1
-            continue
-
-        if line.startswith("### ") and in_back_matter:
-            blocks.append({"type": "section_title", "content": line.lstrip("# ").strip()})
-            i += 1
-            continue
-
-        if line.startswith("## "):
-            blocks.append({"type": "section_title", "content": line.lstrip("# ").strip()})
-            i += 1
-            continue
-
-        if line.startswith("**Interactive Moment:**"):
-            blocks.append({"type": "interactive", "content": line.replace("**Interactive Moment:**", "").strip()})
-            i += 1
-            continue
-
-        if line.startswith("**Question:**"):
-            q = line.replace("**Question:**", "").strip()
-            a = ""
-            if i + 1 < len(lines) and lines[i + 1].startswith("**Answer:**"):
-                a = lines[i + 1].replace("**Answer:**", "").strip()
-                i += 1
-            blocks.append({"type": "qa", "content": f"Q: {q}\nA: {a}"})
-            i += 1
-            continue
-
-        if line.startswith("# Sam") or line.startswith("### Everlight"):
-            i += 1
-            continue
-        skip_prefixes = ("**Document Status:", "**Date:", "**Format:", "**Page Layout:",
-                         "**Phonics Focus:", "**Core Value:", "**CASEL", "**CCSS",
-                         "**Superpower Unlocked:", "**Target Age:", "**Series Position:")
-        if any(line.startswith(p) for p in skip_prefixes):
-            i += 1
-            continue
-        if line.startswith("End of Master Manuscript") or line.startswith("Next steps:"):
-            i += 1
-            continue
-
-        blocks.append({"type": "text", "content": line.strip()})
-        i += 1
-
-    return blocks
+# parse_md is now imported from shared.publishing.markdown_utils
 
 
-def strip_md(text):
-    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
-    text = re.sub(r"\*([^*]+)\*", r"\1", text)
-    text = re.sub(r"__([^_]+)__", r"\1", text)
-    text = re.sub(r"_([^_]+)_", r"\1", text)
-    return text
+# strip_md is now imported from shared.publishing.markdown_utils
 
 
 def add_formatted_paragraph(doc, text, font_size=12, space_after=6):

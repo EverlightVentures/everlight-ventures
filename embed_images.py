@@ -1,46 +1,26 @@
 """Embed images as base64 into reader HTML files for Android compatibility."""
-import base64
 import re
 import os
-from PIL import Image
-from io import BytesIO
+import sys
 
-BOOKS = [
-    {
-        "html": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_reader.html",
-        "img_dir": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images",
-    },
-    {
-        "html": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_reader.html",
-        "img_dir": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images",
-    },
-    {
-        "html": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/Sams_Fourth_Superpower_reader.html",
-        "img_dir": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images",
-    },
-    {
-        "html": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/Sams_Fifth_Superpower_reader.html",
-        "img_dir": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images",
-    },
-]
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY
+from shared.publishing.image_utils import compress_and_encode
+
+# Build BOOKS list from central registry (previously duplicated inline)
+BOOKS = []
+for _bid in [1, 2, 4, 5]:
+    _b = BOOK_REGISTRY[_bid]
+    _stem = _b["title"].replace("'", "").replace(" ", "_")
+    BOOKS.append({
+        "html": str(_b["dir"] / f"{_stem}_reader.html"),
+        "img_dir": str(_b["img_dir"]),
+    })
 
 MAX_WIDTH = 800
 JPEG_QUALITY = 72
 
-
-def compress_and_encode(img_path):
-    """Load image, resize to max width, compress, return base64 string."""
-    img = Image.open(img_path)
-    if img.mode in ("RGBA", "P"):
-        img = img.convert("RGB")
-    w, h = img.size
-    if w > MAX_WIDTH:
-        ratio = MAX_WIDTH / w
-        img = img.resize((MAX_WIDTH, int(h * ratio)), Image.LANCZOS)
-    buf = BytesIO()
-    img.save(buf, format="JPEG", quality=JPEG_QUALITY, optimize=True)
-    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-    return f"data:image/jpeg;base64,{b64}"
+# compress_and_encode is now imported from shared.publishing.image_utils
 
 
 def process_book(book):

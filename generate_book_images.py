@@ -1,37 +1,30 @@
 import os
 import re
+import sys
 import requests
 import json
 from pathlib import Path
 import time
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY, BASE_DIR
+from shared.publishing.openai_images import generate_image as _shared_generate, download_image as _shared_download
+
 # Configuration
 API_KEY = os.environ.get("OPENAI_API_KEY", "")
-BASE_DIR = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM")
 
-BOOKS = {
-    "1": {
-        "manuscript": BASE_DIR / "Book1/Sams_First_Superpower_MASTER.md",
-        "image_dir": BASE_DIR / "Book1/images",
-        "prefix": "1_"
-    },
-    "2": {
-        "manuscript": BASE_DIR / "Book 2/Sams_Second_Superpower_MASTER.md",
-        "image_dir": BASE_DIR / "Book 2/images",
-        "prefix": "2_"
-    },
-    "4": {
-        "manuscript": BASE_DIR / "book_4/manuscript/Sams_Fourth_Superpower_MASTER.md",
-        "image_dir": BASE_DIR / "book_4/images",
-        "prefix": "4_"
-    },
-    "5": {
-        "manuscript": BASE_DIR / "book_5/manuscript/Sams_Fifth_Superpower_MASTER.md",
-        "image_dir": BASE_DIR / "book_5/images",
-        "prefix": "5_",
-        "prompts_file": BASE_DIR / "book_5/ILLUSTRATION_BRIEF.md"
+# Build BOOKS dict from central registry (previously duplicated inline)
+BOOKS = {}
+for _bid in [1, 2, 4, 5]:
+    _b = BOOK_REGISTRY[_bid]
+    entry = {
+        "manuscript": _b["manuscript"],
+        "image_dir": _b["img_dir"],
+        "prefix": f"{_b['prefix']}_",
     }
-}
+    if _bid == 5:
+        entry["prompts_file"] = BASE_DIR / "book_5/ILLUSTRATION_BRIEF.md"
+    BOOKS[str(_bid)] = entry
 
 # Enhanced Style Guide for consistent 3D Animation look
 STYLE_GUIDE = """
@@ -68,47 +61,20 @@ BOOK5_PROMPTS = {
 }
 
 def generate_image(prompt, is_bw=False):
-    url = "https://api.openai.com/v1/images/generations"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    
-    if is_bw:
-        # Instruction for coloring book style
-        full_prompt = f"Professional children's coloring book line art, thick bold clean black outlines, white background, no color, black and white only, gentle grey shading for depth. Scene: {prompt}. {STYLE_GUIDE}"
-    else:
-        full_prompt = f"Vibrant 3D animation style children's book illustration, cinematic lighting, rich textures, soft depth of field. Scene: {prompt}. {STYLE_GUIDE}"
+    """Generate image via shared utility with book-specific styling."""
+    return _shared_generate(
+        prompt,
+        is_bw=is_bw,
+        bw_prefix="Professional children's coloring book line art, thick bold clean black outlines, white background, no color, black and white only, gentle grey shading for depth. Scene: ",
+        color_prefix="Vibrant 3D animation style children's book illustration, cinematic lighting, rich textures, soft depth of field. Scene: ",
+        style_suffix=STYLE_GUIDE,
+        api_key=API_KEY,
+    )
 
-    data = {
-        "model": "dall-e-3",
-        "prompt": full_prompt,
-        "n": 1,
-        "size": "1024x1024",
-        "quality": "standard"
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=120)
-        response.raise_for_status()
-        return response.json()['data'][0]['url']
-    except Exception as e:
-        print(f"Error generating: {e}")
-        if hasattr(e, 'response') and e.response is not None:
-             print(f"Details: {e.response.text}")
-        return None
 
 def download_image(url, save_path):
-    try:
-        response = requests.get(url, timeout=60)
-        response.raise_for_status()
-        with open(save_path, 'wb') as f:
-            f.write(response.content)
-        print(f"Successfully saved to {save_path}")
-        return True
-    except Exception as e:
-        print(f"Error downloading: {e}")
-        return False
+    """Download image via shared utility."""
+    return _shared_download(url, save_path)
 
 def process_book(book_id):
     config = BOOKS[book_id]

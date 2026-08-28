@@ -14,16 +14,18 @@ BACK:  Solid color + text only (NO cover art), all text inside safe zone
 """
 
 import os
+import sys
 import requests
 import time
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from pathlib import Path
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY, BASE_DIR
+from shared.publishing.image_utils import draw_centered_text, draw_wrapped_text
+from shared.publishing.openai_images import generate_image as _shared_generate, download_image as _shared_download
+
 API_KEY = os.environ.get("OPENAI_API_KEY", "")
-BASE_DIR = Path(
-    "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/"
-    "Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM"
-)
 
 # ---- KDP COVER DIMENSIONS (v3) ----
 TOTAL_W_IN = 12.360   # updated from 12.353
@@ -204,81 +206,22 @@ STYLE_GUIDE = (
 
 
 def generate_cover_image(prompt, save_path):
-    """Generate a cover via DALL-E 3."""
-    url = "https://api.openai.com/v1/images/generations"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}",
-    }
-    full_prompt = (
-        "Vibrant 3D animation style children's book cover illustration, "
-        f"cinematic lighting, rich textures, soft depth of field. {prompt}. "
-        f"{STYLE_GUIDE}"
+    """Generate a cover via shared DALL-E utility + download."""
+    image_url = _shared_generate(
+        prompt,
+        color_prefix="Vibrant 3D animation style children's book cover illustration, cinematic lighting, rich textures, soft depth of field. ",
+        style_suffix=STYLE_GUIDE,
+        quality="hd",
+        max_retries=3,
+        api_key=API_KEY,
     )
-    data = {
-        "model": "dall-e-3",
-        "prompt": full_prompt,
-        "n": 1,
-        "size": "1024x1024",
-        "quality": "hd",
-    }
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            print(f"  Generating cover (attempt {attempt + 1})...")
-            resp = requests.post(url, headers=headers, json=data, timeout=120)
-            resp.raise_for_status()
-            image_url = resp.json()["data"][0]["url"]
-            img_resp = requests.get(image_url, timeout=60)
-            img_resp.raise_for_status()
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(save_path, "wb") as f:
-                f.write(img_resp.content)
-            print(f"  Saved: {save_path}")
-            return True
-        except Exception as e:
-            print(f"  Error (attempt {attempt + 1}): {e}")
-            if attempt < max_retries - 1:
-                time.sleep(5)
-    return False
+    if not image_url:
+        return False
+    return _shared_download(image_url, save_path)
 
 
-def draw_centered_text(draw, text, y, font, fill, canvas_width):
-    """Draw text centered horizontally. Returns text height."""
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
-    x = (canvas_width - text_w) // 2
-    draw.text((x, y), text, font=font, fill=fill)
-    return text_h
-
-
-def draw_wrapped_text(draw, text, x, y, max_width, font, fill, line_spacing=1.3):
-    """Draw word-wrapped text. Returns final Y position."""
-    paragraphs = text.split("\n")
-    current_y = y
-    for para in paragraphs:
-        if para.strip() == "":
-            current_y += int(font.size * 0.6)
-            continue
-        words = para.split()
-        lines = []
-        current_line = ""
-        for word in words:
-            test = (current_line + " " + word).strip()
-            bbox = draw.textbbox((0, 0), test, font=font)
-            if bbox[2] - bbox[0] > max_width:
-                if current_line:
-                    lines.append(current_line)
-                current_line = word
-            else:
-                current_line = test
-        if current_line:
-            lines.append(current_line)
-        for line in lines:
-            draw.text((x, current_y), line, font=font, fill=fill)
-            current_y += int(font.size * line_spacing)
-    return current_y
+# draw_centered_text and draw_wrapped_text are now imported from
+# shared.publishing.image_utils
 
 
 def build_full_wrap(config):
